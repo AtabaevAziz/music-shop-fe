@@ -1,0 +1,30 @@
+{
+  "name": "music-shop-fe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "pnpm dlx prettier --write .",
+    "fix": "pnpm run format && pnpm run lint:fix"
+  },
+  "dependencies": {
+    "next": "15.3.3",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "eslint": "9.29.0",
+    "eslint-config-next": "15.3.3",
+    "prettier": "3.6.2",
+    "typescript": "5.7.2"
+  }
+}

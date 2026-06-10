@@ -12,3 +12,7 @@
 /captures
 .externalNativeBuild
 .cxx
+node_modules
+.next
+out
+dist
