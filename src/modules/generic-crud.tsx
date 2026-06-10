@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Badge, Field, PageHeader } from "@/components/ui";
+import { Badge, Field, Modal, PageHeader } from "@/components/ui";
 import { getDictionary, Locale } from "@/lib/i18n";
 
 export type CrudField = {
@@ -33,6 +33,8 @@ export function GenericCrudModule<T extends { id: string }>({
   const dict = getDictionary(locale);
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -43,23 +45,35 @@ export function GenericCrudModule<T extends { id: string }>({
   }, [items, query]);
 
   return (
-    <div className="drawer-layout">
+    <>
       <section className="table-card">
         <PageHeader
           title={title}
           subtitle={subtitle}
           actions={
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={dict.search}
-              style={{
-                minWidth: 220,
-                padding: "12px 14px",
-                borderRadius: 12,
-                border: "1px solid var(--line)",
-              }}
-            />
+            <div className="stack-row">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={dict.search}
+                style={{
+                  minWidth: 220,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1px solid var(--line)",
+                }}
+              />
+              <button
+                className="button"
+                type="button"
+                onClick={() => {
+                  setDraft({});
+                  setIsEditorOpen(true);
+                }}
+              >
+                {dict.addNew}
+              </button>
+            </div>
           }
         />
         {filtered.length ? (
@@ -87,7 +101,8 @@ export function GenericCrudModule<T extends { id: string }>({
                     <div className="stack-row">
                       <button
                         className="button-ghost"
-                        onClick={() =>
+                        type="button"
+                        onClick={() => {
                           setDraft(
                             Object.fromEntries(
                               fields
@@ -97,14 +112,16 @@ export function GenericCrudModule<T extends { id: string }>({
                                 ])
                                 .concat([["id", item.id]]),
                             ),
-                          )
-                        }
+                          );
+                          setIsEditorOpen(true);
+                        }}
                       >
                         {dict.edit}
                       </button>
                       <button
                         className="button-danger"
-                        onClick={() => void onDelete(item.id)}
+                        type="button"
+                        onClick={() => setDeleteTargetId(item.id)}
                       >
                         {dict.delete}
                       </button>
@@ -118,76 +135,117 @@ export function GenericCrudModule<T extends { id: string }>({
           <div className="empty-state">{dict.noData}</div>
         )}
       </section>
-      <aside className="drawer">
-        <PageHeader
+
+      {isEditorOpen ? (
+        <Modal
           title={draft.id ? dict.edit : dict.addNew}
           subtitle={title}
-        />
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            void onSave(draft).then(() => setDraft({}));
+          closeLabel={dict.close}
+          onClose={() => {
+            setDraft({});
+            setIsEditorOpen(false);
           }}
-          className="form-grid"
         >
-          {fields.map((field) => (
-            <Field key={field.name} label={field.label}>
-              {field.type === "textarea" ? (
-                <textarea
-                  value={draft[field.name] ?? ""}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      [field.name]: event.target.value,
-                    }))
-                  }
-                />
-              ) : field.type === "select" ? (
-                <select
-                  value={draft[field.name] ?? ""}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      [field.name]: event.target.value,
-                    }))
-                  }
-                >
-                  <option value="">Select</option>
-                  {field.options?.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type ?? "text"}
-                  value={draft[field.name] ?? ""}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      [field.name]: event.target.value,
-                    }))
-                  }
-                />
-              )}
-            </Field>
-          ))}
-          <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
-            <button className="button" type="submit">
-              {dict.save}
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void onSave(draft).then(() => {
+                setDraft({});
+                setIsEditorOpen(false);
+              });
+            }}
+            className="form-grid"
+          >
+            {fields.map((field) => (
+              <Field key={field.name} label={field.label}>
+                {field.type === "textarea" ? (
+                  <textarea
+                    value={draft[field.name] ?? ""}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        [field.name]: event.target.value,
+                      }))
+                    }
+                  />
+                ) : field.type === "select" ? (
+                  <select
+                    value={draft[field.name] ?? ""}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        [field.name]: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Select</option>
+                    {field.options?.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type ?? "text"}
+                    value={draft[field.name] ?? ""}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        [field.name]: event.target.value,
+                      }))
+                    }
+                  />
+                )}
+              </Field>
+            ))}
+            <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+              <button className="button" type="submit">
+                {dict.save}
+              </button>
+              <button
+                className="button-ghost"
+                type="button"
+                onClick={() => {
+                  setDraft({});
+                  setIsEditorOpen(false);
+                }}
+              >
+                {dict.cancel}
+              </button>
+              {draft.id ? <Badge tone="neutral">{dict.details}</Badge> : null}
+            </div>
+          </form>
+        </Modal>
+      ) : null}
+
+      {deleteTargetId ? (
+        <Modal
+          title={dict.confirmDelete}
+          subtitle={dict.deletePrompt}
+          closeLabel={dict.close}
+          onClose={() => setDeleteTargetId(null)}
+        >
+          <div className="modal-actions">
+            <button
+              className="button-danger"
+              type="button"
+              onClick={() => {
+                void onDelete(deleteTargetId).then(() => setDeleteTargetId(null));
+              }}
+            >
+              {dict.delete}
             </button>
             <button
               className="button-ghost"
               type="button"
-              onClick={() => setDraft({})}
+              onClick={() => setDeleteTargetId(null)}
             >
               {dict.cancel}
             </button>
-            {draft.id ? <Badge tone="neutral">{dict.details}</Badge> : null}
           </div>
-        </form>
-      </aside>
-    </div>
+        </Modal>
+      ) : null}
+    </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { formatMoney } from "@/lib/utils";
 import { Locale } from "@/lib/i18n";
 
@@ -61,4 +61,63 @@ export function Money({
   locale: Locale;
 }) {
   return <>{formatMoney(value, currency, locale)}</>;
+}
+
+export function Modal({
+  title,
+  subtitle,
+  children,
+  onClose,
+  closeLabel = "Close",
+}: {
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+  onClose: () => void;
+  closeLabel?: string;
+}) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [onClose]);
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div
+        className="modal-card"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        <PageHeader
+          title={title}
+          subtitle={subtitle ?? ""}
+          actions={
+            <button
+              className="button-ghost"
+              type="button"
+              onClick={onClose}
+              aria-label={closeLabel}
+            >
+              {closeLabel}
+            </button>
+          }
+        />
+        {children}
+      </div>
+    </div>
+  );
 }

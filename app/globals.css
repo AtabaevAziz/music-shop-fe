@@ -1,14 +1,14 @@
 :root {
   color-scheme: light;
-  --bg: #f4f1eb;
-  --surface: #fffdf8;
-  --surface-2: #f0ebe1;
-  --surface-3: #e3d8c7;
-  --line: #d4c6af;
-  --text: #211912;
-  --muted: #6f6357;
-  --accent: #9c4f1d;
-  --accent-strong: #7c3910;
+  --bg: #fff0dd;
+  --surface: #fff9f2;
+  --surface-2: #ffe9d0;
+  --surface-3: #ffd6a8;
+  --line: #e3bf94;
+  --text: #2f1b0d;
+  --muted: #8a6240;
+  --accent: #df7a22;
+  --accent-strong: #b85712;
   --success: #2f7d4c;
   --warn: #b87b16;
   --danger: #b04432;
@@ -28,10 +28,15 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(156, 79, 29, 0.08),
-      transparent 25%
+      rgba(223, 122, 34, 0.2),
+      transparent 28%
     ),
-    linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+    radial-gradient(
+      circle at right 18%,
+      rgba(255, 181, 72, 0.18),
+      transparent 24%
+    ),
+    linear-gradient(180deg, #fff8ef 0%, var(--bg) 100%);
   color: var(--text);
   font-family: Georgia, "Times New Roman", serif;
 }
@@ -63,7 +68,7 @@ button {
 }
 
 .sidebar {
-  background: rgba(27, 21, 16, 0.92);
+  background: linear-gradient(180deg, rgba(106, 45, 8, 0.96), rgba(68, 25, 6, 0.94));
   color: #f4ede3;
   padding: 28px 20px;
   display: flex;
@@ -81,7 +86,7 @@ button {
   background:
     linear-gradient(
       140deg,
-      rgba(255, 207, 150, 0.15),
+      rgba(255, 204, 120, 0.22),
       rgba(255, 255, 255, 0.03)
     ),
     rgba(255, 255, 255, 0.02);
@@ -259,7 +264,7 @@ th {
 }
 
 .badge.neutral {
-  background: rgba(156, 79, 29, 0.09);
+  background: rgba(223, 122, 34, 0.12);
   color: var(--accent-strong);
 }
 
@@ -293,7 +298,7 @@ th {
 }
 
 .button-ghost {
-  background: rgba(156, 79, 29, 0.08);
+  background: rgba(223, 122, 34, 0.1);
   color: var(--accent-strong);
 }
 
@@ -312,6 +317,35 @@ th {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: 20px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(60, 27, 7, 0.4);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.modal-card {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: rgba(255, 249, 242, 0.98);
+  border: 1px solid rgba(227, 191, 148, 0.95);
+  border-radius: var(--radius);
+  box-shadow: 0 28px 70px rgba(84, 33, 4, 0.24);
+  padding: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 .drawer {

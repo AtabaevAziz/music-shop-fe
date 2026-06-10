@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { Field, PageHeader, Badge, Money } from "@/components/ui";
+import { Field, PageHeader, Badge, Money, Modal } from "@/components/ui";
 import { useMusicStore } from "@/data/store";
 import { getDictionary, Locale } from "@/lib/i18n";
 import { parseList } from "@/lib/utils";
@@ -28,6 +28,8 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const { db, saveProduct, deleteEntity } = useMusicStore();
   const [query, setQuery] = useState("");
   const [formError, setFormError] = useState("");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ProductDraft>({
     status: db.settings.defaultProductStatus,
     condition: "new",
@@ -49,6 +51,13 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const brandMap = Object.fromEntries(
     db.brands.map((item) => [item.id, item.name]),
   );
+
+  function resetDraft() {
+    setDraft({
+      status: db.settings.defaultProductStatus,
+      condition: "new",
+    });
+  }
 
   async function submit() {
     const parsed = productSchema.safeParse(draft);
@@ -74,27 +83,41 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       stockQty: Number(draft.stockQty),
     });
     setFormError("");
-    setDraft({ status: db.settings.defaultProductStatus, condition: "new" });
+    resetDraft();
+    setIsEditorOpen(false);
   }
 
   return (
-    <div className="drawer-layout">
+    <>
       <section className="table-card">
         <PageHeader
           title={dict.catalog}
           subtitle="Product master data, pricing, descriptions, and merchandising status."
           actions={
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={dict.search}
-              style={{
-                minWidth: 220,
-                padding: "12px 14px",
-                borderRadius: 12,
-                border: "1px solid var(--line)",
-              }}
-            />
+            <div className="stack-row">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={dict.search}
+                style={{
+                  minWidth: 220,
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  border: "1px solid var(--line)",
+                }}
+              />
+              <button
+                className="button"
+                type="button"
+                onClick={() => {
+                  setFormError("");
+                  resetDraft();
+                  setIsEditorOpen(true);
+                }}
+              >
+                {dict.addNew}
+              </button>
+            </div>
           }
         />
         <table>
@@ -153,7 +176,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <div className="stack-row">
                     <button
                       className="button-ghost"
-                      onClick={() =>
+                      type="button"
+                      onClick={() => {
+                        setFormError("");
                         setDraft({
                           id: product.id,
                           name: product.name,
@@ -172,14 +197,16 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                           specs: Object.entries(product.specs)
                             .map(([key, value]) => `${key}: ${value}`)
                             .join("\n"),
-                        })
-                      }
+                        });
+                        setIsEditorOpen(true);
+                      }}
                     >
                       {dict.edit}
                     </button>
                     <button
                       className="button-danger"
-                      onClick={() => void deleteEntity("products", product.id)}
+                      type="button"
+                      onClick={() => setDeleteTargetId(product.id)}
                     >
                       {dict.delete}
                     </button>
@@ -191,214 +218,250 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         </table>
       </section>
 
-      <aside className="drawer">
-        <PageHeader
+      {isEditorOpen ? (
+        <Modal
           title={draft.id ? dict.edit : dict.addNew}
           subtitle="Product record"
-        />
-        {formError ? <div className="error">{formError}</div> : null}
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            void submit();
+          closeLabel={dict.close}
+          onClose={() => {
+            setFormError("");
+            resetDraft();
+            setIsEditorOpen(false);
           }}
-          className="form-grid"
         >
-          <Field label="Name">
-            <input
-              value={draft.name ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  name: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="SKU">
-            <input
-              value={draft.sku ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({ ...current, sku: event.target.value }))
-              }
-            />
-          </Field>
-          <Field label="Barcode">
-            <input
-              value={draft.barcode ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  barcode: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Category">
-            <select
-              value={draft.categoryId ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  categoryId: event.target.value,
-                }))
-              }
+          {formError ? <div className="error">{formError}</div> : null}
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submit();
+            }}
+            className="form-grid"
+          >
+            <Field label="Name">
+              <input
+                value={draft.name ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="SKU">
+              <input
+                value={draft.sku ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({ ...current, sku: event.target.value }))
+                }
+              />
+            </Field>
+            <Field label="Barcode">
+              <input
+                value={draft.barcode ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    barcode: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Category">
+              <select
+                value={draft.categoryId ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    categoryId: event.target.value,
+                  }))
+                }
+              >
+                <option value="">Select</option>
+                {db.categories.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Brand">
+              <select
+                value={draft.brandId ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    brandId: event.target.value,
+                  }))
+                }
+              >
+                <option value="">Select</option>
+                {db.brands.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Condition">
+              <select
+                value={draft.condition ?? "new"}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    condition: event.target.value,
+                  }))
+                }
+              >
+                <option value="new">new</option>
+                <option value="used">used</option>
+                <option value="showroom">showroom</option>
+              </select>
+            </Field>
+            <Field label="Price">
+              <input
+                type="number"
+                value={draft.price ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    price: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Cost price">
+              <input
+                type="number"
+                value={draft.costPrice ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    costPrice: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Stock qty">
+              <input
+                type="number"
+                value={draft.stockQty ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    stockQty: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label={dict.status}>
+              <select
+                value={draft.status ?? db.settings.defaultProductStatus}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    status: event.target.value,
+                  }))
+                }
+              >
+                <option value="draft">draft</option>
+                <option value="active">active</option>
+                <option value="archived">archived</option>
+              </select>
+            </Field>
+            <Field label="Short description">
+              <textarea
+                value={draft.shortDescription ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    shortDescription: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Full description">
+              <textarea
+                value={draft.description ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Images, one per line">
+              <textarea
+                value={draft.images ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    images: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Specs as Key: Value">
+              <textarea
+                value={draft.specs ?? ""}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    specs: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+              <button className="button" type="submit">
+                {dict.save}
+              </button>
+              <button
+                className="button-ghost"
+                type="button"
+                onClick={() => {
+                  setFormError("");
+                  resetDraft();
+                  setIsEditorOpen(false);
+                }}
+              >
+                {dict.cancel}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      ) : null}
+
+      {deleteTargetId ? (
+        <Modal
+          title={dict.confirmDelete}
+          subtitle={dict.deletePrompt}
+          closeLabel={dict.close}
+          onClose={() => setDeleteTargetId(null)}
+        >
+          <div className="modal-actions">
+            <button
+              className="button-danger"
+              type="button"
+              onClick={() => {
+                void deleteEntity("products", deleteTargetId).then(() =>
+                  setDeleteTargetId(null),
+                );
+              }}
             >
-              <option value="">Select</option>
-              {db.categories.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Brand">
-            <select
-              value={draft.brandId ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  brandId: event.target.value,
-                }))
-              }
-            >
-              <option value="">Select</option>
-              {db.brands.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Condition">
-            <select
-              value={draft.condition ?? "new"}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  condition: event.target.value,
-                }))
-              }
-            >
-              <option value="new">new</option>
-              <option value="used">used</option>
-              <option value="showroom">showroom</option>
-            </select>
-          </Field>
-          <Field label="Price">
-            <input
-              type="number"
-              value={draft.price ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  price: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Cost price">
-            <input
-              type="number"
-              value={draft.costPrice ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  costPrice: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Stock qty">
-            <input
-              type="number"
-              value={draft.stockQty ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  stockQty: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label={dict.status}>
-            <select
-              value={draft.status ?? db.settings.defaultProductStatus}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  status: event.target.value,
-                }))
-              }
-            >
-              <option value="draft">draft</option>
-              <option value="active">active</option>
-              <option value="archived">archived</option>
-            </select>
-          </Field>
-          <Field label="Short description">
-            <textarea
-              value={draft.shortDescription ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  shortDescription: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Full description">
-            <textarea
-              value={draft.description ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Images, one per line">
-            <textarea
-              value={draft.images ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  images: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Specs as Key: Value">
-            <textarea
-              value={draft.specs ?? ""}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  specs: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
-            <button className="button" type="submit">
-              {dict.save}
+              {dict.delete}
             </button>
             <button
               className="button-ghost"
               type="button"
-              onClick={() =>
-                setDraft({
-                  status: db.settings.defaultProductStatus,
-                  condition: "new",
-                })
-              }
+              onClick={() => setDeleteTargetId(null)}
             >
               {dict.cancel}
             </button>
           </div>
-        </form>
-      </aside>
-    </div>
+        </Modal>
+      ) : null}
+    </>
   );
 }

@@ -47,6 +47,9 @@ type Dictionary = {
   noData: string;
   demoResetDone: string;
   loginDone: string;
+  confirmDelete: string;
+  deletePrompt: string;
+  close: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -92,6 +95,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     noData: "Данных пока нет",
     demoResetDone: "Демо-данные восстановлены.",
     loginDone: "Сессия активирована.",
+    confirmDelete: "Подтвердить удаление",
+    deletePrompt: "Это действие нельзя отменить.",
+    close: "Закрыть",
   },
   en: {
     brand: "Sonata Ops",
@@ -135,6 +141,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     noData: "No data yet",
     demoResetDone: "Demo data restored.",
     loginDone: "Session activated.",
+    confirmDelete: "Confirm deletion",
+    deletePrompt: "This action cannot be undone.",
+    close: "Close",
   },
 };
 
