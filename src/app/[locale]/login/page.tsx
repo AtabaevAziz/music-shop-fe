@@ -1,5 +1,5 @@
-import { Locale } from "@/lib/i18n";
 import { LoginScreen } from "@/features/auth/login-screen";
+import { Locale } from "@/lib/i18n";
 
 export default async function LoginPage({
   params,

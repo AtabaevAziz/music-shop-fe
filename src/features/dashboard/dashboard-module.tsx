@@ -1,9 +1,9 @@
 "use client";
 
-import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
-import { formatMoney } from "@/lib/utils";
 import { Badge, PageHeader } from "@/components/ui/primitives";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { formatMoney } from "@/lib/utils";
+import { useMusicStore } from "@/store/music-store";
 
 export function DashboardModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
@@ -130,7 +130,9 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                   <Badge tone="neutral">
                     {translateDynamicLabel(locale, product.status)}
                   </Badge>
-                  <span>{formatMoney(product.price, db.settings.currency, locale)}</span>
+                  <span>
+                    {formatMoney(product.price, db.settings.currency, locale)}
+                  </span>
                 </div>
               </article>
             ))}

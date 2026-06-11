@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
+import { useTransition } from "react";
+
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 

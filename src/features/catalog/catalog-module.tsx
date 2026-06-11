@@ -2,10 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { Field, PageHeader, Badge, Money, Modal } from "@/components/ui/primitives";
-import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
+
+import {
+  Badge,
+  Field,
+  Modal,
+  Money,
+  PageHeader,
+} from "@/components/ui/primitives";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { parseList } from "@/lib/utils";
+import { useMusicStore } from "@/store/music-store";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -252,7 +259,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               <input
                 value={draft.sku ?? ""}
                 onChange={(event) =>
-                  setDraft((current) => ({ ...current, sku: event.target.value }))
+                  setDraft((current) => ({
+                    ...current,
+                    sku: event.target.value,
+                  }))
                 }
               />
             </Field>
@@ -313,8 +323,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="new">{translateDynamicLabel(locale, "new")}</option>
-                <option value="used">{translateDynamicLabel(locale, "used")}</option>
+                <option value="new">
+                  {translateDynamicLabel(locale, "new")}
+                </option>
+                <option value="used">
+                  {translateDynamicLabel(locale, "used")}
+                </option>
                 <option value="showroom">
                   {translateDynamicLabel(locale, "showroom")}
                 </option>

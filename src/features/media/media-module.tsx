@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader, Field, Badge } from "@/components/ui/primitives";
+
+import { Badge, Field, PageHeader } from "@/components/ui/primitives";
+import { Locale, getDictionary } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale } from "@/lib/i18n";
 
 export function MediaModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);

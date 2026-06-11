@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
+
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
@@ -87,7 +88,7 @@ export function AppShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`nav-link${pathname === item.href ? " active" : ""}`}
+                className={`nav-link${pathname === item.href ? "active" : ""}`}
               >
                 {item.label}
               </Link>
@@ -155,8 +156,8 @@ export function AppShell({
             <section className="table-card">
               <h2>Access restricted</h2>
               <p className="muted">
-                This role can sign in, but this module is intentionally hidden in
-                the demo access matrix.
+                This role can sign in, but this module is intentionally hidden
+                in the demo access matrix.
               </p>
             </section>
           )}

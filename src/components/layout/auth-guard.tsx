@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useMusicStore } from "@/store/music-store";
+import { useEffect } from "react";
+
 import { Locale } from "@/lib/i18n";
+import { useMusicStore } from "@/store/music-store";
 
 export function AuthGuard({
   locale,

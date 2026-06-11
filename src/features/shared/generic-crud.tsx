@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import { Badge, Field, Modal, PageHeader } from "@/components/ui/primitives";
-import { getDictionary, Locale } from "@/lib/i18n";
+import { Locale, getDictionary } from "@/lib/i18n";
 
 export type CrudField = {
   name: string;
@@ -237,7 +238,9 @@ export function GenericCrudModule<T extends { id: string }>({
               className="button-danger"
               type="button"
               onClick={() => {
-                void onDelete(deleteTargetId).then(() => setDeleteTargetId(null));
+                void onDelete(deleteTargetId).then(() =>
+                  setDeleteTargetId(null),
+                );
               }}
             >
               {dict.delete}

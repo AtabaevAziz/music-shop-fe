@@ -1,8 +1,9 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { formatMoney } from "@/lib/utils";
+
 import { Locale } from "@/lib/i18n";
+import { formatMoney } from "@/lib/utils";
 
 export function Badge({
   tone,

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { MusicStoreProvider } from "@/store/music-store";
+
 import { isLocale } from "@/lib/i18n";
+import { MusicStoreProvider } from "@/store/music-store";
 
 export default async function LocaleLayout({
   children,

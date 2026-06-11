@@ -1,8 +1,8 @@
 "use client";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
 import { Role } from "@/types/music";
 
 export function EmployeesModule({ locale }: { locale: Locale }) {

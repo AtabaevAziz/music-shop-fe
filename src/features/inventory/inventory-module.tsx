@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader, Field, Badge } from "@/components/ui/primitives";
+
+import { Badge, Field, PageHeader } from "@/components/ui/primitives";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
 
 export function InventoryModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
@@ -36,10 +37,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
   return (
     <div className="inventory-shell">
       <section className="table-card">
-        <PageHeader
-          title={dict.inventory}
-          subtitle={dict.inventorySubtitle}
-        />
+        <PageHeader title={dict.inventory} subtitle={dict.inventorySubtitle} />
         <div className="inventory-overview">
           <div className="card metric-card">
             <div className="muted">{dict.stockOnHand}</div>
@@ -62,10 +60,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
 
       <div className="inventory-grid">
         <section className="table-card inventory-table-section">
-          <PageHeader
-            title={dict.inventory}
-            subtitle={dict.stockHealth}
-          />
+          <PageHeader title={dict.inventory} subtitle={dict.stockHealth} />
           <table>
             <thead>
               <tr>
@@ -119,7 +114,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                   <div className="stack-row" style={{ marginTop: 10 }}>
                     <Badge
                       tone={
-                        selectedProduct.stockQty <= db.settings.lowStockThreshold
+                        selectedProduct.stockQty <=
+                        db.settings.lowStockThreshold
                           ? "warn"
                           : "success"
                       }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader, Field } from "@/components/ui/primitives";
+
+import { Field, PageHeader } from "@/components/ui/primitives";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
 import { ProductStatus } from "@/types/music";
 
 type SettingsDraft = {
@@ -77,8 +78,12 @@ export function SettingsModule({ locale }: { locale: Locale }) {
               }))
             }
           >
-            <option value="draft">{translateDynamicLabel(locale, "draft")}</option>
-            <option value="active">{translateDynamicLabel(locale, "active")}</option>
+            <option value="draft">
+              {translateDynamicLabel(locale, "draft")}
+            </option>
+            <option value="active">
+              {translateDynamicLabel(locale, "active")}
+            </option>
             <option value="archived">
               {translateDynamicLabel(locale, "archived")}
             </option>

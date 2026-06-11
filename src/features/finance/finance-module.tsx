@@ -1,8 +1,8 @@
 "use client";
 
-import { PageHeader, Badge, Money } from "@/components/ui/primitives";
+import { Badge, Money, PageHeader } from "@/components/ui/primitives";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
 
 export function FinanceModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);

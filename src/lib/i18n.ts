@@ -144,12 +144,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     order: "Заказ",
     total: "Сумма",
     margin: "Маржа",
-    inventorySubtitle: "Остатки, риск пополнения и последние движения по складу",
+    inventorySubtitle:
+      "Остатки, риск пополнения и последние движения по складу",
     available: "В наличии",
     condition: "Состояние",
     stockHealth: "Состояние остатка",
     stockAdjustment: "Корректировка остатков",
-    stockAdjustmentSubtitle: "Быстрое складское действие с сохранением в localStorage",
+    stockAdjustmentSubtitle:
+      "Быстрое складское действие с сохранением в localStorage",
     recentMovements: "Последние движения",
     recentMovementsSubtitle: "Журнал последних операций по остаткам",
     replenishmentRisk: "Риск пополнения",
@@ -222,7 +224,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     order: "Order",
     total: "Total",
     margin: "Margin",
-    inventorySubtitle: "Current stock, replenishment risk, and recent warehouse movement visibility",
+    inventorySubtitle:
+      "Current stock, replenishment risk, and recent warehouse movement visibility",
     available: "Available",
     condition: "Condition",
     stockHealth: "Stock health",

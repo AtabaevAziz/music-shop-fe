@@ -1,7 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { seedDatabase, nextId } from "@/store/seed";
+
+import { slugify } from "@/lib/utils";
+import { nextId, seedDatabase } from "@/store/seed";
 import {
   Activity,
   Brand,
@@ -9,14 +11,12 @@ import {
   Customer,
   Database,
   Employee,
-  Order,
   OrderStatus,
   Product,
   ProductStatus,
   Role,
   Session,
 } from "@/types/music";
-import { slugify } from "@/lib/utils";
 
 type Flash = { kind: "success" | "error"; message: string } | null;
 

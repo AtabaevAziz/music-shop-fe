@@ -1,5 +1,5 @@
-import { Database } from "@/types/music";
 import { slugify } from "@/lib/utils";
+import { Database } from "@/types/music";
 
 const now = new Date();
 
@@ -267,7 +267,7 @@ export const seedDatabase: Database = {
     {
       id: "emp-1",
       name: "Nodir Ismoilov",
-      email: "nodir@sonataops.test",
+      email: "nodir@musicshop.test",
       phone: "+998 90 111 00 00",
       role: "admin",
       status: "active",
@@ -275,7 +275,7 @@ export const seedDatabase: Database = {
     {
       id: "emp-2",
       name: "Diana Petrova",
-      email: "diana@sonataops.test",
+      email: "diana@musicshop.test",
       phone: "+998 90 222 00 00",
       role: "store_manager",
       status: "active",
@@ -283,7 +283,7 @@ export const seedDatabase: Database = {
     {
       id: "emp-3",
       name: "Sardor Yuldashev",
-      email: "sardor@sonataops.test",
+      email: "sardor@musicshop.test",
       phone: "+998 90 333 00 00",
       role: "catalog_manager",
       status: "active",
@@ -291,7 +291,7 @@ export const seedDatabase: Database = {
     {
       id: "emp-4",
       name: "Anya Mironova",
-      email: "anya@sonataops.test",
+      email: "anya@musicshop.test",
       phone: "+998 90 444 00 00",
       role: "sales_operator",
       status: "active",

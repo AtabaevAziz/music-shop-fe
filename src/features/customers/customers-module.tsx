@@ -1,8 +1,8 @@
 "use client";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { getDictionary, Locale, translateDynamicLabel } from "@/lib/i18n";
 
 export function CustomersModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
