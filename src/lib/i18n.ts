@@ -50,13 +50,45 @@ type Dictionary = {
   confirmDelete: string;
   deletePrompt: string;
   close: string;
+  dashboardLowStockSubtitle: string;
+  dashboardPipelineSubtitle: string;
+  dashboardFeaturedTitle: string;
+  dashboardFeaturedSubtitle: string;
+  dashboardActivitySubtitle: string;
+  product: string;
+  sku: string;
+  qty: string;
+  financeSubtitle: string;
+  grossMargin: string;
+  paidOrders: string;
+  order: string;
+  total: string;
+  margin: string;
+  inventorySubtitle: string;
+  available: string;
+  condition: string;
+  stockHealth: string;
+  stockAdjustment: string;
+  stockAdjustmentSubtitle: string;
+  recentMovements: string;
+  recentMovementsSubtitle: string;
+  replenishmentRisk: string;
+  thresholdLabel: string;
+  stockOnHand: string;
+  showroomUnits: string;
+  movementCount: string;
+  delta: string;
+  reason: string;
+  currentStock: string;
+  stockHealthy: string;
+  manualCorrection: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
   ru: {
-    brand: "Sonata Ops",
-    appName: "Music Instruments Backoffice",
-    appSubtitle: "Внутренняя панель для каталога, склада, заказов и финансов",
+    brand: "Music Shop",
+    appName: "Music Shop Backoffice",
+    appSubtitle: "Панель магазина для каталога, склада, заказов и финансов",
     loginTitle: "Операционная панель магазина музыкальных инструментов",
     loginText:
       "Интерактивное демо без бэкенда: роли, заказы, склад, товары и настройки работают целиком на клиенте.",
@@ -98,11 +130,43 @@ export const dictionaries: Record<Locale, Dictionary> = {
     confirmDelete: "Подтвердить удаление",
     deletePrompt: "Это действие нельзя отменить.",
     close: "Закрыть",
+    dashboardLowStockSubtitle: "Товары ниже порога пополнения",
+    dashboardPipelineSubtitle: "Операционная видимость выполнения заказов",
+    dashboardFeaturedTitle: "Актуальный ассортимент",
+    dashboardFeaturedSubtitle: "Быстрый срез по текущим товарам витрины",
+    dashboardActivitySubtitle: "Последние события клиентского демо",
+    product: "Товар",
+    sku: "SKU",
+    qty: "Кол-во",
+    financeSubtitle: "Контроль выручки и маржи для внутренних операций",
+    grossMargin: "Валовая маржа",
+    paidOrders: "Оплаченные заказы",
+    order: "Заказ",
+    total: "Сумма",
+    margin: "Маржа",
+    inventorySubtitle: "Остатки, риск пополнения и последние движения по складу",
+    available: "В наличии",
+    condition: "Состояние",
+    stockHealth: "Состояние остатка",
+    stockAdjustment: "Корректировка остатков",
+    stockAdjustmentSubtitle: "Быстрое складское действие с сохранением в localStorage",
+    recentMovements: "Последние движения",
+    recentMovementsSubtitle: "Журнал последних операций по остаткам",
+    replenishmentRisk: "Риск пополнения",
+    thresholdLabel: "Порог",
+    stockOnHand: "Товарных единиц",
+    showroomUnits: "Шоурум-позиций",
+    movementCount: "Движений сегодня",
+    delta: "Изменение",
+    reason: "Причина",
+    currentStock: "Текущий остаток",
+    stockHealthy: "Норма",
+    manualCorrection: "Ручная корректировка",
   },
   en: {
-    brand: "Sonata Ops",
-    appName: "Music Instruments Backoffice",
-    appSubtitle: "Internal admin for catalog, inventory, orders, and finance",
+    brand: "Music Shop",
+    appName: "Music Shop Backoffice",
+    appSubtitle: "Store admin for catalog, inventory, orders, and finance",
     loginTitle: "Operational panel for a musical instruments retailer",
     loginText:
       "Interactive demo without a backend: roles, orders, stock, products, and settings run entirely on the client.",
@@ -144,9 +208,101 @@ export const dictionaries: Record<Locale, Dictionary> = {
     confirmDelete: "Confirm deletion",
     deletePrompt: "This action cannot be undone.",
     close: "Close",
+    dashboardLowStockSubtitle: "Products below replenishment threshold",
+    dashboardPipelineSubtitle: "Operational fulfillment visibility",
+    dashboardFeaturedTitle: "Featured assortment",
+    dashboardFeaturedSubtitle: "Fast view of the current storefront mix",
+    dashboardActivitySubtitle: "Latest browser-side demo events",
+    product: "Product",
+    sku: "SKU",
+    qty: "Qty",
+    financeSubtitle: "Revenue and margin awareness for internal operations",
+    grossMargin: "Gross margin",
+    paidOrders: "Paid orders",
+    order: "Order",
+    total: "Total",
+    margin: "Margin",
+    inventorySubtitle: "Current stock, replenishment risk, and recent warehouse movement visibility",
+    available: "Available",
+    condition: "Condition",
+    stockHealth: "Stock health",
+    stockAdjustment: "Stock adjustment",
+    stockAdjustmentSubtitle: "Fast inventory action persisted in localStorage",
+    recentMovements: "Recent movements",
+    recentMovementsSubtitle: "Latest stock operations log",
+    replenishmentRisk: "Replenishment risk",
+    thresholdLabel: "Threshold",
+    stockOnHand: "Units on hand",
+    showroomUnits: "Showroom units",
+    movementCount: "Movements today",
+    delta: "Delta",
+    reason: "Reason",
+    currentStock: "Current stock",
+    stockHealthy: "Healthy",
+    manualCorrection: "Manual correction",
   },
 };
 
 export function getDictionary(locale: Locale) {
   return dictionaries[locale];
+}
+
+const dynamicLabels = {
+  ru: {
+    active: "Активный",
+    inactive: "Неактивный",
+    draft: "Черновик",
+    archived: "Архивный",
+    new: "Новый",
+    confirmed: "Подтвержден",
+    packed: "Собран",
+    ready_for_pickup: "Готов к выдаче",
+    completed: "Завершен",
+    cancelled: "Отменен",
+    used: "Б/у",
+    showroom: "Шоурум",
+    pending: "Ожидает",
+    partial: "Частично",
+    paid: "Оплачен",
+    refunded: "Возврат",
+    standard: "Стандарт",
+    studio: "Студия",
+    vip: "VIP",
+    admin: "Администратор",
+    store_manager: "Менеджер магазина",
+    catalog_manager: "Менеджер каталога",
+    sales_operator: "Оператор продаж",
+  },
+  en: {
+    active: "Active",
+    inactive: "Inactive",
+    draft: "Draft",
+    archived: "Archived",
+    new: "New",
+    confirmed: "Confirmed",
+    packed: "Packed",
+    ready_for_pickup: "Ready for pickup",
+    completed: "Completed",
+    cancelled: "Cancelled",
+    used: "Used",
+    showroom: "Showroom",
+    pending: "Pending",
+    partial: "Partial",
+    paid: "Paid",
+    refunded: "Refunded",
+    standard: "Standard",
+    studio: "Studio",
+    vip: "VIP",
+    admin: "Admin",
+    store_manager: "Store manager",
+    catalog_manager: "Catalog manager",
+    sales_operator: "Sales operator",
+  },
+} as const;
+
+export function translateDynamicLabel(locale: Locale, value: string) {
+  return (
+    dynamicLabels[locale][value as keyof (typeof dynamicLabels)[Locale]] ??
+    value.replaceAll("_", " ")
+  );
 }

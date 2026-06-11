@@ -1,0 +1,270 @@
+openapi: 3.0.0
+info:
+  description: "DigitalSchool - Speech Therapy Session APIs"
+  version: 1.0.0
+  title: DigitalSchool - Speech Therapy
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: speech-therapy
+    description: Speech Therapy Session management
+paths:
+  /speech-therapist/sessions/create:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - speech-therapy
+      summary: Create a speech therapy session
+      description: "Create a new speech therapy session for a student"
+      operationId: createSpeechTherapySession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeechTherapySessionInput"
+        description: Speech therapy session input
+        required: true
+      responses:
+        "201":
+          description: successful operation
+        "400":
+          description: bad request data
+        "403":
+          description: Unauthorized - missing or invalid token
+        "422":
+          description: invalid json params
+  /speech-therapist/sessions:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - speech-therapy
+      summary: Get speech therapy sessions by filters
+      description: "Retrieve speech therapy sessions with optional filters"
+      operationId: getSpeechTherapySessions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeechTherapySessionFilters"
+        description: Filter criteria
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedResponse"
+        "400":
+          description: bad request data
+        "403":
+          description: Unauthorized - missing or invalid token
+  /speech-therapist/sessions/{sessionId}:
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - speech-therapy
+      summary: Update a speech therapy session
+      description: "Update an existing speech therapy session"
+      operationId: updateSpeechTherapySession
+      parameters:
+        - name: sessionId
+          in: path
+          description: "ID of the speech therapy session to update"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeechTherapySessionUpdate"
+        description: Updated session data
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpeechTherapySession"
+        "400":
+          description: bad request data
+        "403":
+          description: Unauthorized - missing or invalid token
+        "404":
+          description: Session not found
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - speech-therapy
+      summary: Delete a speech therapy session
+      description: "Soft delete a speech therapy session"
+      operationId: deleteSpeechTherapySession
+      parameters:
+        - name: sessionId
+          in: path
+          description: "ID of the speech therapy session to delete"
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+        "403":
+          description: Unauthorized - missing or invalid token
+        "404":
+          description: Session not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SpeechTherapySessionInput:
+      type: object
+      required:
+        - studentId
+        - status
+        - diagnosis
+        - lesson
+        - startedAt
+        - endedAt
+      properties:
+        studentId:
+          type: string
+          format: uuid
+          description: "Student ID"
+        status:
+          type: string
+          enum: [in_progress, not_completed, completed]
+          description: "Session status"
+        diagnosis:
+          type: string
+          description: "Diagnosis"
+        notes:
+          type: string
+          nullable: true
+          description: "Additional notes"
+        lesson:
+          type: string
+          description: "Lesson content"
+        homework:
+          type: string
+          nullable: true
+          description: "Homework assignment"
+        startedAt:
+          type: string
+          format: date-time
+          description: "Session start time"
+        endedAt:
+          type: string
+          format: date-time
+          description: "Session end time"
+    SpeechTherapySessionUpdate:
+      type: object
+      required:
+        - status
+        - diagnosis
+        - lesson
+      properties:
+        status:
+          type: string
+          enum: [in_progress, not_completed, completed]
+          description: "Session status"
+        diagnosis:
+          type: string
+          description: "Diagnosis"
+        notes:
+          type: string
+          nullable: true
+          description: "Additional notes"
+        lesson:
+          type: string
+          description: "Lesson content"
+        homework:
+          type: string
+          nullable: true
+          description: "Homework assignment"
+    SpeechTherapySession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "Session ID"
+        createdAt:
+          type: string
+          format: date-time
+          description: "Creation timestamp"
+        student:
+          type: object
+          description: "Student information"
+        status:
+          type: string
+          enum: [in_progress, not_completed, completed]
+          description: "Session status"
+        diagnosis:
+          type: string
+          description: "Diagnosis"
+        notes:
+          type: string
+          nullable: true
+          description: "Additional notes"
+        lesson:
+          type: string
+          description: "Lesson content"
+        homework:
+          type: string
+          nullable: true
+          description: "Homework assignment"
+        startedAt:
+          type: string
+          format: date-time
+          description: "Session start time"
+        endedAt:
+          type: string
+          format: date-time
+          description: "Session end time"
+    SpeechTherapySessionFilters:
+      type: object
+      properties:
+        studentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: "Filter by student ID"
+        status:
+          type: string
+          enum: [in_progress, not_completed, completed]
+          nullable: true
+          description: "Filter by status"
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: "Page number"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: "Items per page"
+    PaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        count:
+          type: integer
+          description: "Total count of items"
