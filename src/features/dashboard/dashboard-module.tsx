@@ -124,6 +124,12 @@ export function DashboardModule({ locale }: { locale: Locale }) {
           <div className="list-clean">
             {featuredProducts.map((product) => (
               <article key={product.id} className="card">
+                <img
+                  src={product.primaryImage ?? product.images[0] ?? ""}
+                  alt={product.name}
+                  className="product-thumb"
+                  style={{ width: "100%", height: 180, marginBottom: 12 }}
+                />
                 <strong>{product.name}</strong>
                 <div className="muted">{product.sku}</div>
                 <div className="heading-row">

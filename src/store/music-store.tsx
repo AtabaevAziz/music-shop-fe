@@ -56,6 +56,8 @@ type StoreContextValue = {
 
 const DB_KEY = "music-shop-db";
 const SESSION_KEY = "music-shop-session";
+const DB_VERSION_KEY = "music-shop-db-version";
+const DB_VERSION = "2";
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
@@ -100,11 +102,16 @@ export function MusicStoreProvider({
   useEffect(() => {
     const rawDb = window.localStorage.getItem(DB_KEY);
     const rawSession = window.localStorage.getItem(SESSION_KEY);
-    if (rawDb) {
+    const rawDbVersion = window.localStorage.getItem(DB_VERSION_KEY);
+    if (rawDb && rawDbVersion === DB_VERSION) {
       setDb(JSON.parse(rawDb) as Database);
     }
     if (rawSession) {
       setSession(JSON.parse(rawSession) as Session);
+    }
+    if (rawDbVersion !== DB_VERSION) {
+      window.localStorage.setItem(DB_KEY, JSON.stringify(cloneSeed()));
+      window.localStorage.setItem(DB_VERSION_KEY, DB_VERSION);
     }
     setReady(true);
   }, []);
@@ -112,6 +119,7 @@ export function MusicStoreProvider({
   useEffect(() => {
     if (!ready) return;
     window.localStorage.setItem(DB_KEY, JSON.stringify(db));
+    window.localStorage.setItem(DB_VERSION_KEY, DB_VERSION);
   }, [db, ready]);
 
   useEffect(() => {

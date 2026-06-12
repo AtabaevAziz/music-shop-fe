@@ -130,6 +130,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         <table>
           <thead>
             <tr>
+              <th>Preview</th>
               <th>Product</th>
               <th>Category</th>
               <th>Brand</th>
@@ -143,7 +144,17 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             {filtered.map((product) => (
               <tr key={product.id}>
                 <td>
-                  <strong>{product.name}</strong>
+                  <img
+                    src={product.primaryImage ?? product.images[0] ?? ""}
+                    alt={product.name}
+                    className="product-thumb"
+                  />
+                </td>
+                <td>
+                  <div className="product-cell">
+                    <strong>{product.name}</strong>
+                    <div className="muted">{product.shortDescription}</div>
+                  </div>
                   <div className="muted">{product.sku}</div>
                 </td>
                 <td>{categoryMap[product.categoryId]}</td>

@@ -18,7 +18,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
       <section className="table-card">
         <PageHeader
           title={dict.media}
-          subtitle="Attach product images and manage primary artwork."
+          subtitle="Attach product image paths and manage primary artwork."
         />
         <form
           className="form-grid"
@@ -41,7 +41,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
               ))}
             </select>
           </Field>
-          <Field label="Image label">
+          <Field label="Image path">
             <input
               value={label}
               onChange={(event) => setLabel(event.target.value)}
@@ -57,18 +57,20 @@ export function MediaModule({ locale }: { locale: Locale }) {
       <section className="table-card">
         <PageHeader
           title={product?.name ?? dict.media}
-          subtitle="Mock gallery preview"
+          subtitle="Product gallery preview"
         />
         {product ? (
           <div className="media-grid">
             {product.images.map((image) => (
               <div key={image} className="media-tile">
-                <div className="art-preview">{image}</div>
+                <div className="art-preview">
+                  <img src={image} alt={product.name} className="media-image" />
+                </div>
                 <div
                   className="stack-row"
                   style={{ justifyContent: "space-between" }}
                 >
-                  <span>{image}</span>
+                  <span>{image.split("/").pop()}</span>
                   {product.primaryImage === image ? (
                     <Badge tone="success">primary</Badge>
                   ) : null}
@@ -76,6 +78,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
                 {product.primaryImage !== image ? (
                   <button
                     className="button-ghost"
+                    type="button"
                     onClick={() => void setPrimaryImage(product.id, image)}
                   >
                     Set primary

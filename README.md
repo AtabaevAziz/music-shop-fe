@@ -28,11 +28,15 @@ pnpm dev
 pnpm build
 pnpm start
 pnpm lint
+pnpm fix
+pnpm typecheck
 pnpm format
 pnpm prepare
 ```
 
 ## Project Structure
+
+High-level project map:
 
 ```text
 music-shop-fe/
@@ -69,6 +73,8 @@ music-shop-fe/
 │   │   └── seed.ts              # Initial in-memory database
 │   └── types/
 │       └── music.ts             # Domain types
+├── public/
+│   └── products/                # Product media used by seeded catalog items
 ├── Dockerfile
 ├── next.config.ts
 ├── package.json
@@ -91,6 +97,11 @@ music-shop-fe/
 - Orders and customers for store operations
 - Employees, finance, media, and settings for backoffice workflows
 
+## Demo Assets
+
+- Product media is served from `public/products/`
+- Current seeded assets include `fender-player-stratocaster.jpg`, `yamaha-p125.jpg`, `roland-spd-sx.jpg`, and `shure-sm7b.jpg`
+
 ## Docker
 
 ```bash
@@ -101,4 +112,4 @@ docker run -p 3000:3000 music-shop-fe
 ## Notes
 
 - This repository is a frontend demo and does not require a backend to run.
-- The README reflects the current filesystem and should be updated together with future structural changes.
+- The README should be updated together with future structural changes.
