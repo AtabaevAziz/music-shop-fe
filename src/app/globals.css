@@ -369,6 +369,7 @@ p {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10px;
+  margin-left: auto;
 }
 
 .page-scroll {
@@ -406,7 +407,8 @@ p {
   position: relative;
   min-height: 100vh;
   display: grid;
-  place-items: center;
+  align-items: center;
+  justify-items: center;
   padding: 28px;
 }
 
@@ -414,6 +416,7 @@ p {
   position: relative;
   z-index: 1;
   width: min(1200px, 100%);
+  max-width: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
   gap: 24px;
@@ -437,7 +440,6 @@ p {
   overflow: hidden;
   display: grid;
   gap: 20px;
-  min-height: 100%;
   padding: 34px;
   border-radius: calc(var(--radius) + 2px);
   color: #eff9ff;
@@ -493,7 +495,7 @@ p {
   position: relative;
   z-index: 1;
   max-width: 12ch;
-  font-size: clamp(2.8rem, 5vw, 4.7rem);
+  font-size: clamp(2.35rem, 4.3vw, 4.1rem);
   line-height: 0.94;
   letter-spacing: -0.06em;
 }
@@ -503,8 +505,8 @@ p {
   z-index: 1;
   max-width: 62ch;
   color: rgba(231, 246, 250, 0.8);
-  font-size: 1.02rem;
-  line-height: 1.75;
+  font-size: 0.96rem;
+  line-height: 1.62;
 }
 
 .hero-grid,
@@ -519,14 +521,14 @@ p {
 .hero-grid {
   position: relative;
   z-index: 1;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   margin-top: auto;
 }
 
 .hero-note {
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: 8px;
+  padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.08);
@@ -544,14 +546,14 @@ p {
 
 .login-role-grid {
   display: grid;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .login-role {
   display: grid;
-  gap: 10px;
-  padding: 18px 20px;
+  gap: 8px;
+  padding: 16px 18px;
   text-align: left;
   border: 1px solid rgba(120, 143, 174, 0.18);
   border-radius: 22px;
@@ -728,6 +730,17 @@ p {
 
 .toolbar {
   justify-content: space-between;
+}
+
+.page-actions {
+  padding: 0 0 18px;
+  margin-bottom: 18px;
+  border: 0;
+  border-bottom: 1px solid rgba(123, 145, 175, 0.12);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .stack-row.spread {
@@ -1140,6 +1153,111 @@ tbody tr:hover {
   }
 }
 
+@media (max-height: 940px) {
+  .auth-page {
+    align-items: start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .auth-card {
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .auth-card > section:last-child {
+    gap: 10px;
+  }
+
+  .hero-panel {
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .hero-panel h1 {
+    font-size: clamp(2.1rem, 3.5vw, 3.35rem);
+  }
+
+  .hero-lead {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .hero-grid {
+    gap: 12px;
+  }
+
+  .hero-note {
+    padding: 14px;
+  }
+
+  .login-role-grid {
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .login-role {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-height: 760px) {
+  .auth-page {
+    align-items: start;
+    padding: 16px;
+  }
+
+  .auth-card {
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .auth-card > section:last-child h2 {
+    font-size: clamp(1.3rem, 2vw, 1.65rem);
+  }
+
+  .hero-panel {
+    gap: 14px;
+    padding: 20px;
+  }
+
+  .hero-eyebrow {
+    padding: 7px 12px;
+    font-size: 0.72rem;
+  }
+
+  .hero-panel h1 {
+    font-size: clamp(1.9rem, 3.1vw, 2.75rem);
+  }
+
+  .hero-lead {
+    font-size: 0.88rem;
+    line-height: 1.42;
+  }
+
+  .hero-note {
+    padding: 12px 14px;
+  }
+
+  .hero-note-label {
+    font-size: 0.7rem;
+  }
+
+  .login-role-grid {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .login-role {
+    gap: 6px;
+    padding: 12px 14px;
+  }
+
+  .login-role-title {
+    font-size: 0.96rem;
+  }
+}
+
 @media (max-width: 720px) {
   .auth-page,
   .app-shell,
@@ -1162,9 +1280,14 @@ tbody tr:hover {
     align-items: flex-start;
   }
 
+  .topbar-copy {
+    width: 100%;
+  }
+
   .topbar-actions {
     width: 100%;
     justify-content: flex-start;
+    margin-left: 0;
   }
 
   .hero-panel {
@@ -1173,7 +1296,25 @@ tbody tr:hover {
 
   .hero-panel h1 {
     max-width: none;
-    font-size: clamp(2.2rem, 10vw, 3rem);
+    font-size: clamp(1.95rem, 8vw, 2.7rem);
+  }
+
+  .hero-lead {
+    font-size: 0.92rem;
+    line-height: 1.48;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .hero-note {
+    padding: 14px;
+  }
+
+  .login-role {
+    padding: 14px 16px;
   }
 
   .toolbar-search {

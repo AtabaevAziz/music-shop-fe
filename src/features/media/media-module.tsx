@@ -17,10 +17,6 @@ export function MediaModule({ locale }: { locale: Locale }) {
   return (
     <div className="two-columns">
       <section className="table-card">
-        <PageHeader
-          title={dict.media}
-          subtitle="Attach product image paths and manage primary artwork."
-        />
         <form
           className="form-grid"
           onSubmit={(event) => {

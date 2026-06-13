@@ -44,7 +44,6 @@ export function DashboardModule({ locale }: { locale: Locale }) {
   return (
     <div className="dashboard-shell">
       <section className="table-card dashboard-hero">
-        <PageHeader title={dict.dashboard} subtitle={dict.appSubtitle} />
         <div className="dashboard-overview">
           <div className="card metric-card">
             <div className="muted">{dict.revenue}</div>

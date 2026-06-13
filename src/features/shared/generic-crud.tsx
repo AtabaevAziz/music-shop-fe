@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Badge, Field, Modal, PageHeader } from "@/components/ui/primitives";
+import { Badge, Field, Modal } from "@/components/ui/primitives";
 import { Locale, getDictionary } from "@/lib/i18n";
 
 export type CrudField = {
@@ -25,7 +25,6 @@ type CrudModuleProps<T extends { id: string }> = {
 export function GenericCrudModule<T extends { id: string }>({
   locale,
   title,
-  subtitle,
   items,
   fields,
   onSave,
@@ -48,30 +47,26 @@ export function GenericCrudModule<T extends { id: string }>({
   return (
     <>
       <section className="table-card">
-        <PageHeader
-          title={title}
-          subtitle={subtitle}
-          actions={
-            <div className="stack-row">
-              <input
-                className="toolbar-search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={dict.search}
-              />
-              <button
-                className="button"
-                type="button"
-                onClick={() => {
-                  setDraft({});
-                  setIsEditorOpen(true);
-                }}
-              >
-                {dict.addNew}
-              </button>
-            </div>
-          }
-        />
+        <div className="toolbar page-actions">
+          <div className="stack-row">
+            <input
+              className="toolbar-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={dict.search}
+            />
+            <button
+              className="button"
+              type="button"
+              onClick={() => {
+                setDraft({});
+                setIsEditorOpen(true);
+              }}
+            >
+              {dict.addNew}
+            </button>
+          </div>
+        </div>
         {filtered.length ? (
           <table>
             <thead>

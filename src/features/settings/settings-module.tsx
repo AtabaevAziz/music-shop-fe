@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Field, PageHeader } from "@/components/ui/primitives";
+import { Field } from "@/components/ui/primitives";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 import { ProductStatus } from "@/types/music";
@@ -26,10 +26,6 @@ export function SettingsModule({ locale }: { locale: Locale }) {
 
   return (
     <section className="table-card">
-      <PageHeader
-        title={dict.settings}
-        subtitle="Settings-driven behavior for pricing and inventory control."
-      />
       <form
         className="form-grid"
         onSubmit={(event) => {
@@ -45,7 +41,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
           });
         }}
       >
-        <Field label="Currency">
+        <Field label={dict.currencyLabel}>
           <input
             value={draft.currency}
             onChange={(event) =>
@@ -56,7 +52,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             }
           />
         </Field>
-        <Field label="Low stock threshold">
+        <Field label={dict.lowStockThresholdLabel}>
           <input
             type="number"
             value={draft.lowStockThreshold}
@@ -68,7 +64,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             }
           />
         </Field>
-        <Field label="Default product status">
+        <Field label={dict.defaultProductStatusLabel}>
           <select
             value={draft.defaultProductStatus}
             onChange={(event) =>
@@ -89,7 +85,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             </option>
           </select>
         </Field>
-        <Field label="Default markup %">
+        <Field label={dict.defaultMarkupLabel}>
           <input
             type="number"
             value={draft.defaultMarkupPercent}

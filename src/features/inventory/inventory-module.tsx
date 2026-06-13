@@ -37,7 +37,6 @@ export function InventoryModule({ locale }: { locale: Locale }) {
   return (
     <div className="inventory-shell">
       <section className="table-card">
-        <PageHeader title={dict.inventory} subtitle={dict.inventorySubtitle} />
         <div className="inventory-overview">
           <div className="card metric-card">
             <div className="muted">{dict.stockOnHand}</div>

@@ -72,6 +72,23 @@ export function AppShell({
   const currentSegment = (pathname.split("/")[2] ??
     "") as (typeof navOrder)[number];
   const isAllowed = accessMap[currentSegment]?.includes(session.role) ?? true;
+  const pageMeta: Record<
+    (typeof navOrder)[number],
+    { title: string; subtitle: string }
+  > = {
+    "": { title: dict.dashboard, subtitle: dict.appSubtitle },
+    catalog: { title: dict.catalog, subtitle: dict.catalogSubtitle },
+    categories: { title: dict.categories, subtitle: dict.categoriesSubtitle },
+    brands: { title: dict.brands, subtitle: dict.brandsSubtitle },
+    inventory: { title: dict.inventory, subtitle: dict.inventorySubtitle },
+    orders: { title: dict.orders, subtitle: dict.ordersSubtitle },
+    customers: { title: dict.customers, subtitle: dict.customersSubtitle },
+    employees: { title: dict.employees, subtitle: dict.employeesSubtitle },
+    finance: { title: dict.finance, subtitle: dict.financeSubtitle },
+    settings: { title: dict.settings, subtitle: dict.settingsSubtitle },
+    media: { title: dict.media, subtitle: dict.mediaSubtitle },
+  };
+  const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
 
   return (
     <div className="app-shell">
@@ -102,20 +119,22 @@ export function AppShell({
           </nav>
         </div>
         <div className="surface sidebar-metric sidebar-footer">
-          <div className="sidebar-metric-label muted">Inventory threshold</div>
+          <div className="sidebar-metric-label muted">
+            {dict.inventoryThresholdTitle}
+          </div>
           <div className="sidebar-metric-value">
             {db.settings.lowStockThreshold}
           </div>
           <div className="sidebar-metric-copy muted">
-            Reorder alerts use this value across inventory and dashboard views.
+            {dict.inventoryThresholdHelp}
           </div>
         </div>
       </aside>
       <main className="content-area">
         <div className="topbar">
           <div className="topbar-copy">
-            <strong>{dict.appName}</strong>
-            <div className="muted">{dict.appSubtitle}</div>
+            <strong>{currentPage.title}</strong>
+            <div className="muted">{currentPage.subtitle}</div>
           </div>
           <div className="topbar-actions">
             <button

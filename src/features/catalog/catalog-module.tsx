@@ -4,13 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-import {
-  Badge,
-  Field,
-  Modal,
-  Money,
-  PageHeader,
-} from "@/components/ui/primitives";
+import { Badge, Field, Modal, Money } from "@/components/ui/primitives";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { parseList } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
@@ -98,31 +92,27 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   return (
     <>
       <section className="table-card">
-        <PageHeader
-          title={dict.catalog}
-          subtitle="Product master data, pricing, descriptions, and merchandising status."
-          actions={
-            <div className="stack-row">
-              <input
-                className="toolbar-search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={dict.search}
-              />
-              <button
-                className="button"
-                type="button"
-                onClick={() => {
-                  setFormError("");
-                  resetDraft();
-                  setIsEditorOpen(true);
-                }}
-              >
-                {dict.addNew}
-              </button>
-            </div>
-          }
-        />
+        <div className="toolbar page-actions">
+          <div className="stack-row">
+            <input
+              className="toolbar-search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={dict.search}
+            />
+            <button
+              className="button"
+              type="button"
+              onClick={() => {
+                setFormError("");
+                resetDraft();
+                setIsEditorOpen(true);
+              }}
+            >
+              {dict.addNew}
+            </button>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>

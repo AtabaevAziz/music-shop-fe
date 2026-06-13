@@ -20,10 +20,6 @@ export function OrdersModule({ locale }: { locale: Locale }) {
   return (
     <div className="two-columns">
       <section className="table-card">
-        <PageHeader
-          title={dict.orders}
-          subtitle="Internal order processing and fulfillment progression."
-        />
         <table>
           <thead>
             <tr>

@@ -63,9 +63,21 @@ type Dictionary = {
   dashboardFeaturedTitle: string;
   dashboardFeaturedSubtitle: string;
   dashboardActivitySubtitle: string;
+  catalogSubtitle: string;
+  categoriesSubtitle: string;
+  brandsSubtitle: string;
+  ordersSubtitle: string;
+  customersSubtitle: string;
+  employeesSubtitle: string;
+  settingsSubtitle: string;
+  mediaSubtitle: string;
   product: string;
   sku: string;
   qty: string;
+  currencyLabel: string;
+  lowStockThresholdLabel: string;
+  defaultProductStatusLabel: string;
+  defaultMarkupLabel: string;
   financeSubtitle: string;
   grossMargin: string;
   paidOrders: string;
@@ -90,6 +102,8 @@ type Dictionary = {
   currentStock: string;
   stockHealthy: string;
   manualCorrection: string;
+  inventoryThresholdTitle: string;
+  inventoryThresholdHelp: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -151,9 +165,23 @@ export const dictionaries: Record<Locale, Dictionary> = {
     dashboardFeaturedTitle: "Актуальный ассортимент",
     dashboardFeaturedSubtitle: "Быстрый срез по текущим товарам витрины",
     dashboardActivitySubtitle: "Последние события клиентского демо",
+    catalogSubtitle: "Товары, цены, описания и merchandising-статусы каталога.",
+    categoriesSubtitle:
+      "Структурированная товарная таксономия для музыкального каталога.",
+    brandsSubtitle: "Справочник брендов, вендоров и производителей.",
+    ordersSubtitle: "Обработка заказов и продвижение по этапам выполнения.",
+    customersSubtitle: "Клиентские записи с видимостью для заказов и продаж.",
+    employeesSubtitle:
+      "Внутренние пользователи и роли для защищённого доступа.",
+    settingsSubtitle:
+      "Настройки, влияющие на ценообразование и складское поведение.",
     product: "Товар",
     sku: "SKU",
     qty: "Кол-во",
+    currencyLabel: "Валюта",
+    lowStockThresholdLabel: "Порог низкого остатка",
+    defaultProductStatusLabel: "Статус товара по умолчанию",
+    defaultMarkupLabel: "Наценка по умолчанию %",
     financeSubtitle: "Контроль выручки и маржи для внутренних операций",
     grossMargin: "Валовая маржа",
     paidOrders: "Оплаченные заказы",
@@ -180,6 +208,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     currentStock: "Текущий остаток",
     stockHealthy: "Норма",
     manualCorrection: "Ручная корректировка",
+    mediaSubtitle:
+      "Пути к изображениям товаров и управление основным изображением.",
+    inventoryThresholdTitle: "Порог остатков",
+    inventoryThresholdHelp:
+      "Это значение используется для предупреждений в складе и на дашборде.",
   },
   en: {
     brand: "Music Shop",
@@ -240,9 +273,25 @@ export const dictionaries: Record<Locale, Dictionary> = {
     dashboardFeaturedTitle: "Featured assortment",
     dashboardFeaturedSubtitle: "Fast view of the current storefront mix",
     dashboardActivitySubtitle: "Latest browser-side demo events",
+    catalogSubtitle:
+      "Products, pricing, descriptions, and merchandising status.",
+    categoriesSubtitle:
+      "Structured product taxonomy for the music retail catalog.",
+    brandsSubtitle: "Reusable vendor and manufacturer records.",
+    ordersSubtitle: "Internal order processing and fulfillment progression.",
+    customersSubtitle:
+      "Internal customer records with order-facing visibility.",
+    employeesSubtitle:
+      "Role-aware internal users for protected backoffice access.",
+    settingsSubtitle:
+      "Settings-driven behavior for pricing and inventory control.",
     product: "Product",
     sku: "SKU",
     qty: "Qty",
+    currencyLabel: "Currency",
+    lowStockThresholdLabel: "Low stock threshold",
+    defaultProductStatusLabel: "Default product status",
+    defaultMarkupLabel: "Default markup %",
     financeSubtitle: "Revenue and margin awareness for internal operations",
     grossMargin: "Gross margin",
     paidOrders: "Paid orders",
@@ -268,6 +317,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     currentStock: "Current stock",
     stockHealthy: "Healthy",
     manualCorrection: "Manual correction",
+    mediaSubtitle: "Attach product image paths and manage primary artwork.",
+    inventoryThresholdTitle: "Inventory threshold",
+    inventoryThresholdHelp:
+      "Reorder alerts use this value across inventory and dashboard views.",
   },
 };
 

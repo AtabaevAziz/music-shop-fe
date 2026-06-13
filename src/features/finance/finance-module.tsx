@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Money, PageHeader } from "@/components/ui/primitives";
+import { Badge, Money } from "@/components/ui/primitives";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 
@@ -31,10 +31,6 @@ export function FinanceModule({ locale }: { locale: Locale }) {
   return (
     <div className="finance-shell">
       <section className="table-card finance-section">
-        <PageHeader
-          title={dict.financeVisibility}
-          subtitle={dict.financeSubtitle}
-        />
         <div className="stats-grid">
           <div className="card">
             <div className="muted">{dict.revenue}</div>
