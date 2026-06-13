@@ -101,7 +101,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             }
           />
         </Field>
-        <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+        <div className="stack-row form-actions">
           <button className="button" type="submit">
             {dict.save}
           </button>

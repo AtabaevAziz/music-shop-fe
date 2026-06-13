@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
@@ -103,15 +104,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
           actions={
             <div className="stack-row">
               <input
+                className="toolbar-search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={dict.search}
-                style={{
-                  minWidth: 220,
-                  padding: "12px 14px",
-                  borderRadius: 12,
-                  border: "1px solid var(--line)",
-                }}
               />
               <button
                 className="button"
@@ -141,97 +137,105 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((product) => (
-              <tr key={product.id}>
-                <td>
-                  <img
-                    src={product.primaryImage ?? product.images[0] ?? ""}
-                    alt={product.name}
-                    className="product-thumb"
-                  />
-                </td>
-                <td>
-                  <div className="product-cell">
-                    <strong>{product.name}</strong>
-                    <div className="muted">{product.shortDescription}</div>
-                  </div>
-                  <div className="muted">{product.sku}</div>
-                </td>
-                <td>{categoryMap[product.categoryId]}</td>
-                <td>{brandMap[product.brandId]}</td>
-                <td>
-                  <Money
-                    value={product.price}
-                    currency={db.settings.currency}
-                    locale={locale}
-                  />
-                </td>
-                <td>
-                  <Badge
-                    tone={
-                      product.stockQty <= db.settings.lowStockThreshold
-                        ? "warn"
-                        : "success"
-                    }
-                  >
-                    {product.stockQty}
-                  </Badge>
-                </td>
-                <td>
-                  <Badge
-                    tone={
-                      product.status === "active"
-                        ? "success"
-                        : product.status === "archived"
-                          ? "danger"
-                          : "neutral"
-                    }
-                  >
-                    {translateDynamicLabel(locale, product.status)}
-                  </Badge>
-                </td>
-                <td>
-                  <div className="stack-row">
-                    <button
-                      className="button-ghost"
-                      type="button"
-                      onClick={() => {
-                        setFormError("");
-                        setDraft({
-                          id: product.id,
-                          name: product.name,
-                          sku: product.sku,
-                          barcode: product.barcode ?? "",
-                          categoryId: product.categoryId,
-                          brandId: product.brandId,
-                          price: String(product.price),
-                          costPrice: String(product.costPrice),
-                          stockQty: String(product.stockQty),
-                          status: product.status,
-                          shortDescription: product.shortDescription,
-                          description: product.description,
-                          condition: product.condition,
-                          images: product.images.join("\n"),
-                          specs: Object.entries(product.specs)
-                            .map(([key, value]) => `${key}: ${value}`)
-                            .join("\n"),
-                        });
-                        setIsEditorOpen(true);
-                      }}
+            {filtered.map((product) => {
+              const previewImage = product.primaryImage ?? product.images[0];
+
+              return (
+                <tr key={product.id}>
+                  <td>
+                    {previewImage ? (
+                      <Image
+                        src={previewImage}
+                        alt={product.name}
+                        width={96}
+                        height={72}
+                        className="product-thumb"
+                      />
+                    ) : null}
+                  </td>
+                  <td>
+                    <div className="product-cell">
+                      <strong>{product.name}</strong>
+                      <div className="muted">{product.shortDescription}</div>
+                    </div>
+                    <div className="muted">{product.sku}</div>
+                  </td>
+                  <td>{categoryMap[product.categoryId]}</td>
+                  <td>{brandMap[product.brandId]}</td>
+                  <td>
+                    <Money
+                      value={product.price}
+                      currency={db.settings.currency}
+                      locale={locale}
+                    />
+                  </td>
+                  <td>
+                    <Badge
+                      tone={
+                        product.stockQty <= db.settings.lowStockThreshold
+                          ? "warn"
+                          : "success"
+                      }
                     >
-                      {dict.edit}
-                    </button>
-                    <button
-                      className="button-danger"
-                      type="button"
-                      onClick={() => setDeleteTargetId(product.id)}
+                      {product.stockQty}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Badge
+                      tone={
+                        product.status === "active"
+                          ? "success"
+                          : product.status === "archived"
+                            ? "danger"
+                            : "neutral"
+                      }
                     >
-                      {dict.delete}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {translateDynamicLabel(locale, product.status)}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div className="stack-row">
+                      <button
+                        className="button-ghost"
+                        type="button"
+                        onClick={() => {
+                          setFormError("");
+                          setDraft({
+                            id: product.id,
+                            name: product.name,
+                            sku: product.sku,
+                            barcode: product.barcode ?? "",
+                            categoryId: product.categoryId,
+                            brandId: product.brandId,
+                            price: String(product.price),
+                            costPrice: String(product.costPrice),
+                            stockQty: String(product.stockQty),
+                            status: product.status,
+                            shortDescription: product.shortDescription,
+                            description: product.description,
+                            condition: product.condition,
+                            images: product.images.join("\n"),
+                            specs: Object.entries(product.specs)
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join("\n"),
+                          });
+                          setIsEditorOpen(true);
+                        }}
+                      >
+                        {dict.edit}
+                      </button>
+                      <button
+                        className="button-danger"
+                        type="button"
+                        onClick={() => setDeleteTargetId(product.id)}
+                      >
+                        {dict.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </section>
@@ -446,7 +450,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+            <div className="stack-row form-actions">
               <button className="button" type="submit">
                 {dict.save}
               </button>

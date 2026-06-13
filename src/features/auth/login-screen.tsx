@@ -7,23 +7,11 @@ import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
-const roles: { role: Role; blurb: string }[] = [
-  {
-    role: "admin",
-    blurb: "Full operational access with user and settings control.",
-  },
-  {
-    role: "store_manager",
-    blurb: "Orders, inventory, staff overview, and finance visibility.",
-  },
-  {
-    role: "catalog_manager",
-    blurb: "Products, brands, categories, and media workflows.",
-  },
-  {
-    role: "sales_operator",
-    blurb: "Orders, customers, and pickup processing.",
-  },
+const roles: Role[] = [
+  "admin",
+  "store_manager",
+  "catalog_manager",
+  "sales_operator",
 ];
 
 export function LoginScreen({ locale }: { locale: Locale }) {
@@ -32,67 +20,51 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const { login } = useMusicStore();
   const [isPending, startTransition] = useTransition();
   const dict = getDictionary(locale);
+  const roleBlurbs: Record<Role, string> = {
+    admin: dict.adminBlurb,
+    store_manager: dict.storeManagerBlurb,
+    catalog_manager: dict.catalogManagerBlurb,
+    sales_operator: dict.salesOperatorBlurb,
+  };
 
   return (
     <div className="auth-page">
       <div className="auth-card">
         <section className="hero-panel">
-          <strong>{dict.brand}</strong>
+          <div className="hero-eyebrow">{dict.brand}</div>
           <h1>{dict.loginTitle}</h1>
-          <p>{dict.loginText}</p>
+          <p className="hero-lead">{dict.loginText}</p>
           <div className="hero-grid">
-            <div
-              className="card"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                color: "white",
-                borderColor: "rgba(255,255,255,0.08)",
-              }}
-            >
-              <div
-                className="muted"
-                style={{ color: "rgba(255,255,255,0.65)" }}
-              >
-                Modules
-              </div>
-              <div>Dashboard, Catalog, Inventory, Orders, Finance</div>
+            <div className="hero-note">
+              <div className="hero-note-label">{dict.loginModulesLabel}</div>
+              <div>{dict.loginModulesValue}</div>
             </div>
-            <div
-              className="card"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                color: "white",
-                borderColor: "rgba(255,255,255,0.08)",
-              }}
-            >
-              <div
-                className="muted"
-                style={{ color: "rgba(255,255,255,0.65)" }}
-              >
-                Demo mode
-              </div>
-              <div>Frontend-only state + local persistence</div>
+            <div className="hero-note">
+              <div className="hero-note-label">{dict.loginDemoLabel}</div>
+              <div>{dict.loginDemoValue}</div>
             </div>
           </div>
         </section>
         <section>
           <h2>{dict.enterAs}</h2>
           <div className="login-role-grid">
-            {roles.map((entry) => (
+            {roles.map((role) => (
               <button
-                key={entry.role}
+                key={role}
                 className="login-role"
                 disabled={isPending}
                 onClick={() => {
                   startTransition(() => {
-                    void login(entry.role).then(() =>
+                    void login(role).then(() =>
                       router.push(searchParams.get("next") || `/${locale}`),
                     );
                   });
                 }}
               >
-                <strong>{translateDynamicLabel(locale, entry.role)}</strong>
-                <p className="muted">{entry.blurb}</p>
+                <strong className="login-role-title">
+                  {translateDynamicLabel(locale, role)}
+                </strong>
+                <p className="muted">{roleBlurbs[role]}</p>
               </button>
             ))}
           </div>

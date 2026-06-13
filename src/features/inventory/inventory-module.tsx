@@ -181,10 +181,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 );
                 return (
                   <li key={movement.id} className="card">
-                    <div
-                      className="stack-row"
-                      style={{ justifyContent: "space-between" }}
-                    >
+                    <div className="stack-row spread">
                       <strong>{product?.name ?? movement.productId}</strong>
                       <Badge tone={movement.delta > 0 ? "success" : "warn"}>
                         {movement.delta > 0 ? "+" : ""}

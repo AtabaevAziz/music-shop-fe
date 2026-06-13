@@ -26,11 +26,9 @@ export function PageHeader({
 }) {
   return (
     <div className="toolbar">
-      <div>
-        <h2 style={{ margin: 0 }}>{title}</h2>
-        <p className="muted" style={{ marginBottom: 0 }}>
-          {subtitle}
-        </p>
+      <div className="toolbar-copy">
+        <h2>{title}</h2>
+        <p className="muted">{subtitle}</p>
       </div>
       {actions}
     </div>

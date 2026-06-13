@@ -1,3 +1,4 @@
+
 export const locales = ["ru", "en"] as const;
 
 export type Locale = (typeof locales)[number];
@@ -12,7 +13,15 @@ type Dictionary = {
   appSubtitle: string;
   loginTitle: string;
   loginText: string;
+  loginModulesLabel: string;
+  loginModulesValue: string;
+  loginDemoLabel: string;
+  loginDemoValue: string;
   enterAs: string;
+  adminBlurb: string;
+  storeManagerBlurb: string;
+  catalogManagerBlurb: string;
+  salesOperatorBlurb: string;
   dashboard: string;
   catalog: string;
   categories: string;
@@ -87,12 +96,21 @@ type Dictionary = {
 export const dictionaries: Record<Locale, Dictionary> = {
   ru: {
     brand: "Music Shop",
-    appName: "Music Shop Backoffice",
-    appSubtitle: "Панель магазина для каталога, склада, заказов и финансов",
-    loginTitle: "Операционная панель магазина музыкальных инструментов",
+    appName: "Music Shop Online",
+    appSubtitle:
+      "Онлайн-магазин музыкальных инструментов с панелью управления продажами, каталогом и складом",
+    loginTitle: "Онлайн-магазин музыкальных инструментов и операционная панель",
     loginText:
-      "Интерактивное демо без бэкенда: роли, заказы, склад, товары и настройки работают целиком на клиенте.",
+      "Демо интернет-магазина музыкальных инструментов: каталог товаров, заказы, клиенты, склад и настройки доступны целиком на клиенте без бэкенда.",
+    loginModulesLabel: "Разделы",
+    loginModulesValue: "Дашборд, каталог, склад, заказы и финансы",
+    loginDemoLabel: "Демо-режим",
+    loginDemoValue: "Состояние хранится на клиенте и сохраняется локально",
     enterAs: "Войти как",
+    adminBlurb: "Полный доступ к операциям, пользователям и настройкам.",
+    storeManagerBlurb: "Заказы, склад, сотрудники и обзор финансов магазина.",
+    catalogManagerBlurb: "Товары, бренды, категории и управление медиа.",
+    salesOperatorBlurb: "Заказы, клиенты и обработка самовывоза.",
     dashboard: "Дашборд",
     catalog: "Каталог",
     categories: "Категории",
@@ -167,12 +185,22 @@ export const dictionaries: Record<Locale, Dictionary> = {
   },
   en: {
     brand: "Music Shop",
-    appName: "Music Shop Backoffice",
-    appSubtitle: "Store admin for catalog, inventory, orders, and finance",
-    loginTitle: "Operational panel for a musical instruments retailer",
+    appName: "Music Shop Online",
+    appSubtitle:
+      "Online musical instrument store with admin tools for catalog, inventory, orders, and sales operations",
+    loginTitle: "Online musical instrument store and operations backoffice",
     loginText:
-      "Interactive demo without a backend: roles, orders, stock, products, and settings run entirely on the client.",
+      "Browser-only demo of a musical instrument ecommerce operation with products, orders, customers, inventory, and settings running fully on the client.",
+    loginModulesLabel: "Modules",
+    loginModulesValue: "Dashboard, Catalog, Inventory, Orders, and Finance",
+    loginDemoLabel: "Demo mode",
+    loginDemoValue: "Frontend-only state with local persistence",
     enterAs: "Enter as",
+    adminBlurb: "Full operational access with user and settings control.",
+    storeManagerBlurb:
+      "Orders, inventory, staff overview, and finance visibility.",
+    catalogManagerBlurb: "Products, brands, categories, and media workflows.",
+    salesOperatorBlurb: "Orders, customers, and pickup processing.",
     dashboard: "Dashboard",
     catalog: "Catalog",
     categories: "Categories",

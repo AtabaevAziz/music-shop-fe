@@ -94,10 +94,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
         <ul className="list-clean">
           {db.orders.map((order) => (
             <li key={order.id} className="card">
-              <div
-                className="stack-row"
-                style={{ justifyContent: "space-between" }}
-              >
+              <div className="stack-row spread">
                 <strong>{order.id}</strong>
                 <Badge
                   tone={

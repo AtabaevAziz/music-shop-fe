@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 import { Badge, Field, PageHeader } from "@/components/ui/primitives";
@@ -47,7 +48,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
               onChange={(event) => setLabel(event.target.value)}
             />
           </Field>
-          <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+          <div className="stack-row form-actions">
             <button className="button" type="submit">
               {dict.save}
             </button>
@@ -64,12 +65,17 @@ export function MediaModule({ locale }: { locale: Locale }) {
             {product.images.map((image) => (
               <div key={image} className="media-tile">
                 <div className="art-preview">
-                  <img src={image} alt={product.name} className="media-image" />
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={product.name}
+                      width={640}
+                      height={480}
+                      className="media-image"
+                    />
+                  ) : null}
                 </div>
-                <div
-                  className="stack-row"
-                  style={{ justifyContent: "space-between" }}
-                >
+                <div className="stack-row spread">
                   <span>{image.split("/").pop()}</span>
                   {product.primaryImage === image ? (
                     <Badge tone="success">primary</Badge>

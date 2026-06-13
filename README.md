@@ -1,6 +1,6 @@
-# Music Shop Frontend
+# Music Shop Online
 
-Music Shop is a Next.js admin demo for a musical instruments retailer. The app runs entirely on the client: catalog, inventory, orders, finance, and settings are backed by a local demo store and persisted in browser storage.
+Music Shop Online is a Next.js frontend demo of an online musical instrument store with a browser-side operations backoffice. Catalog, inventory, orders, customers, finance, media, and settings are managed entirely on the client and persisted in browser storage.
 
 ## Tech Stack
 
@@ -8,7 +8,9 @@ Music Shop is a Next.js admin demo for a musical instruments retailer. The app r
 - React 18 and TypeScript
 - Client-side state via React Context
 - Zod for form validation
-- CSS in `src/app/globals.css`
+- `next/font` for app typography
+- Shared visual system in `src/app/globals.css`
+- `shadcn/ui` integration via `components.json` and `src/components/ui`
 
 ## Quick Start
 
@@ -43,20 +45,20 @@ music-shop-fe/
 ├── src/
 │   ├── app/
 │   │   ├── [locale]/
-│   │   │   ├── (protected)/     # Auth-protected music shop pages
+│   │   │   ├── (protected)/     # Auth-protected backoffice pages
 │   │   │   └── login/           # Demo sign-in
-│   │   ├── globals.css          # Global theme and layout styles
-│   │   ├── layout.tsx           # Root HTML shell
+│   │   ├── globals.css          # Global theme, layout, and UI tokens
+│   │   ├── layout.tsx           # Root HTML shell and font setup
 │   │   └── page.tsx             # Redirect to default locale
 │   ├── components/
 │   │   ├── layout/              # App shell and auth guard
-│   │   └── ui/                  # Shared UI primitives
+│   │   └── ui/                  # Shared primitives and shadcn-derived UI components
 │   ├── features/
 │   │   ├── auth/                # Login experience
-│   │   ├── dashboard/           # Dashboard view
+│   │   ├── dashboard/           # Operational dashboard
 │   │   ├── catalog/             # Product catalog CRUD
-│   │   ├── inventory/           # Stock operations
-│   │   ├── orders/              # Order queue
+│   │   ├── inventory/           # Stock operations and thresholds
+│   │   ├── orders/              # Order queue and workflow
 │   │   ├── finance/             # Revenue and payment visibility
 │   │   ├── media/               # Product media workflow
 │   │   ├── settings/            # Store settings
@@ -74,7 +76,8 @@ music-shop-fe/
 │   └── types/
 │       └── music.ts             # Domain types
 ├── public/
-│   └── products/                # Product media used by seeded catalog items
+│   └── products/                # Seeded product media
+├── components.json              # shadcn/ui configuration
 ├── Dockerfile
 ├── next.config.ts
 ├── package.json
@@ -85,22 +88,28 @@ music-shop-fe/
 
 - Locales: `ru` and `en`
 - Default entry: `/ru/login`
-- Protected routes are rendered inside the shared app shell
+- Protected routes render inside a shared backoffice shell
 - Demo sessions are role-based: `admin`, `store_manager`, `catalog_manager`, `sales_operator`
-- State persists in `localStorage` under music shop keys
+- State persists in `localStorage`
 
 ## Main Modules
 
-- Dashboard with revenue, low stock, order pipeline, and activity
+- Dashboard with revenue, low stock, order pipeline, featured products, and recent activity
 - Catalog for products, brands, and categories
-- Inventory for stock adjustments and thresholds
+- Inventory for stock adjustments, replenishment risk, and movement history
 - Orders and customers for store operations
-- Employees, finance, media, and settings for backoffice workflows
+- Employees, finance, media, and settings for internal backoffice workflows
+
+## UI Notes
+
+- The app uses a custom light-theme backoffice visual system driven from `src/app/globals.css`
+- Shared surfaces, tables, forms, buttons, and modal styling are centralized so feature screens inherit the same design language
+- `src/components/ui/primitives.tsx` remains the lightweight shared UI layer, while `src/components/ui/` also contains shadcn-generated building blocks
 
 ## Demo Assets
 
 - Product media is served from `public/products/`
-- Current seeded assets include `fender-player-stratocaster.jpg`, `yamaha-p125.jpg`, `roland-spd-sx.jpg`, and `shure-sm7b.jpg`
+- Seeded assets include `fender-player-stratocaster.jpg`, `yamaha-p125.jpg`, `roland-spd-sx.jpg`, and `shure-sm7b.jpg`
 
 ## Docker
 
@@ -111,5 +120,5 @@ docker run -p 3000:3000 music-shop-fe
 
 ## Notes
 
-- This repository is a frontend demo and does not require a backend to run.
-- The README should be updated together with future structural changes.
+- This repository is a frontend-only demo and does not require a backend to run
+- Documentation should be updated alongside future structural or product-positioning changes

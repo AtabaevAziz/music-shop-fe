@@ -77,9 +77,12 @@ export function AppShell({
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-mark">
-          <strong>{dict.brand}</strong>
-          <p style={{ marginBottom: 8 }}>{dict.appSubtitle}</p>
-          <small>{translateDynamicLabel(locale, session.role)}</small>
+          <div className="sidebar-kicker">{dict.brand}</div>
+          <strong className="sidebar-title">{dict.appName}</strong>
+          <p className="sidebar-copy muted">{dict.appSubtitle}</p>
+          <small className="sidebar-role">
+            {translateDynamicLabel(locale, session.role)}
+          </small>
         </div>
         <nav className="nav-list">
           {navItems
@@ -94,29 +97,23 @@ export function AppShell({
               </Link>
             ))}
         </nav>
-        <div
-          className="surface"
-          style={{
-            padding: 16,
-            background: "rgba(15, 159, 154, 0.08)",
-            borderColor: "rgba(15, 159, 154, 0.14)",
-          }}
-        >
-          <div className="muted" style={{ color: "rgba(100, 128, 137, 0.9)" }}>
-            Inventory threshold
-          </div>
-          <div style={{ fontSize: 30, marginTop: 4 }}>
+        <div className="surface sidebar-metric">
+          <div className="sidebar-metric-label muted">Inventory threshold</div>
+          <div className="sidebar-metric-value">
             {db.settings.lowStockThreshold}
+          </div>
+          <div className="sidebar-metric-copy muted">
+            Reorder alerts use this value across inventory and dashboard views.
           </div>
         </div>
       </aside>
       <main className="content-area">
         <div className="topbar">
-          <div>
+          <div className="topbar-copy">
             <strong>{dict.appName}</strong>
             <div className="muted">{dict.appSubtitle}</div>
           </div>
-          <div className="stack-row">
+          <div className="topbar-actions">
             <button
               className="button-ghost"
               onClick={() =>

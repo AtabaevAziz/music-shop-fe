@@ -54,15 +54,10 @@ export function GenericCrudModule<T extends { id: string }>({
           actions={
             <div className="stack-row">
               <input
+                className="toolbar-search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={dict.search}
-                style={{
-                  minWidth: 220,
-                  padding: "12px 14px",
-                  borderRadius: 12,
-                  border: "1px solid var(--line)",
-                }}
               />
               <button
                 className="button"
@@ -206,7 +201,7 @@ export function GenericCrudModule<T extends { id: string }>({
                 )}
               </Field>
             ))}
-            <div className="stack-row" style={{ gridColumn: "1 / -1" }}>
+            <div className="stack-row form-actions">
               <button className="button" type="submit">
                 {dict.save}
               </button>

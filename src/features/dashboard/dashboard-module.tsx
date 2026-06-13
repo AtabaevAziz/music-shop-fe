@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { Badge, PageHeader } from "@/components/ui/primitives";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils";
@@ -122,26 +124,33 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             subtitle={dict.dashboardFeaturedSubtitle}
           />
           <div className="list-clean">
-            {featuredProducts.map((product) => (
-              <article key={product.id} className="card">
-                <img
-                  src={product.primaryImage ?? product.images[0] ?? ""}
-                  alt={product.name}
-                  className="product-thumb"
-                  style={{ width: "100%", height: 180, marginBottom: 12 }}
-                />
-                <strong>{product.name}</strong>
-                <div className="muted">{product.sku}</div>
-                <div className="heading-row">
-                  <Badge tone="neutral">
-                    {translateDynamicLabel(locale, product.status)}
-                  </Badge>
-                  <span>
-                    {formatMoney(product.price, db.settings.currency, locale)}
-                  </span>
-                </div>
-              </article>
-            ))}
+            {featuredProducts.map((product) => {
+              const previewImage = product.primaryImage ?? product.images[0];
+
+              return (
+                <article key={product.id} className="card">
+                  {previewImage ? (
+                    <Image
+                      src={previewImage}
+                      alt={product.name}
+                      width={720}
+                      height={180}
+                      className="product-thumb product-thumb-featured"
+                    />
+                  ) : null}
+                  <strong>{product.name}</strong>
+                  <div className="muted">{product.sku}</div>
+                  <div className="heading-row">
+                    <Badge tone="neutral">
+                      {translateDynamicLabel(locale, product.status)}
+                    </Badge>
+                    <span>
+                      {formatMoney(product.price, db.settings.currency, locale)}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
 
