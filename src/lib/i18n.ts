@@ -1,4 +1,3 @@
-
 export const locales = ["ru", "en"] as const;
 
 export type Locale = (typeof locales)[number];
@@ -97,8 +96,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
   ru: {
     brand: "Music Shop",
     appName: "Music Shop Online",
-    appSubtitle:
-      "Онлайн-магазин музыкальных инструментов с панелью управления продажами, каталогом и складом",
+    appSubtitle: "Онлайн-магазин с каталогом, заказами и складом",
     loginTitle: "Онлайн-магазин музыкальных инструментов и операционная панель",
     loginText:
       "Демо интернет-магазина музыкальных инструментов: каталог товаров, заказы, клиенты, склад и настройки доступны целиком на клиенте без бэкенда.",
@@ -186,8 +184,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
   en: {
     brand: "Music Shop",
     appName: "Music Shop Online",
-    appSubtitle:
-      "Online musical instrument store with admin tools for catalog, inventory, orders, and sales operations",
+    appSubtitle: "Online store with catalog, orders, and inventory tools",
     loginTitle: "Online musical instrument store and operations backoffice",
     loginText:
       "Browser-only demo of a musical instrument ecommerce operation with products, orders, customers, inventory, and settings running fully on the client.",

@@ -84,20 +84,24 @@ export function AppShell({
             {translateDynamicLabel(locale, session.role)}
           </small>
         </div>
-        <nav className="nav-list">
-          {navItems
-            .filter((item) => !item.roles || item.roles.includes(session.role))
-            .map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-link${pathname === item.href ? "active" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-        </nav>
-        <div className="surface sidebar-metric">
+        <div className="sidebar-body">
+          <nav className="nav-list">
+            {navItems
+              .filter(
+                (item) => !item.roles || item.roles.includes(session.role),
+              )
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-link${pathname === item.href ? "active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+          </nav>
+        </div>
+        <div className="surface sidebar-metric sidebar-footer">
           <div className="sidebar-metric-label muted">Inventory threshold</div>
           <div className="sidebar-metric-value">
             {db.settings.lowStockThreshold}
