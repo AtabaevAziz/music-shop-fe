@@ -3,22 +3,49 @@
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
-import { Role } from "@/types/music";
+import { Employee, Role } from "@/types/music";
+
+type EmployeeDraft = {
+  id?: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: Employee["role"];
+  status: Employee["status"];
+};
 
 export function EmployeesModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   const { db, saveEmployee, deleteEntity } = useMusicStore();
 
   return (
-    <GenericCrudModule
+    <GenericCrudModule<Employee, EmployeeDraft>
       locale={locale}
       title={dict.employees}
       subtitle="Role-aware internal users for protected backoffice access."
       items={db.employees}
+      createDraft={() => ({
+        name: "",
+        email: "",
+        phone: "",
+        role: "sales_operator",
+        status: "active",
+      })}
+      toDraft={(employee) => ({
+        id: employee.id,
+        name: employee.name,
+        email: employee.email,
+        phone: employee.phone,
+        role: employee.role,
+        status: employee.status,
+      })}
+      getSearchText={(employee) =>
+        `${employee.name} ${employee.email} ${employee.phone} ${employee.role}`.toLowerCase()
+      }
       fields={[
         { name: "name", label: "Name" },
-        { name: "email", label: "Email" },
-        { name: "phone", label: "Phone" },
+        { name: "email", label: "Email", type: "email" },
+        { name: "phone", label: "Phone", type: "tel" },
         {
           name: "role",
           label: "Role",
@@ -51,11 +78,11 @@ export function EmployeesModule({ locale }: { locale: Locale }) {
       onSave={(draft) =>
         saveEmployee({
           id: draft.id,
-          name: draft.name ?? "",
-          email: draft.email ?? "",
-          phone: draft.phone ?? "",
-          role: (draft.role as Role) ?? "sales_operator",
-          status: (draft.status as "active" | "inactive") ?? "active",
+          name: draft.name,
+          email: draft.email,
+          phone: draft.phone,
+          role: draft.role as Role,
+          status: draft.status,
         })
       }
       onDelete={(id) => deleteEntity("employees", id)}

@@ -732,6 +732,10 @@ p {
   justify-content: space-between;
 }
 
+.module-toolbar-actions {
+  margin-left: auto;
+}
+
 .page-actions {
   padding: 0 0 18px;
   margin-bottom: 18px;
@@ -1082,6 +1086,17 @@ tbody tr:hover {
   border: 1px dashed rgba(123, 145, 175, 0.24);
   border-radius: 20px;
   background: rgba(246, 249, 252, 0.72);
+}
+
+.empty-state-detailed {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.empty-state-detailed p {
+  max-width: 48ch;
+  line-height: 1.6;
 }
 
 .flash,

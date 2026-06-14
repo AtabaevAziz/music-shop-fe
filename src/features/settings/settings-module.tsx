@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Field } from "@/components/ui/primitives";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 import { ProductStatus } from "@/types/music";
 
@@ -25,7 +26,10 @@ export function SettingsModule({ locale }: { locale: Locale }) {
   });
 
   return (
-    <section className="table-card">
+    <ModuleSection
+      title={dict.settings}
+      subtitle={dict.settingsSubtitle}
+    >
       <form
         className="form-grid"
         onSubmit={(event) => {
@@ -103,6 +107,6 @@ export function SettingsModule({ locale }: { locale: Locale }) {
           </button>
         </div>
       </form>
-    </section>
+    </ModuleSection>
   );
 }

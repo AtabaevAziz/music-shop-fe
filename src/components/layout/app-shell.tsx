@@ -111,7 +111,7 @@ export function AppShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`nav-link${pathname === item.href ? "active" : ""}`}
+                  className={`nav-link${pathname === item.href ? " active" : ""}`}
                 >
                   {item.label}
                 </Link>

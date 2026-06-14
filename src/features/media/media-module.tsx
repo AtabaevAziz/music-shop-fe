@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Badge, Field, PageHeader } from "@/components/ui/primitives";
 import { Locale, getDictionary } from "@/lib/i18n";
+import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 
 export function MediaModule({ locale }: { locale: Locale }) {
@@ -16,7 +17,10 @@ export function MediaModule({ locale }: { locale: Locale }) {
 
   return (
     <div className="two-columns">
-      <section className="table-card">
+      <ModuleSection
+        title={dict.media}
+        subtitle={dict.mediaSubtitle}
+      >
         <form
           className="form-grid"
           onSubmit={(event) => {
@@ -50,8 +54,8 @@ export function MediaModule({ locale }: { locale: Locale }) {
             </button>
           </div>
         </form>
-      </section>
-      <section className="table-card">
+      </ModuleSection>
+      <ModuleSection>
         <PageHeader
           title={product?.name ?? dict.media}
           subtitle="Product gallery preview"
@@ -92,7 +96,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
         ) : (
           <div className="empty-state">{dict.noData}</div>
         )}
-      </section>
+      </ModuleSection>
     </div>
   );
 }

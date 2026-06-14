@@ -3,21 +3,66 @@
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
+import { Category } from "@/types/music";
+
+type CategoryDraft = {
+  id?: string;
+  name: string;
+  slug?: string;
+  parentId: string;
+  status: Category["status"];
+  description: string;
+};
 
 export function CategoriesModule({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
   const { db, saveCategory, deleteEntity } = useMusicStore();
+  const categoryNameMap = Object.fromEntries(
+    db.categories.map((category) => [category.id, category.name]),
+  );
 
   return (
-    <GenericCrudModule
+    <GenericCrudModule<Category, CategoryDraft>
       locale={locale}
       title={dict.categories}
       subtitle="Structured product taxonomy for the music retail catalog."
       items={db.categories}
+      createDraft={() => ({
+        name: "",
+        slug: "",
+        parentId: "",
+        status: "active",
+        description: "",
+      })}
+      toDraft={(category) => ({
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        parentId: category.parentId ?? "",
+        status: category.status,
+        description: category.description,
+      })}
+      getSearchText={(category) =>
+        `${category.name} ${category.slug} ${category.description}`.toLowerCase()
+      }
       fields={[
         { name: "name", label: "Name" },
-        { name: "slug", label: "Slug" },
-        { name: "parentId", label: "Parent" },
+        {
+          name: "slug",
+          label: "Slug",
+          inForm: false,
+        },
+        {
+          name: "parentId",
+          label: "Parent",
+          type: "select",
+          options: db.categories.map((category) => ({
+            label: category.name,
+            value: category.id,
+          })),
+          formatValue: (value) =>
+            (typeof value === "string" && categoryNameMap[value]) || "Root",
+        },
         {
           name: "status",
           label: dict.status,
@@ -35,10 +80,10 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
       onSave={(draft) =>
         saveCategory({
           id: draft.id,
-          name: draft.name ?? "",
-          parentId: draft.parentId ?? "",
-          status: (draft.status as "active" | "inactive") ?? "active",
-          description: draft.description ?? "",
+          name: draft.name,
+          parentId: draft.parentId,
+          status: draft.status,
+          description: draft.description,
         })
       }
       onDelete={(id) => deleteEntity("categories", id)}
