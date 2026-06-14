@@ -23,6 +23,8 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+Open the repository as a JavaScript/TypeScript project in WebStorm or IntelliJ IDEA. This project does not use Gradle or Android tooling.
+
 ## Scripts
 
 ```bash
