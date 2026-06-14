@@ -104,6 +104,43 @@ type Dictionary = {
   manualCorrection: string;
   inventoryThresholdTitle: string;
   inventoryThresholdHelp: string;
+  nameLabel: string;
+  descriptionLabel: string;
+  countryLabel: string;
+  websiteLabel: string;
+  phoneLabel: string;
+  emailLabel: string;
+  parentLabel: string;
+  rootLabel: string;
+  slugLabel: string;
+  roleLabel: string;
+  tierLabel: string;
+  notesLabel: string;
+  previewLabel: string;
+  categoryLabel: string;
+  brandLabel: string;
+  priceLabel: string;
+  stockLabel: string;
+  barcodeLabel: string;
+  selectLabel: string;
+  costPriceLabel: string;
+  stockQtyLabel: string;
+  shortDescriptionLabel: string;
+  fullDescriptionLabel: string;
+  imagesPerLineLabel: string;
+  specsKeyValueLabel: string;
+  productRecordSubtitle: string;
+  validationFailed: string;
+  customerLabel: string;
+  workflowControlsTitle: string;
+  workflowControlsSubtitle: string;
+  imagePathLabel: string;
+  productGalleryPreviewSubtitle: string;
+  primaryLabel: string;
+  setPrimaryLabel: string;
+  loadingWorkspace: string;
+  accessRestrictedTitle: string;
+  accessRestrictedText: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -213,6 +250,44 @@ export const dictionaries: Record<Locale, Dictionary> = {
     inventoryThresholdTitle: "Порог остатков",
     inventoryThresholdHelp:
       "Это значение используется для предупреждений в складе и на дашборде.",
+    nameLabel: "Название",
+    descriptionLabel: "Описание",
+    countryLabel: "Страна",
+    websiteLabel: "Сайт",
+    phoneLabel: "Телефон",
+    emailLabel: "Email",
+    parentLabel: "Родитель",
+    rootLabel: "Корень",
+    slugLabel: "Слаг",
+    roleLabel: "Роль",
+    tierLabel: "Уровень",
+    notesLabel: "Заметки",
+    previewLabel: "Превью",
+    categoryLabel: "Категория",
+    brandLabel: "Бренд",
+    priceLabel: "Цена",
+    stockLabel: "Остаток",
+    barcodeLabel: "Штрихкод",
+    selectLabel: "Выбрать",
+    costPriceLabel: "Себестоимость",
+    stockQtyLabel: "Кол-во на складе",
+    shortDescriptionLabel: "Краткое описание",
+    fullDescriptionLabel: "Полное описание",
+    imagesPerLineLabel: "Изображения, по одному на строку",
+    specsKeyValueLabel: "Характеристики в формате Ключ: Значение",
+    productRecordSubtitle: "Карточка товара",
+    validationFailed: "Проверьте заполнение формы.",
+    customerLabel: "Клиент",
+    workflowControlsTitle: "Управление этапами",
+    workflowControlsSubtitle: "Смоделируйте прохождение заказа по этапам.",
+    imagePathLabel: "Путь к изображению",
+    productGalleryPreviewSubtitle: "Предпросмотр галереи товара",
+    primaryLabel: "основное",
+    setPrimaryLabel: "Сделать основным",
+    loadingWorkspace: "Загрузка рабочего пространства...",
+    accessRestrictedTitle: "Доступ ограничен",
+    accessRestrictedText:
+      "Эта роль может войти в систему, но данный модуль скрыт настройками демо-доступа.",
   },
   en: {
     brand: "Music Shop",
@@ -321,6 +396,44 @@ export const dictionaries: Record<Locale, Dictionary> = {
     inventoryThresholdTitle: "Inventory threshold",
     inventoryThresholdHelp:
       "Reorder alerts use this value across inventory and dashboard views.",
+    nameLabel: "Name",
+    descriptionLabel: "Description",
+    countryLabel: "Country",
+    websiteLabel: "Website",
+    phoneLabel: "Phone",
+    emailLabel: "Email",
+    parentLabel: "Parent",
+    rootLabel: "Root",
+    slugLabel: "Slug",
+    roleLabel: "Role",
+    tierLabel: "Tier",
+    notesLabel: "Notes",
+    previewLabel: "Preview",
+    categoryLabel: "Category",
+    brandLabel: "Brand",
+    priceLabel: "Price",
+    stockLabel: "Stock",
+    barcodeLabel: "Barcode",
+    selectLabel: "Select",
+    costPriceLabel: "Cost price",
+    stockQtyLabel: "Stock qty",
+    shortDescriptionLabel: "Short description",
+    fullDescriptionLabel: "Full description",
+    imagesPerLineLabel: "Images, one per line",
+    specsKeyValueLabel: "Specs as Key: Value",
+    productRecordSubtitle: "Product record",
+    validationFailed: "Please review the form fields.",
+    customerLabel: "Customer",
+    workflowControlsTitle: "Workflow controls",
+    workflowControlsSubtitle: "Simulate retail order progression.",
+    imagePathLabel: "Image path",
+    productGalleryPreviewSubtitle: "Product gallery preview",
+    primaryLabel: "primary",
+    setPrimaryLabel: "Set primary",
+    loadingWorkspace: "Loading workspace...",
+    accessRestrictedTitle: "Access restricted",
+    accessRestrictedText:
+      "This role can sign in, but this module is intentionally hidden in the demo access matrix.",
   },
 };
 
@@ -386,4 +499,118 @@ export function translateDynamicLabel(locale: Locale, value: string) {
     dynamicLabels[locale][value as keyof (typeof dynamicLabels)[Locale]] ??
     value.replaceAll("_", " ")
   );
+}
+
+type StoreMessageParams = Record<string, string | number | undefined>;
+
+function entityLabel(locale: Locale, entityType: string) {
+  const dict = getDictionary(locale);
+
+  return (
+    {
+      categories: dict.categories,
+      brands: dict.brands,
+      customers: dict.customers,
+      employees: dict.employees,
+      products: dict.catalog,
+    }[entityType] ?? entityType
+  );
+}
+
+export function formatStoreMessage(
+  locale: Locale,
+  key: string,
+  params: StoreMessageParams = {},
+) {
+  const dict = getDictionary(locale);
+  const name = String(params.name ?? "");
+  const orderId = String(params.orderId ?? "");
+  const productName = String(params.productName ?? params.productId ?? "");
+  const status = String(params.status ?? "");
+  const delta = String(params.delta ?? "");
+
+  switch (key) {
+    case "categorySavedFlash":
+      return locale === "ru" ? "Категория сохранена" : "Category saved";
+    case "brandSavedFlash":
+      return locale === "ru" ? "Бренд сохранён" : "Brand saved";
+    case "customerSavedFlash":
+      return locale === "ru" ? "Клиент сохранён" : "Customer saved";
+    case "employeeSavedFlash":
+      return locale === "ru" ? "Сотрудник сохранён" : "Employee saved";
+    case "productSavedFlash":
+      return locale === "ru" ? "Товар сохранён" : "Product saved";
+    case "entityDeletedFlash":
+      return locale === "ru" ? "Запись удалена" : "Entity deleted";
+    case "inventoryUpdatedFlash":
+      return locale === "ru" ? "Склад обновлён" : "Inventory updated";
+    case "orderStatusUpdatedFlash":
+      return locale === "ru"
+        ? "Статус заказа обновлён"
+        : "Order status updated";
+    case "settingsSavedFlash":
+      return locale === "ru" ? "Настройки сохранены" : "Settings saved";
+    case "imageAttachedFlash":
+      return locale === "ru" ? "Изображение прикреплено" : "Image attached";
+    case "primaryImageSetFlash":
+      return locale === "ru"
+        ? "Основное изображение обновлено"
+        : "Primary image set";
+    case "categorySavedActivity":
+      return locale === "ru"
+        ? `Категория ${name} сохранена`
+        : `Category ${name} saved`;
+    case "brandSavedActivity":
+      return locale === "ru" ? `Бренд ${name} сохранён` : `Brand ${name} saved`;
+    case "customerSavedActivity":
+      return locale === "ru"
+        ? `Клиент ${name} сохранён`
+        : `Customer ${name} saved`;
+    case "employeeSavedActivity":
+      return locale === "ru"
+        ? `Сотрудник ${name} сохранён`
+        : `Employee ${name} saved`;
+    case "productSavedActivity":
+      return locale === "ru"
+        ? `Товар ${name} сохранён`
+        : `Product ${name} saved`;
+    case "entityRemovedActivity":
+      return locale === "ru"
+        ? `Запись удалена из раздела ${entityLabel(locale, String(params.entityType ?? ""))}`
+        : `Entity removed from ${entityLabel(locale, String(params.entityType ?? ""))}`;
+    case "stockAdjustedActivity":
+      return locale === "ru"
+        ? `Остаток ${productName} скорректирован на ${delta}`
+        : `Stock adjusted by ${delta} for ${productName}`;
+    case "orderMovedActivity":
+      return locale === "ru"
+        ? `Заказ ${orderId} переведён в статус ${translateDynamicLabel(locale, status)}`
+        : `Order ${orderId} moved to ${translateDynamicLabel(locale, status)}`;
+    case "businessSettingsUpdatedActivity":
+      return locale === "ru"
+        ? "Бизнес-настройки обновлены"
+        : "Business settings updated";
+    case "mediaAddedActivity":
+      return locale === "ru"
+        ? `Медиа добавлено к ${productName}`
+        : `Media added to ${productName}`;
+    case "primaryImageChangedActivity":
+      return locale === "ru"
+        ? `Основное изображение изменено для ${productName}`
+        : `Primary image changed for ${productName}`;
+    case "seedOrderReadyActivity":
+      return locale === "ru"
+        ? `Заказ ${orderId} отмечен как готовый к выдаче`
+        : `Order ${orderId} marked ready for pickup`;
+    case "seedReservedStockActivity":
+      return locale === "ru"
+        ? `Остаток ${productName} зарезервирован для заказа ${orderId}`
+        : `${productName} stock reserved for order ${orderId}`;
+    case "seedSupplierBatchActivity":
+      return locale === "ru"
+        ? `Новая поставка получена для ${productName}`
+        : `New supplier batch received for ${productName}`;
+    default:
+      return key;
+  }
 }

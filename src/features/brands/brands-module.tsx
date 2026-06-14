@@ -21,7 +21,7 @@ export function BrandsModule({ locale }: { locale: Locale }) {
     <GenericCrudModule<Brand, BrandDraft>
       locale={locale}
       title={dict.brands}
-      subtitle="Reusable vendor and manufacturer records."
+      subtitle={dict.brandsSubtitle}
       items={db.brands}
       createDraft={() => ({
         name: "",
@@ -40,9 +40,9 @@ export function BrandsModule({ locale }: { locale: Locale }) {
         `${brand.name} ${brand.country} ${brand.website}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: "Name" },
-        { name: "country", label: "Country" },
-        { name: "website", label: "Website", type: "url" },
+        { name: "name", label: dict.nameLabel },
+        { name: "country", label: dict.countryLabel },
+        { name: "website", label: dict.websiteLabel, type: "url" },
         {
           name: "status",
           label: dict.status,

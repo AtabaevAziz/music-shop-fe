@@ -23,7 +23,7 @@ export function CustomersModule({ locale }: { locale: Locale }) {
     <GenericCrudModule<Customer, CustomerDraft>
       locale={locale}
       title={dict.customers}
-      subtitle="Internal customer records with order-facing visibility."
+      subtitle={dict.customersSubtitle}
       items={db.customers}
       createDraft={() => ({
         name: "",
@@ -46,12 +46,12 @@ export function CustomersModule({ locale }: { locale: Locale }) {
         `${customer.name} ${customer.phone} ${customer.email} ${customer.tier}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: "Name" },
-        { name: "phone", label: "Phone", type: "tel" },
-        { name: "email", label: "Email", type: "email" },
+        { name: "name", label: dict.nameLabel },
+        { name: "phone", label: dict.phoneLabel, type: "tel" },
+        { name: "email", label: dict.emailLabel, type: "email" },
         {
           name: "tier",
-          label: "Tier",
+          label: dict.tierLabel,
           type: "select",
           options: [
             {
@@ -74,7 +74,7 @@ export function CustomersModule({ locale }: { locale: Locale }) {
             },
           ],
         },
-        { name: "notes", label: "Notes", type: "textarea" },
+        { name: "notes", label: dict.notesLabel, type: "textarea" },
       ]}
       onSave={(draft) =>
         saveCustomer({

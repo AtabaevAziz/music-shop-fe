@@ -4,14 +4,24 @@ import { ReactNode, useMemo, useState } from "react";
 
 import { Field, Modal } from "@/components/ui/primitives";
 import { Locale, getDictionary } from "@/lib/i18n";
-import { ModuleEmptyState, ModuleSection } from "@/shared/components/module-shell";
+import {
+  ModuleEmptyState,
+  ModuleSection,
+} from "@/shared/components/module-shell";
 
 type CrudOption = {
   label: string;
   value: string;
 };
 
-type CrudFieldType = "text" | "textarea" | "select" | "number" | "email" | "tel" | "url";
+type CrudFieldType =
+  | "text"
+  | "textarea"
+  | "select"
+  | "number"
+  | "email"
+  | "tel"
+  | "url";
 
 type CrudDraft = {
   id?: string;
@@ -68,7 +78,10 @@ function getDisplayValue<TItem, TDraft extends CrudDraft>(
   return String(value ?? "");
 }
 
-export function CrudModule<TItem extends { id: string }, TDraft extends CrudDraft>({
+export function CrudModule<
+  TItem extends { id: string },
+  TDraft extends CrudDraft,
+>({
   locale,
   title,
   subtitle,
@@ -111,11 +124,17 @@ export function CrudModule<TItem extends { id: string }, TDraft extends CrudDraf
     setIsEditorOpen(false);
   }
 
-  function updateDraftValue(name: Extract<keyof TDraft, string>, value: string) {
-    setDraft((current) => ({
-      ...current,
-      [name]: value,
-    }) as TDraft);
+  function updateDraftValue(
+    name: Extract<keyof TDraft, string>,
+    value: string,
+  ) {
+    setDraft(
+      (current) =>
+        ({
+          ...current,
+          [name]: value,
+        }) as TDraft,
+    );
   }
 
   function resolveDisplayValue(field: CrudField<TItem, TDraft>, item: TItem) {
@@ -275,7 +294,11 @@ export function CrudModule<TItem extends { id: string }, TDraft extends CrudDraf
               <button className="button" type="submit">
                 {dict.save}
               </button>
-              <button className="button-ghost" type="button" onClick={closeEditor}>
+              <button
+                className="button-ghost"
+                type="button"
+                onClick={closeEditor}
+              >
                 {dict.cancel}
               </button>
             </div>
@@ -295,7 +318,9 @@ export function CrudModule<TItem extends { id: string }, TDraft extends CrudDraf
               className="button-danger"
               type="button"
               onClick={() => {
-                void onDelete(deleteTargetId).then(() => setDeleteTargetId(null));
+                void onDelete(deleteTargetId).then(() =>
+                  setDeleteTargetId(null),
+                );
               }}
             >
               {dict.delete}

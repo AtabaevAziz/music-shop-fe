@@ -17,10 +17,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
 
   return (
     <div className="two-columns">
-      <ModuleSection
-        title={dict.media}
-        subtitle={dict.mediaSubtitle}
-      >
+      <ModuleSection title={dict.media} subtitle={dict.mediaSubtitle}>
         <form
           className="form-grid"
           onSubmit={(event) => {
@@ -30,7 +27,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
             setLabel("");
           }}
         >
-          <Field label="Product">
+          <Field label={dict.product}>
             <select
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
@@ -42,7 +39,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
               ))}
             </select>
           </Field>
-          <Field label="Image path">
+          <Field label={dict.imagePathLabel}>
             <input
               value={label}
               onChange={(event) => setLabel(event.target.value)}
@@ -58,7 +55,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
       <ModuleSection>
         <PageHeader
           title={product?.name ?? dict.media}
-          subtitle="Product gallery preview"
+          subtitle={dict.productGalleryPreviewSubtitle}
         />
         {product ? (
           <div className="media-grid">
@@ -78,7 +75,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
                 <div className="stack-row spread">
                   <span>{image.split("/").pop()}</span>
                   {product.primaryImage === image ? (
-                    <Badge tone="success">primary</Badge>
+                    <Badge tone="success">{dict.primaryLabel}</Badge>
                   ) : null}
                 </div>
                 {product.primaryImage !== image ? (
@@ -87,7 +84,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
                     type="button"
                     onClick={() => void setPrimaryImage(product.id, image)}
                   >
-                    Set primary
+                    {dict.setPrimaryLabel}
                   </button>
                 ) : null}
               </div>

@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { Locale } from "@/lib/i18n";
+import { Locale, getDictionary } from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 
 export function AuthGuard({
@@ -16,6 +16,7 @@ export function AuthGuard({
   const { ready, session } = useMusicStore();
   const router = useRouter();
   const pathname = usePathname();
+  const dict = getDictionary(locale);
 
   useEffect(() => {
     if (ready && !session) {
@@ -27,7 +28,7 @@ export function AuthGuard({
     return (
       <div className="auth-page">
         <div className="auth-card">
-          <div className="empty-state">Loading workspace...</div>
+          <div className="empty-state">{dict.loadingWorkspace}</div>
         </div>
       </div>
     );

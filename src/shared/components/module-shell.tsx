@@ -30,7 +30,11 @@ export function ModuleSection({
   return (
     <section className={cn("table-card", className)}>
       {title || subtitle || actions ? (
-        <PageHeader title={title ?? ""} subtitle={subtitle ?? ""} actions={actions} />
+        <PageHeader
+          title={title ?? ""}
+          subtitle={subtitle ?? ""}
+          actions={actions}
+        />
       ) : null}
       {children}
     </section>

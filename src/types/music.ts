@@ -105,6 +105,8 @@ export type Activity = {
   id: string;
   title: string;
   timestamp: string;
+  messageKey?: string;
+  messageParams?: Record<string, string | number>;
 };
 
 export type Session = {

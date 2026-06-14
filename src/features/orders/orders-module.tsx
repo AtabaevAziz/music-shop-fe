@@ -24,8 +24,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Customer</th>
-              <th>Total</th>
+              <th>{dict.customerLabel}</th>
+              <th>{dict.total}</th>
               <th>{dict.paymentState}</th>
               <th>{dict.status}</th>
             </tr>
@@ -84,8 +84,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
       </section>
       <section className="table-card">
         <PageHeader
-          title="Workflow controls"
-          subtitle="Simulate retail order progression."
+          title={dict.workflowControlsTitle}
+          subtitle={dict.workflowControlsSubtitle}
         />
         <ul className="list-clean">
           {db.orders.map((order) => (

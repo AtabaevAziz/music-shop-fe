@@ -3,7 +3,12 @@
 import Image from "next/image";
 
 import { Badge, PageHeader } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import {
+  Locale,
+  formatStoreMessage,
+  getDictionary,
+  translateDynamicLabel,
+} from "@/lib/i18n";
 import { formatMoney } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
@@ -161,7 +166,15 @@ export function DashboardModule({ locale }: { locale: Locale }) {
           <ul className="list-clean activity-feed">
             {db.activity.map((item) => (
               <li key={item.id} className="card">
-                <strong>{item.title}</strong>
+                <strong>
+                  {item.messageKey
+                    ? formatStoreMessage(
+                        locale,
+                        item.messageKey,
+                        item.messageParams,
+                      )
+                    : item.title}
+                </strong>
                 <div className="muted">
                   {new Date(item.timestamp).toLocaleString(
                     locale === "ru" ? "ru-RU" : "en-US",

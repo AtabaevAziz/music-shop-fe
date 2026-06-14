@@ -64,7 +64,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   async function submit() {
     const parsed = productSchema.safeParse(draft);
     if (!parsed.success) {
-      setFormError(parsed.error.issues[0]?.message ?? "Validation failed");
+      setFormError(dict.validationFailed);
       return;
     }
     const specs = Object.fromEntries(
@@ -116,12 +116,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         <table>
           <thead>
             <tr>
-              <th>Preview</th>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Brand</th>
-              <th>Price</th>
-              <th>Stock</th>
+              <th>{dict.previewLabel}</th>
+              <th>{dict.product}</th>
+              <th>{dict.categoryLabel}</th>
+              <th>{dict.brandLabel}</th>
+              <th>{dict.priceLabel}</th>
+              <th>{dict.stockLabel}</th>
               <th>{dict.status}</th>
               <th>{dict.actions}</th>
             </tr>
@@ -233,7 +233,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       {isEditorOpen ? (
         <Modal
           title={draft.id ? dict.edit : dict.addNew}
-          subtitle="Product record"
+          subtitle={dict.productRecordSubtitle}
           closeLabel={dict.close}
           onClose={() => {
             setFormError("");
@@ -249,7 +249,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             }}
             className="form-grid"
           >
-            <Field label="Name">
+            <Field label={dict.nameLabel}>
               <input
                 value={draft.name ?? ""}
                 onChange={(event) =>
@@ -260,7 +260,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="SKU">
+            <Field label={dict.sku}>
               <input
                 value={draft.sku ?? ""}
                 onChange={(event) =>
@@ -271,7 +271,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Barcode">
+            <Field label={dict.barcodeLabel}>
               <input
                 value={draft.barcode ?? ""}
                 onChange={(event) =>
@@ -282,7 +282,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Category">
+            <Field label={dict.categoryLabel}>
               <select
                 value={draft.categoryId ?? ""}
                 onChange={(event) =>
@@ -292,7 +292,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="">Select</option>
+                <option value="">{dict.selectLabel}</option>
                 {db.categories.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -300,7 +300,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 ))}
               </select>
             </Field>
-            <Field label="Brand">
+            <Field label={dict.brandLabel}>
               <select
                 value={draft.brandId ?? ""}
                 onChange={(event) =>
@@ -310,7 +310,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="">Select</option>
+                <option value="">{dict.selectLabel}</option>
                 {db.brands.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -318,7 +318,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 ))}
               </select>
             </Field>
-            <Field label="Condition">
+            <Field label={dict.condition}>
               <select
                 value={draft.condition ?? "new"}
                 onChange={(event) =>
@@ -339,7 +339,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 </option>
               </select>
             </Field>
-            <Field label="Price">
+            <Field label={dict.priceLabel}>
               <input
                 type="number"
                 value={draft.price ?? ""}
@@ -351,7 +351,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Cost price">
+            <Field label={dict.costPriceLabel}>
               <input
                 type="number"
                 value={draft.costPrice ?? ""}
@@ -363,7 +363,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Stock qty">
+            <Field label={dict.stockQtyLabel}>
               <input
                 type="number"
                 value={draft.stockQty ?? ""}
@@ -396,7 +396,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 </option>
               </select>
             </Field>
-            <Field label="Short description">
+            <Field label={dict.shortDescriptionLabel}>
               <textarea
                 value={draft.shortDescription ?? ""}
                 onChange={(event) =>
@@ -407,7 +407,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Full description">
+            <Field label={dict.fullDescriptionLabel}>
               <textarea
                 value={draft.description ?? ""}
                 onChange={(event) =>
@@ -418,7 +418,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Images, one per line">
+            <Field label={dict.imagesPerLineLabel}>
               <textarea
                 value={draft.images ?? ""}
                 onChange={(event) =>
@@ -429,7 +429,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label="Specs as Key: Value">
+            <Field label={dict.specsKeyValueLabel}>
               <textarea
                 value={draft.specs ?? ""}
                 onChange={(event) =>

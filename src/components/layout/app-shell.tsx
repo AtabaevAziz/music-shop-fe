@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import {
+  Locale,
+  formatStoreMessage,
+  getDictionary,
+  translateDynamicLabel,
+} from "@/lib/i18n";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
@@ -111,7 +116,7 @@ export function AppShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`nav-link${pathname === item.href ? " active" : ""}`}
+                  className={`nav-link${pathname === item.href ? "active" : ""}`}
                 >
                   {item.label}
                 </Link>
@@ -167,18 +172,18 @@ export function AppShell({
         <div className="page-scroll">
           {flash ? (
             <div className={flash.kind === "error" ? "error" : "flash"}>
-              {flash.message}
+              {flash.message ??
+                (flash.key
+                  ? formatStoreMessage(locale, flash.key, flash.params)
+                  : "")}
             </div>
           ) : null}
           {isAllowed ? (
             children
           ) : (
             <section className="table-card">
-              <h2>Access restricted</h2>
-              <p className="muted">
-                This role can sign in, but this module is intentionally hidden
-                in the demo access matrix.
-              </p>
+              <h2>{dict.accessRestrictedTitle}</h2>
+              <p className="muted">{dict.accessRestrictedText}</p>
             </section>
           )}
         </div>

@@ -1,7 +1,27 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { isLocale } from "@/lib/i18n";
+import { getDictionary, isLocale } from "@/lib/i18n";
 import { MusicStoreProvider } from "@/store/music-store";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (!isLocale(locale)) {
+    return {};
+  }
+
+  const dict = getDictionary(locale);
+
+  return {
+    title: dict.appName,
+    description: dict.appSubtitle,
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -16,5 +36,5 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  return <MusicStoreProvider>{children}</MusicStoreProvider>;
+  return <MusicStoreProvider locale={locale}>{children}</MusicStoreProvider>;
 }

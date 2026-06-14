@@ -26,10 +26,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
   });
 
   return (
-    <ModuleSection
-      title={dict.settings}
-      subtitle={dict.settingsSubtitle}
-    >
+    <ModuleSection title={dict.settings} subtitle={dict.settingsSubtitle}>
       <form
         className="form-grid"
         onSubmit={(event) => {

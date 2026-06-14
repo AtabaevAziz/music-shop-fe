@@ -25,7 +25,7 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
     <GenericCrudModule<Category, CategoryDraft>
       locale={locale}
       title={dict.categories}
-      subtitle="Structured product taxonomy for the music retail catalog."
+      subtitle={dict.categoriesSubtitle}
       items={db.categories}
       createDraft={() => ({
         name: "",
@@ -46,22 +46,23 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
         `${category.name} ${category.slug} ${category.description}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: "Name" },
+        { name: "name", label: dict.nameLabel },
         {
           name: "slug",
-          label: "Slug",
+          label: dict.slugLabel,
           inForm: false,
         },
         {
           name: "parentId",
-          label: "Parent",
+          label: dict.parentLabel,
           type: "select",
           options: db.categories.map((category) => ({
             label: category.name,
             value: category.id,
           })),
           formatValue: (value) =>
-            (typeof value === "string" && categoryNameMap[value]) || "Root",
+            (typeof value === "string" && categoryNameMap[value]) ||
+            dict.rootLabel,
         },
         {
           name: "status",
@@ -75,7 +76,7 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
             },
           ],
         },
-        { name: "description", label: "Description", type: "textarea" },
+        { name: "description", label: dict.descriptionLabel, type: "textarea" },
       ]}
       onSave={(draft) =>
         saveCategory({

@@ -1,9 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
+import { Locale } from "@/lib/i18n";
 import { slugify } from "@/lib/utils";
-import { nextId, seedDatabase } from "@/store/seed";
+import { localizeDemoDatabase, nextId, seedDatabase } from "@/store/seed";
 import {
   Activity,
   Brand,
@@ -18,7 +19,12 @@ import {
   Session,
 } from "@/types/music";
 
-type Flash = { kind: "success" | "error"; message: string } | null;
+type Flash = {
+  kind: "success" | "error";
+  message?: string;
+  key?: string;
+  params?: Record<string, string | number>;
+} | null;
 
 type StoreContextValue = {
   db: Database;
@@ -78,26 +84,21 @@ function simulateDelay() {
   return new Promise((resolve) => setTimeout(resolve, 280));
 }
 
-function addActivity(activity: Activity[], title: string) {
-  return [
-    {
-      id: nextId("activity", title),
-      title,
-      timestamp: new Date().toISOString(),
-    },
-    ...activity,
-  ].slice(0, 12);
-}
-
 export function MusicStoreProvider({
+  locale,
   children,
 }: {
+  locale: Locale;
   children: React.ReactNode;
 }) {
   const [db, setDb] = useState<Database>(cloneSeed);
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  const localizedDb = useMemo(
+    () => localizeDemoDatabase(db, locale),
+    [db, locale],
+  );
 
   useEffect(() => {
     const rawDb = window.localStorage.getItem(DB_KEY);
@@ -139,17 +140,43 @@ export function MusicStoreProvider({
 
   const patchDb = async (
     updater: (current: Database) => Database,
-    flashMessage?: string,
+    flashConfig?: Flash,
   ) => {
     await simulateDelay();
     setDb((current) => updater(current));
-    if (flashMessage) {
-      setFlash({ kind: "success", message: flashMessage });
+    if (flashConfig) {
+      setFlash(flashConfig);
     }
   };
 
+  function addActivityEntry(
+    activity: Activity[],
+    messageKey: string,
+    params: Record<string, string | number> = {},
+  ) {
+    const identitySource =
+      String(
+        params.name ??
+          params.orderId ??
+          params.productName ??
+          params.productId ??
+          messageKey,
+      ) || messageKey;
+
+    return [
+      {
+        id: nextId("activity", identitySource),
+        title: messageKey,
+        messageKey,
+        messageParams: params,
+        timestamp: new Date().toISOString(),
+      },
+      ...activity,
+    ].slice(0, 12);
+  }
+
   const value: StoreContextValue = {
-    db,
+    db: localizedDb,
     session,
     ready,
     flash,
@@ -164,195 +191,242 @@ export function MusicStoreProvider({
       setFlash({ kind: "success", message });
     },
     saveCategory: async (input) => {
-      await patchDb((current) => {
-        const item: Category = {
-          id: input.id ?? nextId("category", input.name),
-          name: input.name,
-          slug: slugify(input.name),
-          parentId: input.parentId || undefined,
-          status: input.status,
-          description: input.description,
-        };
-        const categories = input.id
-          ? current.categories.map((category) =>
-              category.id === input.id ? item : category,
-            )
-          : [item, ...current.categories];
-        return {
-          ...current,
-          categories,
-          activity: addActivity(
-            current.activity,
-            `Category ${item.name} saved`,
-          ),
-        };
-      }, "Category saved");
+      await patchDb(
+        (current) => {
+          const item: Category = {
+            id: input.id ?? nextId("category", input.name),
+            name: input.name,
+            slug: slugify(input.name),
+            parentId: input.parentId || undefined,
+            status: input.status,
+            description: input.description,
+          };
+          const categories = input.id
+            ? current.categories.map((category) =>
+                category.id === input.id ? item : category,
+              )
+            : [item, ...current.categories];
+          return {
+            ...current,
+            categories,
+            activity: addActivityEntry(
+              current.activity,
+              "categorySavedActivity",
+              {
+                name: item.name,
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "categorySavedFlash" },
+      );
     },
     saveBrand: async (input) => {
-      await patchDb((current) => {
-        const item: Brand = {
-          ...input,
-          id: input.id ?? nextId("brand", input.name),
-        };
-        const brands = input.id
-          ? current.brands.map((brand) =>
-              brand.id === input.id ? item : brand,
-            )
-          : [item, ...current.brands];
-        return {
-          ...current,
-          brands,
-          activity: addActivity(current.activity, `Brand ${item.name} saved`),
-        };
-      }, "Brand saved");
+      await patchDb(
+        (current) => {
+          const item: Brand = {
+            ...input,
+            id: input.id ?? nextId("brand", input.name),
+          };
+          const brands = input.id
+            ? current.brands.map((brand) =>
+                brand.id === input.id ? item : brand,
+              )
+            : [item, ...current.brands];
+          return {
+            ...current,
+            brands,
+            activity: addActivityEntry(current.activity, "brandSavedActivity", {
+              name: item.name,
+            }),
+          };
+        },
+        { kind: "success", key: "brandSavedFlash" },
+      );
     },
     saveCustomer: async (input) => {
-      await patchDb((current) => {
-        const item: Customer = {
-          ...input,
-          id: input.id ?? nextId("customer", input.name),
-        };
-        const customers = input.id
-          ? current.customers.map((customer) =>
-              customer.id === input.id ? item : customer,
-            )
-          : [item, ...current.customers];
-        return {
-          ...current,
-          customers,
-          activity: addActivity(
-            current.activity,
-            `Customer ${item.name} saved`,
-          ),
-        };
-      }, "Customer saved");
+      await patchDb(
+        (current) => {
+          const item: Customer = {
+            ...input,
+            id: input.id ?? nextId("customer", input.name),
+          };
+          const customers = input.id
+            ? current.customers.map((customer) =>
+                customer.id === input.id ? item : customer,
+              )
+            : [item, ...current.customers];
+          return {
+            ...current,
+            customers,
+            activity: addActivityEntry(
+              current.activity,
+              "customerSavedActivity",
+              {
+                name: item.name,
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "customerSavedFlash" },
+      );
     },
     saveEmployee: async (input) => {
-      await patchDb((current) => {
-        const item: Employee = {
-          ...input,
-          id: input.id ?? nextId("employee", input.name),
-        };
-        const employees = input.id
-          ? current.employees.map((employee) =>
-              employee.id === input.id ? item : employee,
-            )
-          : [item, ...current.employees];
-        return {
-          ...current,
-          employees,
-          activity: addActivity(
-            current.activity,
-            `Employee ${item.name} saved`,
-          ),
-        };
-      }, "Employee saved");
+      await patchDb(
+        (current) => {
+          const item: Employee = {
+            ...input,
+            id: input.id ?? nextId("employee", input.name),
+          };
+          const employees = input.id
+            ? current.employees.map((employee) =>
+                employee.id === input.id ? item : employee,
+              )
+            : [item, ...current.employees];
+          return {
+            ...current,
+            employees,
+            activity: addActivityEntry(
+              current.activity,
+              "employeeSavedActivity",
+              {
+                name: item.name,
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "employeeSavedFlash" },
+      );
     },
     saveProduct: async (input) => {
-      await patchDb((current) => {
-        const product: Product = {
-          ...input,
-          id: input.id ?? nextId("product", input.name),
-        };
-        const products = input.id
-          ? current.products.map((item) =>
-              item.id === input.id ? product : item,
-            )
-          : [product, ...current.products];
-        return {
-          ...current,
-          products,
-          activity: addActivity(
-            current.activity,
-            `Product ${product.name} saved`,
-          ),
-        };
-      }, "Product saved");
+      await patchDb(
+        (current) => {
+          const product: Product = {
+            ...input,
+            id: input.id ?? nextId("product", input.name),
+          };
+          const products = input.id
+            ? current.products.map((item) =>
+                item.id === input.id ? product : item,
+              )
+            : [product, ...current.products];
+          return {
+            ...current,
+            products,
+            activity: addActivityEntry(
+              current.activity,
+              "productSavedActivity",
+              {
+                name: product.name,
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "productSavedFlash" },
+      );
     },
     deleteEntity: async (type, id) => {
-      await patchDb((current) => {
-        const activity = addActivity(
-          current.activity,
-          `Entity removed from ${type}`,
-        );
-        if (type === "categories") {
+      await patchDb(
+        (current) => {
+          const activity = addActivityEntry(
+            current.activity,
+            "entityRemovedActivity",
+            { entityType: type },
+          );
+          if (type === "categories") {
+            return {
+              ...current,
+              categories: current.categories.filter((item) => item.id !== id),
+              activity,
+            };
+          }
+          if (type === "brands") {
+            return {
+              ...current,
+              brands: current.brands.filter((item) => item.id !== id),
+              activity,
+            };
+          }
+          if (type === "customers") {
+            return {
+              ...current,
+              customers: current.customers.filter((item) => item.id !== id),
+              activity,
+            };
+          }
+          if (type === "employees") {
+            return {
+              ...current,
+              employees: current.employees.filter((item) => item.id !== id),
+              activity,
+            };
+          }
           return {
             ...current,
-            categories: current.categories.filter((item) => item.id !== id),
+            products: current.products.filter((item) => item.id !== id),
             activity,
           };
-        }
-        if (type === "brands") {
-          return {
-            ...current,
-            brands: current.brands.filter((item) => item.id !== id),
-            activity,
-          };
-        }
-        if (type === "customers") {
-          return {
-            ...current,
-            customers: current.customers.filter((item) => item.id !== id),
-            activity,
-          };
-        }
-        if (type === "employees") {
-          return {
-            ...current,
-            employees: current.employees.filter((item) => item.id !== id),
-            activity,
-          };
-        }
-        return {
-          ...current,
-          products: current.products.filter((item) => item.id !== id),
-          activity,
-        };
-      }, "Entity deleted");
+        },
+        { kind: "success", key: "entityDeletedFlash" },
+      );
     },
     adjustStock: async (productId, delta, reason) => {
-      await patchDb((current) => {
-        const products = current.products.map((product) =>
-          product.id === productId
-            ? { ...product, stockQty: Math.max(product.stockQty + delta, 0) }
-            : product,
-        );
-        return {
-          ...current,
-          products,
-          inventoryMovements: [
-            {
-              id: nextId("movement", reason),
-              productId,
-              delta,
-              reason,
-              createdAt: new Date().toISOString(),
-            },
-            ...current.inventoryMovements,
-          ],
-          activity: addActivity(
-            current.activity,
-            `Stock adjusted by ${delta > 0 ? "+" : ""}${delta} for ${productId}`,
-          ),
-        };
-      }, "Inventory updated");
+      await patchDb(
+        (current) => {
+          const product = current.products.find(
+            (item) => item.id === productId,
+          );
+          const products = current.products.map((product) =>
+            product.id === productId
+              ? { ...product, stockQty: Math.max(product.stockQty + delta, 0) }
+              : product,
+          );
+          return {
+            ...current,
+            products,
+            inventoryMovements: [
+              {
+                id: nextId("movement", reason),
+                productId,
+                delta,
+                reason,
+                createdAt: new Date().toISOString(),
+              },
+              ...current.inventoryMovements,
+            ],
+            activity: addActivityEntry(
+              current.activity,
+              "stockAdjustedActivity",
+              {
+                delta: `${delta > 0 ? "+" : ""}${delta}`,
+                productId,
+                productName: product?.name ?? productId,
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "inventoryUpdatedFlash" },
+      );
     },
     changeOrderStatus: async (orderId, status) => {
-      await patchDb((current) => {
-        const orders = current.orders.map((order) =>
-          order.id === orderId
-            ? { ...order, status, updatedAt: new Date().toISOString() }
-            : order,
-        );
-        return {
-          ...current,
-          orders,
-          activity: addActivity(
-            current.activity,
-            `Order ${orderId} moved to ${status}`,
-          ),
-        };
-      }, "Order status updated");
+      await patchDb(
+        (current) => {
+          const orders = current.orders.map((order) =>
+            order.id === orderId
+              ? { ...order, status, updatedAt: new Date().toISOString() }
+              : order,
+          );
+          return {
+            ...current,
+            orders,
+            activity: addActivityEntry(current.activity, "orderMovedActivity", {
+              orderId,
+              status,
+            }),
+          };
+        },
+        { kind: "success", key: "orderStatusUpdatedFlash" },
+      );
     },
     saveSettings: async (input) => {
       await patchDb(
@@ -367,9 +441,12 @@ export function MusicStoreProvider({
                 }
               : product,
           ),
-          activity: addActivity(current.activity, "Business settings updated"),
+          activity: addActivityEntry(
+            current.activity,
+            "businessSettingsUpdatedActivity",
+          ),
         }),
-        "Settings saved",
+        { kind: "success", key: "settingsSavedFlash" },
       );
     },
     addProductImage: async (productId, label) => {
@@ -385,12 +462,14 @@ export function MusicStoreProvider({
                 }
               : product,
           ),
-          activity: addActivity(
-            current.activity,
-            `Media added to ${productId}`,
-          ),
+          activity: addActivityEntry(current.activity, "mediaAddedActivity", {
+            productId,
+            productName:
+              current.products.find((product) => product.id === productId)
+                ?.name ?? productId,
+          }),
         }),
-        "Image attached",
+        { kind: "success", key: "imageAttachedFlash" },
       );
     },
     setPrimaryImage: async (productId, label) => {
@@ -402,12 +481,18 @@ export function MusicStoreProvider({
               ? { ...product, primaryImage: label }
               : product,
           ),
-          activity: addActivity(
+          activity: addActivityEntry(
             current.activity,
-            `Primary image changed for ${productId}`,
+            "primaryImageChangedActivity",
+            {
+              productId,
+              productName:
+                current.products.find((product) => product.id === productId)
+                  ?.name ?? productId,
+            },
           ),
         }),
-        "Primary image set",
+        { kind: "success", key: "primaryImageSetFlash" },
       );
     },
   };

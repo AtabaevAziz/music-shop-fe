@@ -22,7 +22,7 @@ export function EmployeesModule({ locale }: { locale: Locale }) {
     <GenericCrudModule<Employee, EmployeeDraft>
       locale={locale}
       title={dict.employees}
-      subtitle="Role-aware internal users for protected backoffice access."
+      subtitle={dict.employeesSubtitle}
       items={db.employees}
       createDraft={() => ({
         name: "",
@@ -43,12 +43,12 @@ export function EmployeesModule({ locale }: { locale: Locale }) {
         `${employee.name} ${employee.email} ${employee.phone} ${employee.role}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: "Name" },
-        { name: "email", label: "Email", type: "email" },
-        { name: "phone", label: "Phone", type: "tel" },
+        { name: "name", label: dict.nameLabel },
+        { name: "email", label: dict.emailLabel, type: "email" },
+        { name: "phone", label: dict.phoneLabel, type: "tel" },
         {
           name: "role",
-          label: "Role",
+          label: dict.roleLabel,
           type: "select",
           options: (
             [

@@ -1,3 +1,4 @@
+import { Locale } from "@/lib/i18n";
 import { slugify } from "@/lib/utils";
 import { Database } from "@/types/music";
 
@@ -324,4 +325,351 @@ export const seedDatabase: Database = {
 
 export function nextId(prefix: string, value: string) {
   return `${prefix}-${slugify(value)}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+const localizedCategoryContent = {
+  "cat-guitars": {
+    ru: {
+      name: "Гитары",
+      description: "Электро, акустические, басовые и премиальные модели.",
+    },
+    en: {
+      name: "Guitars",
+      description: "Electric, acoustic, bass, and premium models.",
+    },
+  },
+  "cat-keys": {
+    ru: {
+      name: "Клавишные",
+      description: "Сценические пианино, синтезаторы и контроллеры.",
+    },
+    en: {
+      name: "Keyboards",
+      description: "Stage pianos, synthesizers, and controllers.",
+    },
+  },
+  "cat-drums": {
+    ru: {
+      name: "Ударные",
+      description: "Акустические установки, электронные пэды и тарелки.",
+    },
+    en: {
+      name: "Drums",
+      description: "Acoustic kits, electronic pads, cymbals.",
+    },
+  },
+  "cat-studio": {
+    ru: {
+      name: "Студийное оборудование",
+      description: "Интерфейсы, мониторы и микрофоны.",
+    },
+    en: {
+      name: "Studio Gear",
+      description: "Interfaces, monitors, and microphones.",
+    },
+  },
+  "cat-accessories": {
+    ru: {
+      name: "Аксессуары",
+      description: "Струны, кабели, стойки и кейсы.",
+    },
+    en: {
+      name: "Accessories",
+      description: "Strings, cables, stands, and cases.",
+    },
+  },
+} as const;
+
+const localizedProductContent = {
+  "prod-strat": {
+    ru: {
+      shortDescription: "Хитовая электрогитара для сцены и студийной работы.",
+      description:
+        "Универсальная электрогитара с корпусом из ольхи, кленовым грифом и современным профилем C.",
+      specs: {
+        Корпус: "Ольха",
+        Гриф: "Клён",
+        Звукосниматели: "SSS",
+        Цвет: "3-Color Sunburst",
+      },
+    },
+    en: {
+      shortDescription: "Best-selling electric guitar for live and studio use.",
+      description:
+        "A versatile electric guitar with alder body, maple neck, and modern C profile.",
+      specs: {
+        Body: "Alder",
+        Neck: "Maple",
+        Pickups: "SSS",
+        Color: "3-Color Sunburst",
+      },
+    },
+  },
+  "prod-p125": {
+    ru: {
+      shortDescription:
+        "Портативное цифровое пианино с молоточковой механикой.",
+      description:
+        "Компактное пианино для дома, обучения и репетиционных пространств.",
+      specs: {
+        Клавиши: "88",
+        Полифония: "192",
+        Вес: "11.8 кг",
+        Цвет: "Чёрный",
+      },
+    },
+    en: {
+      shortDescription: "Portable digital piano with graded hammer action.",
+      description: "Compact piano for home, teaching, and rehearsal spaces.",
+      specs: {
+        Keys: "88",
+        Polyphony: "192",
+        Weight: "11.8 kg",
+        Finish: "Black",
+      },
+    },
+  },
+  "prod-spd": {
+    ru: {
+      shortDescription:
+        "Сэмплирующий перкуссионный пэд для сцены и гибридных барабанщиков.",
+      description:
+        "Мощный перкуссионный сэмплер с девятью пэдами и удобным live-workflow.",
+      specs: {
+        Пэды: "9",
+        Выходы: "Stereo + Sub",
+        USB: "Да",
+        Память: "16 ГБ",
+      },
+    },
+    en: {
+      shortDescription:
+        "Sampling percussion pad for stage and hybrid drummers.",
+      description:
+        "Powerful percussion sampling pad with nine pads and live control workflow.",
+      specs: {
+        Pads: "9",
+        Outputs: "Stereo + Sub",
+        USB: "Yes",
+        Memory: "16 GB",
+      },
+    },
+  },
+  "prod-sm7b": {
+    ru: {
+      shortDescription: "Динамический микрофон вещательного класса.",
+      description:
+        "Студийный и подкастовый микрофон с мягкой АЧХ и эффективным экранированием.",
+      specs: {
+        Тип: "Динамический",
+        Диаграмма: "Кардиоидная",
+        Применение: "Вокал / Вещание",
+      },
+    },
+    en: {
+      shortDescription: "Broadcast-grade dynamic microphone.",
+      description:
+        "Studio and podcast microphone with smooth response and effective shielding.",
+      specs: {
+        Type: "Dynamic",
+        Pattern: "Cardioid",
+        Application: "Vocal / Broadcast",
+      },
+    },
+  },
+} as const;
+
+const localizedMovementReasons = {
+  "mov-1": {
+    ru: "Выделено для демо-зала",
+    en: "Floor demo allocation",
+  },
+  "mov-2": {
+    ru: "Еженедельная поставка от поставщика",
+    en: "Weekly supplier delivery",
+  },
+  "mov-3": {
+    ru: "Зарезервировано под самовывоз",
+    en: "Reserved for pickup",
+  },
+} as const;
+
+const localizedCustomerNotes = {
+  "cust-1": {
+    ru: "Ежемесячный B2B-покупатель микрофонов.",
+    en: "Monthly B2B buyer for microphones.",
+  },
+  "cust-2": {
+    ru: "Предпочитает премиальные клавишные.",
+    en: "Prefers premium keyboards.",
+  },
+  "cust-3": {
+    ru: "Оформляет только заказы на самовывоз.",
+    en: "Pickup orders only.",
+  },
+} as const;
+
+const localizedOrderNotes = {
+  "ORD-24061": {
+    ru: "Счёт разделён между студией и аккаунтом основателя.",
+    en: "Invoice split between studio and founder account.",
+  },
+  "ORD-24062": {
+    ru: "Самовывоз запланирован после 18:00.",
+    en: "Pickup scheduled after 18:00.",
+  },
+  "ORD-24063": {
+    ru: "Нужен звонок менеджера перед подтверждением.",
+    en: "Needs manager call before confirmation.",
+  },
+} as const;
+
+const localizedActivityTitles = {
+  "act-1": {
+    ru: "Заказ ORD-24062 отмечен как готовый к выдаче",
+    en: "Order ORD-24062 marked ready for pickup",
+  },
+  "act-2": {
+    ru: "Остаток Roland SPD-SX зарезервирован для заказа ORD-24063",
+    en: "Roland SPD-SX stock reserved for order ORD-24063",
+  },
+  "act-3": {
+    ru: "Новая поставка получена для гитар Fender",
+    en: "New supplier batch received for Fender guitars",
+  },
+} as const;
+
+function localizeText(
+  value: string,
+  translations: Record<Locale, string> | undefined,
+  locale: Locale,
+) {
+  if (!translations) return value;
+  const knownVariants = Object.values(translations);
+  return knownVariants.includes(value) ? translations[locale] : value;
+}
+
+function localizeSpecs(
+  specs: Record<string, string>,
+  translations:
+    | {
+        ru: Record<string, string>;
+        en: Record<string, string>;
+      }
+    | undefined,
+  locale: Locale,
+) {
+  if (!translations) return specs;
+
+  const knownVariants = Object.values(translations).map((variant) =>
+    JSON.stringify(variant),
+  );
+
+  return knownVariants.includes(JSON.stringify(specs))
+    ? translations[locale]
+    : specs;
+}
+
+export function localizeDemoDatabase(db: Database, locale: Locale): Database {
+  return {
+    ...db,
+    categories: db.categories.map((category) => {
+      const translations =
+        localizedCategoryContent[
+          category.id as keyof typeof localizedCategoryContent
+        ];
+
+      return {
+        ...category,
+        name: localizeText(
+          category.name,
+          translations && {
+            ru: translations.ru.name,
+            en: translations.en.name,
+          },
+          locale,
+        ),
+        description: localizeText(
+          category.description,
+          translations && {
+            ru: translations.ru.description,
+            en: translations.en.description,
+          },
+          locale,
+        ),
+      };
+    }),
+    products: db.products.map((product) => {
+      const translations =
+        localizedProductContent[
+          product.id as keyof typeof localizedProductContent
+        ];
+
+      return {
+        ...product,
+        shortDescription: localizeText(
+          product.shortDescription,
+          translations && {
+            ru: translations.ru.shortDescription,
+            en: translations.en.shortDescription,
+          },
+          locale,
+        ),
+        description: localizeText(
+          product.description,
+          translations && {
+            ru: translations.ru.description,
+            en: translations.en.description,
+          },
+          locale,
+        ),
+        specs: localizeSpecs(
+          product.specs,
+          translations && {
+            ru: translations.ru.specs,
+            en: translations.en.specs,
+          },
+          locale,
+        ),
+      };
+    }),
+    inventoryMovements: db.inventoryMovements.map((movement) => ({
+      ...movement,
+      reason: localizeText(
+        movement.reason,
+        localizedMovementReasons[
+          movement.id as keyof typeof localizedMovementReasons
+        ],
+        locale,
+      ),
+    })),
+    customers: db.customers.map((customer) => ({
+      ...customer,
+      notes: localizeText(
+        customer.notes,
+        localizedCustomerNotes[
+          customer.id as keyof typeof localizedCustomerNotes
+        ],
+        locale,
+      ),
+    })),
+    orders: db.orders.map((order) => ({
+      ...order,
+      notes: localizeText(
+        order.notes,
+        localizedOrderNotes[order.id as keyof typeof localizedOrderNotes],
+        locale,
+      ),
+    })),
+    activity: db.activity.map((activity) => ({
+      ...activity,
+      title: localizeText(
+        activity.title,
+        localizedActivityTitles[
+          activity.id as keyof typeof localizedActivityTitles
+        ],
+        locale,
+      ),
+    })),
+  };
 }
