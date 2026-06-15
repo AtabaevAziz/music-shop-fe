@@ -1,5 +1,5 @@
 import { DashboardModule } from "@/features/dashboard/dashboard-module";
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export default async function DashboardPage({
   params,

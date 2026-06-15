@@ -1,5 +1,5 @@
 import { InventoryModule } from "@/features/inventory/inventory-module";
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export default async function InventoryPage({
   params,

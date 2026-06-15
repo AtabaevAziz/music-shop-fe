@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { Locale, getDictionary } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 import { useMusicStore } from "@/store/music-store";
 
 export function AuthGuard({
@@ -16,7 +17,7 @@ export function AuthGuard({
   const { ready, session } = useMusicStore();
   const router = useRouter();
   const pathname = usePathname();
-  const dict = getDictionary(locale);
+  const t = useTranslations();
 
   useEffect(() => {
     if (ready && !session) {
@@ -28,7 +29,7 @@ export function AuthGuard({
     return (
       <div className="auth-page">
         <div className="auth-card">
-          <div className="empty-state">{dict.loadingWorkspace}</div>
+          <div className="empty-state">{t("common.loadingWorkspace")}</div>
         </div>
       </div>
     );

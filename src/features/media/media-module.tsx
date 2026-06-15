@@ -1,15 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
 import { Badge, Field, PageHeader } from "@/components/ui/primitives";
-import { Locale, getDictionary } from "@/lib/i18n";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 
-export function MediaModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function MediaModule() {
+  const t = useTranslations();
   const { db, addProductImage, setPrimaryImage } = useMusicStore();
   const [productId, setProductId] = useState(db.products[0]?.id ?? "");
   const [label, setLabel] = useState("");
@@ -17,7 +17,10 @@ export function MediaModule({ locale }: { locale: Locale }) {
 
   return (
     <div className="two-columns">
-      <ModuleSection title={dict.media} subtitle={dict.mediaSubtitle}>
+      <ModuleSection
+        title={t("nav.media")}
+        subtitle={t("section.mediaSubtitle")}
+      >
         <form
           className="form-grid"
           onSubmit={(event) => {
@@ -27,7 +30,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
             setLabel("");
           }}
         >
-          <Field label={dict.product}>
+          <Field label={t("labels.product")}>
             <select
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
@@ -39,7 +42,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
               ))}
             </select>
           </Field>
-          <Field label={dict.imagePathLabel}>
+          <Field label={t("labels.imagePath")}>
             <input
               value={label}
               onChange={(event) => setLabel(event.target.value)}
@@ -47,15 +50,15 @@ export function MediaModule({ locale }: { locale: Locale }) {
           </Field>
           <div className="stack-row form-actions">
             <button className="button" type="submit">
-              {dict.save}
+              {t("common.save")}
             </button>
           </div>
         </form>
       </ModuleSection>
       <ModuleSection>
         <PageHeader
-          title={product?.name ?? dict.media}
-          subtitle={dict.productGalleryPreviewSubtitle}
+          title={product?.name ?? t("nav.media")}
+          subtitle={t("labels.productGalleryPreviewSubtitle")}
         />
         {product ? (
           <div className="media-grid">
@@ -75,7 +78,7 @@ export function MediaModule({ locale }: { locale: Locale }) {
                 <div className="stack-row spread">
                   <span>{image.split("/").pop()}</span>
                   {product.primaryImage === image ? (
-                    <Badge tone="success">{dict.primaryLabel}</Badge>
+                    <Badge tone="success">{t("labels.primary")}</Badge>
                   ) : null}
                 </div>
                 {product.primaryImage !== image ? (
@@ -84,14 +87,14 @@ export function MediaModule({ locale }: { locale: Locale }) {
                     type="button"
                     onClick={() => void setPrimaryImage(product.id, image)}
                   >
-                    {dict.setPrimaryLabel}
+                    {t("labels.setPrimary")}
                   </button>
                 ) : null}
               </div>
             ))}
           </div>
         ) : (
-          <div className="empty-state">{dict.noData}</div>
+          <div className="empty-state">{t("common.noData")}</div>
         )}
       </ModuleSection>
     </div>

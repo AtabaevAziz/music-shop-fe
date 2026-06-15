@@ -1,5 +1,7 @@
+import { Suspense } from "react";
+
 import { LoginScreen } from "@/features/auth/login-screen";
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export default async function LoginPage({
   params,
@@ -7,5 +9,9 @@ export default async function LoginPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  return <LoginScreen locale={locale} />;
+  return (
+    <Suspense fallback={null}>
+      <LoginScreen locale={locale} />
+    </Suspense>
+  );
 }

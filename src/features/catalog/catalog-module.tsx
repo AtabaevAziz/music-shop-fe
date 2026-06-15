@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { Badge, Field, Modal, Money } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { Locale } from "@/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { parseList } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
@@ -26,7 +28,7 @@ const productSchema = z.object({
 type ProductDraft = Record<string, string>;
 
 export function CatalogModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const { db, saveProduct, deleteEntity } = useMusicStore();
   const [query, setQuery] = useState("");
   const [formError, setFormError] = useState("");
@@ -64,7 +66,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   async function submit() {
     const parsed = productSchema.safeParse(draft);
     if (!parsed.success) {
-      setFormError(dict.validationFailed);
+      setFormError(t("labels.validationFailed"));
       return;
     }
     const specs = Object.fromEntries(
@@ -98,7 +100,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               className="toolbar-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={dict.search}
+              placeholder={t("common.search")}
             />
             <button
               className="button"
@@ -109,21 +111,21 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 setIsEditorOpen(true);
               }}
             >
-              {dict.addNew}
+              {t("common.addNew")}
             </button>
           </div>
         </div>
         <table>
           <thead>
             <tr>
-              <th>{dict.previewLabel}</th>
-              <th>{dict.product}</th>
-              <th>{dict.categoryLabel}</th>
-              <th>{dict.brandLabel}</th>
-              <th>{dict.priceLabel}</th>
-              <th>{dict.stockLabel}</th>
-              <th>{dict.status}</th>
-              <th>{dict.actions}</th>
+              <th>{t("labels.preview")}</th>
+              <th>{t("labels.product")}</th>
+              <th>{t("labels.category")}</th>
+              <th>{t("labels.brand")}</th>
+              <th>{t("labels.price")}</th>
+              <th>{t("labels.stock")}</th>
+              <th>{t("common.status")}</th>
+              <th>{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -180,7 +182,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                             : "neutral"
                       }
                     >
-                      {translateDynamicLabel(locale, product.status)}
+                      {dynamicLabel(t, product.status)}
                     </Badge>
                   </td>
                   <td>
@@ -212,14 +214,14 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                           setIsEditorOpen(true);
                         }}
                       >
-                        {dict.edit}
+                        {t("common.edit")}
                       </button>
                       <button
                         className="button-danger"
                         type="button"
                         onClick={() => setDeleteTargetId(product.id)}
                       >
-                        {dict.delete}
+                        {t("common.delete")}
                       </button>
                     </div>
                   </td>
@@ -232,9 +234,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
       {isEditorOpen ? (
         <Modal
-          title={draft.id ? dict.edit : dict.addNew}
-          subtitle={dict.productRecordSubtitle}
-          closeLabel={dict.close}
+          title={draft.id ? t("common.edit") : t("common.addNew")}
+          subtitle={t("labels.productRecordSubtitle")}
+          closeLabel={t("common.close")}
           onClose={() => {
             setFormError("");
             resetDraft();
@@ -249,7 +251,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             }}
             className="form-grid"
           >
-            <Field label={dict.nameLabel}>
+            <Field label={t("labels.name")}>
               <input
                 value={draft.name ?? ""}
                 onChange={(event) =>
@@ -260,7 +262,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.sku}>
+            <Field label={t("labels.sku")}>
               <input
                 value={draft.sku ?? ""}
                 onChange={(event) =>
@@ -271,7 +273,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.barcodeLabel}>
+            <Field label={t("labels.barcode")}>
               <input
                 value={draft.barcode ?? ""}
                 onChange={(event) =>
@@ -282,7 +284,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.categoryLabel}>
+            <Field label={t("labels.category")}>
               <select
                 value={draft.categoryId ?? ""}
                 onChange={(event) =>
@@ -292,7 +294,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="">{dict.selectLabel}</option>
+                <option value="">{t("common.select")}</option>
                 {db.categories.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -300,7 +302,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 ))}
               </select>
             </Field>
-            <Field label={dict.brandLabel}>
+            <Field label={t("labels.brand")}>
               <select
                 value={draft.brandId ?? ""}
                 onChange={(event) =>
@@ -310,7 +312,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="">{dict.selectLabel}</option>
+                <option value="">{t("common.select")}</option>
                 {db.brands.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
@@ -318,7 +320,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 ))}
               </select>
             </Field>
-            <Field label={dict.condition}>
+            <Field label={t("labels.condition")}>
               <select
                 value={draft.condition ?? "new"}
                 onChange={(event) =>
@@ -328,18 +330,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="new">
-                  {translateDynamicLabel(locale, "new")}
-                </option>
-                <option value="used">
-                  {translateDynamicLabel(locale, "used")}
-                </option>
-                <option value="showroom">
-                  {translateDynamicLabel(locale, "showroom")}
-                </option>
+                <option value="new">{dynamicLabel(t, "new")}</option>
+                <option value="used">{dynamicLabel(t, "used")}</option>
+                <option value="showroom">{dynamicLabel(t, "showroom")}</option>
               </select>
             </Field>
-            <Field label={dict.priceLabel}>
+            <Field label={t("labels.price")}>
               <input
                 type="number"
                 value={draft.price ?? ""}
@@ -351,7 +347,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.costPriceLabel}>
+            <Field label={t("labels.costPrice")}>
               <input
                 type="number"
                 value={draft.costPrice ?? ""}
@@ -363,7 +359,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.stockQtyLabel}>
+            <Field label={t("labels.stockQty")}>
               <input
                 type="number"
                 value={draft.stockQty ?? ""}
@@ -375,7 +371,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.status}>
+            <Field label={t("common.status")}>
               <select
                 value={draft.status ?? db.settings.defaultProductStatus}
                 onChange={(event) =>
@@ -385,18 +381,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               >
-                <option value="draft">
-                  {translateDynamicLabel(locale, "draft")}
-                </option>
-                <option value="active">
-                  {translateDynamicLabel(locale, "active")}
-                </option>
-                <option value="archived">
-                  {translateDynamicLabel(locale, "archived")}
-                </option>
+                <option value="draft">{dynamicLabel(t, "draft")}</option>
+                <option value="active">{dynamicLabel(t, "active")}</option>
+                <option value="archived">{dynamicLabel(t, "archived")}</option>
               </select>
             </Field>
-            <Field label={dict.shortDescriptionLabel}>
+            <Field label={t("labels.shortDescription")}>
               <textarea
                 value={draft.shortDescription ?? ""}
                 onChange={(event) =>
@@ -407,7 +397,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.fullDescriptionLabel}>
+            <Field label={t("labels.fullDescription")}>
               <textarea
                 value={draft.description ?? ""}
                 onChange={(event) =>
@@ -418,7 +408,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.imagesPerLineLabel}>
+            <Field label={t("labels.imagesPerLine")}>
               <textarea
                 value={draft.images ?? ""}
                 onChange={(event) =>
@@ -429,7 +419,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </Field>
-            <Field label={dict.specsKeyValueLabel}>
+            <Field label={t("labels.specsKeyValue")}>
               <textarea
                 value={draft.specs ?? ""}
                 onChange={(event) =>
@@ -442,7 +432,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             </Field>
             <div className="stack-row form-actions">
               <button className="button" type="submit">
-                {dict.save}
+                {t("common.save")}
               </button>
               <button
                 className="button-ghost"
@@ -453,7 +443,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   setIsEditorOpen(false);
                 }}
               >
-                {dict.cancel}
+                {t("common.cancel")}
               </button>
             </div>
           </form>
@@ -462,9 +452,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
       {deleteTargetId ? (
         <Modal
-          title={dict.confirmDelete}
-          subtitle={dict.deletePrompt}
-          closeLabel={dict.close}
+          title={t("common.confirmDelete")}
+          subtitle={t("common.deletePrompt")}
+          closeLabel={t("common.close")}
           onClose={() => setDeleteTargetId(null)}
         >
           <div className="modal-actions">
@@ -477,14 +467,14 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 );
               }}
             >
-              {dict.delete}
+              {t("common.delete")}
             </button>
             <button
               className="button-ghost"
               type="button"
               onClick={() => setDeleteTargetId(null)}
             >
-              {dict.cancel}
+              {t("common.cancel")}
             </button>
           </div>
         </Modal>

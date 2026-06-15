@@ -1,4 +1,4 @@
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 import { slugify } from "@/lib/utils";
 import { Database } from "@/types/music";
 
@@ -308,16 +308,29 @@ export const seedDatabase: Database = {
     {
       id: "act-1",
       title: "Order ORD-24062 marked ready for pickup",
+      messageKey: "activity.seedOrderReady",
+      messageParams: {
+        orderId: "ORD-24062",
+      },
       timestamp: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
     },
     {
       id: "act-2",
       title: "Roland SPD-SX stock reserved for order ORD-24063",
+      messageKey: "activity.seedReservedStock",
+      messageParams: {
+        productName: "Roland SPD-SX",
+        orderId: "ORD-24063",
+      },
       timestamp: new Date(now.getTime() - 1000 * 60 * 60 * 5).toISOString(),
     },
     {
       id: "act-3",
       title: "New supplier batch received for Fender guitars",
+      messageKey: "activity.seedSupplierBatch",
+      messageParams: {
+        productName: "Fender guitars",
+      },
       timestamp: new Date(now.getTime() - 1000 * 60 * 60 * 30).toISOString(),
     },
   ],
@@ -524,21 +537,6 @@ const localizedOrderNotes = {
   },
 } as const;
 
-const localizedActivityTitles = {
-  "act-1": {
-    ru: "Заказ ORD-24062 отмечен как готовый к выдаче",
-    en: "Order ORD-24062 marked ready for pickup",
-  },
-  "act-2": {
-    ru: "Остаток Roland SPD-SX зарезервирован для заказа ORD-24063",
-    en: "Roland SPD-SX stock reserved for order ORD-24063",
-  },
-  "act-3": {
-    ru: "Новая поставка получена для гитар Fender",
-    en: "New supplier batch received for Fender guitars",
-  },
-} as const;
-
 function localizeText(
   value: string,
   translations: Record<Locale, string> | undefined,
@@ -661,15 +659,6 @@ export function localizeDemoDatabase(db: Database, locale: Locale): Database {
         locale,
       ),
     })),
-    activity: db.activity.map((activity) => ({
-      ...activity,
-      title: localizeText(
-        activity.title,
-        localizedActivityTitles[
-          activity.id as keyof typeof localizedActivityTitles
-        ],
-        locale,
-      ),
-    })),
+    activity: db.activity,
   };
 }

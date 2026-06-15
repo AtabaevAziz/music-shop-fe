@@ -1,17 +1,20 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Badge, Field, PageHeader } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { Locale } from "@/i18n";
+import { dynamicLabel } from "@/lib/translations";
+import { getIntlLocale } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
 export function InventoryModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const { db, adjustStock } = useMusicStore();
   const [productId, setProductId] = useState(db.products[0]?.id ?? "");
   const [delta, setDelta] = useState("1");
-  const [reason, setReason] = useState(dict.manualCorrection);
+  const [reason, setReason] = useState(t("labels.manualCorrection"));
   const selectedProduct =
     db.products.find((product) => product.id === productId) ?? db.products[0];
   const lowStockProducts = db.products.filter(
@@ -39,19 +42,19 @@ export function InventoryModule({ locale }: { locale: Locale }) {
       <section className="table-card">
         <div className="inventory-overview">
           <div className="card metric-card">
-            <div className="muted">{dict.stockOnHand}</div>
+            <div className="muted">{t("labels.stockOnHand")}</div>
             <div className="kpi-value">{totalUnits}</div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.replenishmentRisk}</div>
+            <div className="muted">{t("labels.replenishmentRisk")}</div>
             <div className="kpi-value">{lowStockProducts.length}</div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.showroomUnits}</div>
+            <div className="muted">{t("labels.showroomUnits")}</div>
             <div className="kpi-value">{showroomUnits}</div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.movementCount}</div>
+            <div className="muted">{t("labels.movementCount")}</div>
             <div className="kpi-value">{recentMovementCount}</div>
           </div>
         </div>
@@ -59,15 +62,18 @@ export function InventoryModule({ locale }: { locale: Locale }) {
 
       <div className="inventory-grid">
         <section className="table-card inventory-table-section">
-          <PageHeader title={dict.inventory} subtitle={dict.stockHealth} />
+          <PageHeader
+            title={t("nav.inventory")}
+            subtitle={t("labels.stockHealth")}
+          />
           <table>
             <thead>
               <tr>
-                <th>{dict.product}</th>
-                <th>{dict.sku}</th>
-                <th>{dict.available}</th>
-                <th>{dict.condition}</th>
-                <th>{dict.replenishmentRisk}</th>
+                <th>{t("labels.product")}</th>
+                <th>{t("labels.sku")}</th>
+                <th>{t("labels.available")}</th>
+                <th>{t("labels.condition")}</th>
+                <th>{t("labels.replenishmentRisk")}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,12 +90,12 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                         {product.stockQty}
                       </Badge>
                     </td>
-                    <td>{translateDynamicLabel(locale, product.condition)}</td>
+                    <td>{dynamicLabel(t, product.condition)}</td>
                     <td>
                       <Badge tone={isLow ? "warn" : "neutral"}>
                         {isLow
-                          ? `${dict.thresholdLabel}: ${db.settings.lowStockThreshold}`
-                          : dict.stockHealthy}
+                          ? `${t("labels.threshold")}: ${db.settings.lowStockThreshold}`
+                          : t("labels.stockHealthy")}
                       </Badge>
                     </td>
                   </tr>
@@ -102,8 +108,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
         <div className="inventory-side">
           <section className="table-card inventory-action-section">
             <PageHeader
-              title={dict.stockAdjustment}
-              subtitle={dict.stockAdjustmentSubtitle}
+              title={t("labels.stockAdjustment")}
+              subtitle={t("labels.stockAdjustmentSubtitle")}
             />
             {selectedProduct ? (
               <div className="inventory-selected-summary">
@@ -119,10 +125,10 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                           : "success"
                       }
                     >
-                      {dict.currentStock}: {selectedProduct.stockQty}
+                      {t("labels.currentStock")}: {selectedProduct.stockQty}
                     </Badge>
                     <Badge tone="neutral">
-                      {translateDynamicLabel(locale, selectedProduct.condition)}
+                      {dynamicLabel(t, selectedProduct.condition)}
                     </Badge>
                   </div>
                 </div>
@@ -135,7 +141,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 void adjustStock(productId, Number(delta), reason);
               }}
             >
-              <Field label={dict.product}>
+              <Field label={t("labels.product")}>
                 <select
                   value={productId}
                   onChange={(event) => setProductId(event.target.value)}
@@ -147,14 +153,14 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                   ))}
                 </select>
               </Field>
-              <Field label={dict.delta}>
+              <Field label={t("labels.delta")}>
                 <input
                   type="number"
                   value={delta}
                   onChange={(event) => setDelta(event.target.value)}
                 />
               </Field>
-              <Field label={dict.reason}>
+              <Field label={t("labels.reason")}>
                 <textarea
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
@@ -162,7 +168,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               </Field>
               <div className="stack-row">
                 <button className="button" type="submit">
-                  {dict.save}
+                  {t("common.save")}
                 </button>
               </div>
             </form>
@@ -170,8 +176,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
 
           <section className="table-card inventory-movements-section">
             <PageHeader
-              title={dict.recentMovements}
-              subtitle={dict.recentMovementsSubtitle}
+              title={t("labels.recentMovements")}
+              subtitle={t("labels.recentMovementsSubtitle")}
             />
             <ul className="list-clean inventory-movement-list">
               {db.inventoryMovements.slice(0, 8).map((movement) => {
@@ -191,7 +197,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <div>{movement.reason}</div>
                     <div className="muted">
                       {new Date(movement.createdAt).toLocaleString(
-                        locale === "ru" ? "ru-RU" : "en-US",
+                        getIntlLocale(locale),
                       )}
                     </div>
                   </li>

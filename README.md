@@ -6,6 +6,7 @@ Music Shop Online is a Next.js frontend demo of an online musical instrument sto
 
 - Next.js 15 with App Router
 - React 18 and TypeScript
+- `next-intl` for locale routing and message-based translations
 - Client-side state via React Context
 - Zod for form validation
 - `next/font` for app typography
@@ -52,6 +53,10 @@ music-shop-fe/
 │   │   ├── globals.css          # Global theme, layout, and UI tokens
 │   │   ├── layout.tsx           # Root HTML shell and font setup
 │   │   └── page.tsx             # Redirect to default locale
+│   ├── i18n.ts                  # next-intl locale configuration
+│   ├── messages/
+│   │   ├── en.json              # English UI messages
+│   │   └── ru.json              # Russian UI messages
 │   ├── components/
 │   │   ├── layout/              # App shell and auth guard
 │   │   └── ui/                  # Shared primitives and shadcn-derived UI components
@@ -70,7 +75,7 @@ music-shop-fe/
 │   │   ├── employees/           # Staff records
 │   │   └── shared/              # Reusable feature-level CRUD building blocks
 │   ├── lib/
-│   │   ├── i18n.ts              # Locale dictionary and helpers
+│   │   ├── translations.ts      # Dynamic label and flash/activity helpers
 │   │   └── utils.ts             # Formatting and small utilities
 │   ├── store/
 │   │   ├── music-store.tsx      # Demo store provider and actions
@@ -90,6 +95,7 @@ music-shop-fe/
 
 - Locales: `ru` and `en`
 - Default entry: `/ru/login`
+- UI translations are stored in `src/messages/*.json` and consumed via `useTranslations()`
 - Protected routes render inside a shared backoffice shell
 - Demo sessions are role-based: `admin`, `store_manager`, `catalog_manager`, `sales_operator`
 - State persists in `localStorage`

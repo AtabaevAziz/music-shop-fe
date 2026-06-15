@@ -1,5 +1,5 @@
 import { OrdersModule } from "@/features/orders/orders-module";
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export default async function OrdersPage({
   params,

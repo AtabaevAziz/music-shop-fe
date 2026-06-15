@@ -1,14 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-import {
-  Locale,
-  formatStoreMessage,
-  getDictionary,
-  translateDynamicLabel,
-} from "@/lib/i18n";
+import { Locale } from "@/i18n";
+import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
@@ -27,6 +24,7 @@ const navOrder = [
   "settings",
   "media",
 ] as const;
+
 const accessMap: Record<(typeof navOrder)[number], Role[]> = {
   "": ["admin", "store_manager", "catalog_manager", "sales_operator"],
   catalog: ["admin", "store_manager", "catalog_manager"],
@@ -48,7 +46,7 @@ export function AppShell({
   locale: Locale;
   children: React.ReactNode;
 }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
   const { db, session, logout, resetDemo, flash } = useMusicStore();
@@ -56,17 +54,17 @@ export function AppShell({
   if (!session) return null;
 
   const navMap: Record<(typeof navOrder)[number], string> = {
-    "": dict.dashboard,
-    catalog: dict.catalog,
-    categories: dict.categories,
-    brands: dict.brands,
-    inventory: dict.inventory,
-    orders: dict.orders,
-    customers: dict.customers,
-    employees: dict.employees,
-    finance: dict.finance,
-    settings: dict.settings,
-    media: dict.media,
+    "": t("nav.dashboard"),
+    catalog: t("nav.catalog"),
+    categories: t("nav.categories"),
+    brands: t("nav.brands"),
+    inventory: t("nav.inventory"),
+    orders: t("nav.orders"),
+    customers: t("nav.customers"),
+    employees: t("nav.employees"),
+    finance: t("nav.finance"),
+    settings: t("nav.settings"),
+    media: t("nav.media"),
   };
 
   const navItems: NavItem[] = navOrder.map((segment) => ({
@@ -74,6 +72,7 @@ export function AppShell({
     label: navMap[segment],
     roles: accessMap[segment],
   }));
+
   const currentSegment = (pathname.split("/")[2] ??
     "") as (typeof navOrder)[number];
   const isAllowed = accessMap[currentSegment]?.includes(session.role) ?? true;
@@ -81,17 +80,38 @@ export function AppShell({
     (typeof navOrder)[number],
     { title: string; subtitle: string }
   > = {
-    "": { title: dict.dashboard, subtitle: dict.appSubtitle },
-    catalog: { title: dict.catalog, subtitle: dict.catalogSubtitle },
-    categories: { title: dict.categories, subtitle: dict.categoriesSubtitle },
-    brands: { title: dict.brands, subtitle: dict.brandsSubtitle },
-    inventory: { title: dict.inventory, subtitle: dict.inventorySubtitle },
-    orders: { title: dict.orders, subtitle: dict.ordersSubtitle },
-    customers: { title: dict.customers, subtitle: dict.customersSubtitle },
-    employees: { title: dict.employees, subtitle: dict.employeesSubtitle },
-    finance: { title: dict.finance, subtitle: dict.financeSubtitle },
-    settings: { title: dict.settings, subtitle: dict.settingsSubtitle },
-    media: { title: dict.media, subtitle: dict.mediaSubtitle },
+    "": { title: t("nav.dashboard"), subtitle: t("meta.appSubtitle") },
+    catalog: {
+      title: t("nav.catalog"),
+      subtitle: t("section.catalogSubtitle"),
+    },
+    categories: {
+      title: t("nav.categories"),
+      subtitle: t("section.categoriesSubtitle"),
+    },
+    brands: { title: t("nav.brands"), subtitle: t("section.brandsSubtitle") },
+    inventory: {
+      title: t("nav.inventory"),
+      subtitle: t("section.inventorySubtitle"),
+    },
+    orders: { title: t("nav.orders"), subtitle: t("section.ordersSubtitle") },
+    customers: {
+      title: t("nav.customers"),
+      subtitle: t("section.customersSubtitle"),
+    },
+    employees: {
+      title: t("nav.employees"),
+      subtitle: t("section.employeesSubtitle"),
+    },
+    finance: {
+      title: t("nav.finance"),
+      subtitle: t("section.financeSubtitle"),
+    },
+    settings: {
+      title: t("nav.settings"),
+      subtitle: t("section.settingsSubtitle"),
+    },
+    media: { title: t("nav.media"), subtitle: t("section.mediaSubtitle") },
   };
   const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
 
@@ -99,11 +119,11 @@ export function AppShell({
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-mark">
-          <div className="sidebar-kicker">{dict.brand}</div>
-          <strong className="sidebar-title">{dict.appName}</strong>
-          <p className="sidebar-copy muted">{dict.appSubtitle}</p>
+          <div className="sidebar-kicker">{t("common.brand")}</div>
+          <strong className="sidebar-title">{t("meta.appName")}</strong>
+          <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
           <small className="sidebar-role">
-            {translateDynamicLabel(locale, session.role)}
+            {dynamicLabel(t, session.role)}
           </small>
         </div>
         <div className="sidebar-body">
@@ -125,13 +145,13 @@ export function AppShell({
         </div>
         <div className="surface sidebar-metric sidebar-footer">
           <div className="sidebar-metric-label muted">
-            {dict.inventoryThresholdTitle}
+            {t("labels.inventoryThresholdTitle")}
           </div>
           <div className="sidebar-metric-value">
             {db.settings.lowStockThreshold}
           </div>
           <div className="sidebar-metric-copy muted">
-            {dict.inventoryThresholdHelp}
+            {t("labels.inventoryThresholdHelp")}
           </div>
         </div>
       </aside>
@@ -150,13 +170,10 @@ export function AppShell({
                 )
               }
             >
-              {dict.language}: {locale.toUpperCase()}
+              {t("common.language")}: {locale.toUpperCase()}
             </button>
-            <button
-              className="button-ghost"
-              onClick={() => void resetDemo(dict.demoResetDone)}
-            >
-              {dict.resetDemo}
+            <button className="button-ghost" onClick={() => void resetDemo()}>
+              {t("nav.resetDemo")}
             </button>
             <button
               className="button-danger"
@@ -165,7 +182,7 @@ export function AppShell({
                 router.replace(`/${locale}/login`);
               }}
             >
-              {dict.logout}
+              {t("nav.logout")}
             </button>
           </div>
         </div>
@@ -174,7 +191,7 @@ export function AppShell({
             <div className={flash.kind === "error" ? "error" : "flash"}>
               {flash.message ??
                 (flash.key
-                  ? formatStoreMessage(locale, flash.key, flash.params)
+                  ? formatTranslatedMessage(t, flash.key, flash.params)
                   : "")}
             </div>
           ) : null}
@@ -182,8 +199,8 @@ export function AppShell({
             children
           ) : (
             <section className="table-card">
-              <h2>{dict.accessRestrictedTitle}</h2>
-              <p className="muted">{dict.accessRestrictedText}</p>
+              <h2>{t("labels.accessRestrictedTitle")}</h2>
+              <p className="muted">{t("labels.accessRestrictedText")}</p>
             </section>
           )}
         </div>

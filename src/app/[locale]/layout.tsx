@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { getDictionary, isLocale } from "@/lib/i18n";
+import { type Locale, isLocale, locales } from "@/i18n";
 import { MusicStoreProvider } from "@/store/music-store";
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata({
   params,
@@ -14,12 +20,11 @@ export async function generateMetadata({
   if (!isLocale(locale)) {
     return {};
   }
-
-  const dict = getDictionary(locale);
+  const t = await getTranslations({ locale, namespace: "meta" });
 
   return {
-    title: dict.appName,
-    description: dict.appSubtitle,
+    title: t("appName"),
+    description: t("appSubtitle"),
   };
 }
 
@@ -36,5 +41,13 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  return <MusicStoreProvider locale={locale}>{children}</MusicStoreProvider>;
+  const messages = (await import(`../../messages/${locale}.json`)).default;
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <MusicStoreProvider locale={locale as Locale}>
+        {children}
+      </MusicStoreProvider>
+    </NextIntlClientProvider>
+  );
 }

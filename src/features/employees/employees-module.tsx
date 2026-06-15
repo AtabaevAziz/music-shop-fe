@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { GenericCrudModule } from "@/features/shared/generic-crud";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Employee, Role } from "@/types/music";
 
@@ -14,15 +16,14 @@ type EmployeeDraft = {
   status: Employee["status"];
 };
 
-export function EmployeesModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function EmployeesModule() {
+  const t = useTranslations();
   const { db, saveEmployee, deleteEntity } = useMusicStore();
 
   return (
     <GenericCrudModule<Employee, EmployeeDraft>
-      locale={locale}
-      title={dict.employees}
-      subtitle={dict.employeesSubtitle}
+      title={t("nav.employees")}
+      subtitle={t("section.employeesSubtitle")}
       items={db.employees}
       createDraft={() => ({
         name: "",
@@ -43,12 +44,12 @@ export function EmployeesModule({ locale }: { locale: Locale }) {
         `${employee.name} ${employee.email} ${employee.phone} ${employee.role}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: dict.nameLabel },
-        { name: "email", label: dict.emailLabel, type: "email" },
-        { name: "phone", label: dict.phoneLabel, type: "tel" },
+        { name: "name", label: t("labels.name") },
+        { name: "email", label: t("labels.email"), type: "email" },
+        { name: "phone", label: t("labels.phone"), type: "tel" },
         {
           name: "role",
-          label: dict.roleLabel,
+          label: t("labels.role"),
           type: "select",
           options: (
             [
@@ -58,20 +59,17 @@ export function EmployeesModule({ locale }: { locale: Locale }) {
               "sales_operator",
             ] as Role[]
           ).map((role) => ({
-            label: translateDynamicLabel(locale, role),
+            label: dynamicLabel(t, role),
             value: role,
           })),
         },
         {
           name: "status",
-          label: dict.status,
+          label: t("common.status"),
           type: "select",
           options: [
-            { label: translateDynamicLabel(locale, "active"), value: "active" },
-            {
-              label: translateDynamicLabel(locale, "inactive"),
-              value: "inactive",
-            },
+            { label: dynamicLabel(t, "active"), value: "active" },
+            { label: dynamicLabel(t, "inactive"), value: "inactive" },
           ],
         },
       ]}

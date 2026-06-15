@@ -1,9 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { Field } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 import { ProductStatus } from "@/types/music";
@@ -15,8 +16,8 @@ type SettingsDraft = {
   defaultMarkupPercent: string;
 };
 
-export function SettingsModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function SettingsModule() {
+  const t = useTranslations();
   const { db, saveSettings } = useMusicStore();
   const [draft, setDraft] = useState<SettingsDraft>({
     currency: db.settings.currency,
@@ -26,7 +27,10 @@ export function SettingsModule({ locale }: { locale: Locale }) {
   });
 
   return (
-    <ModuleSection title={dict.settings} subtitle={dict.settingsSubtitle}>
+    <ModuleSection
+      title={t("nav.settings")}
+      subtitle={t("section.settingsSubtitle")}
+    >
       <form
         className="form-grid"
         onSubmit={(event) => {
@@ -42,7 +46,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
           });
         }}
       >
-        <Field label={dict.currencyLabel}>
+        <Field label={t("labels.currency")}>
           <input
             value={draft.currency}
             onChange={(event) =>
@@ -53,7 +57,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             }
           />
         </Field>
-        <Field label={dict.lowStockThresholdLabel}>
+        <Field label={t("labels.lowStockThreshold")}>
           <input
             type="number"
             value={draft.lowStockThreshold}
@@ -65,7 +69,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
             }
           />
         </Field>
-        <Field label={dict.defaultProductStatusLabel}>
+        <Field label={t("labels.defaultProductStatus")}>
           <select
             value={draft.defaultProductStatus}
             onChange={(event) =>
@@ -75,18 +79,12 @@ export function SettingsModule({ locale }: { locale: Locale }) {
               }))
             }
           >
-            <option value="draft">
-              {translateDynamicLabel(locale, "draft")}
-            </option>
-            <option value="active">
-              {translateDynamicLabel(locale, "active")}
-            </option>
-            <option value="archived">
-              {translateDynamicLabel(locale, "archived")}
-            </option>
+            <option value="draft">{dynamicLabel(t, "draft")}</option>
+            <option value="active">{dynamicLabel(t, "active")}</option>
+            <option value="archived">{dynamicLabel(t, "archived")}</option>
           </select>
         </Field>
-        <Field label={dict.defaultMarkupLabel}>
+        <Field label={t("labels.defaultMarkup")}>
           <input
             type="number"
             value={draft.defaultMarkupPercent}
@@ -100,7 +98,7 @@ export function SettingsModule({ locale }: { locale: Locale }) {
         </Field>
         <div className="stack-row form-actions">
           <button className="button" type="submit">
-            {dict.save}
+            {t("common.save")}
           </button>
         </div>
       </form>

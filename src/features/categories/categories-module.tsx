@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { GenericCrudModule } from "@/features/shared/generic-crud";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Category } from "@/types/music";
 
@@ -14,8 +16,8 @@ type CategoryDraft = {
   description: string;
 };
 
-export function CategoriesModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function CategoriesModule() {
+  const t = useTranslations();
   const { db, saveCategory, deleteEntity } = useMusicStore();
   const categoryNameMap = Object.fromEntries(
     db.categories.map((category) => [category.id, category.name]),
@@ -23,9 +25,8 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
 
   return (
     <GenericCrudModule<Category, CategoryDraft>
-      locale={locale}
-      title={dict.categories}
-      subtitle={dict.categoriesSubtitle}
+      title={t("nav.categories")}
+      subtitle={t("section.categoriesSubtitle")}
       items={db.categories}
       createDraft={() => ({
         name: "",
@@ -46,15 +47,15 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
         `${category.name} ${category.slug} ${category.description}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: dict.nameLabel },
+        { name: "name", label: t("labels.name") },
         {
           name: "slug",
-          label: dict.slugLabel,
+          label: t("labels.slug"),
           inForm: false,
         },
         {
           name: "parentId",
-          label: dict.parentLabel,
+          label: t("labels.parent"),
           type: "select",
           options: db.categories.map((category) => ({
             label: category.name,
@@ -62,21 +63,22 @@ export function CategoriesModule({ locale }: { locale: Locale }) {
           })),
           formatValue: (value) =>
             (typeof value === "string" && categoryNameMap[value]) ||
-            dict.rootLabel,
+            t("labels.root"),
         },
         {
           name: "status",
-          label: dict.status,
+          label: t("common.status"),
           type: "select",
           options: [
-            { label: translateDynamicLabel(locale, "active"), value: "active" },
-            {
-              label: translateDynamicLabel(locale, "inactive"),
-              value: "inactive",
-            },
+            { label: dynamicLabel(t, "active"), value: "active" },
+            { label: dynamicLabel(t, "inactive"), value: "inactive" },
           ],
         },
-        { name: "description", label: dict.descriptionLabel, type: "textarea" },
+        {
+          name: "description",
+          label: t("labels.description"),
+          type: "textarea",
+        },
       ]}
       onSave={(draft) =>
         saveCategory({

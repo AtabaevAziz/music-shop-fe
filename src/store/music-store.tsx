@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 import { slugify } from "@/lib/utils";
 import { localizeDemoDatabase, nextId, seedDatabase } from "@/store/seed";
 import {
@@ -33,7 +33,7 @@ type StoreContextValue = {
   flash: Flash;
   login: (role: Role) => Promise<void>;
   logout: () => void;
-  resetDemo: (message: string) => Promise<void>;
+  resetDemo: () => Promise<void>;
   saveCategory: (
     input: Omit<Category, "id" | "slug"> & { id?: string },
   ) => Promise<void>;
@@ -185,10 +185,10 @@ export function MusicStoreProvider({
       setSession({ role, name: roleToName(role) });
     },
     logout: () => setSession(null),
-    resetDemo: async (message) => {
+    resetDemo: async () => {
       await simulateDelay();
       setDb(cloneSeed());
-      setFlash({ kind: "success", message });
+      setFlash({ kind: "success", key: "flash.demoResetDone" });
     },
     saveCategory: async (input) => {
       await patchDb(
@@ -211,14 +211,14 @@ export function MusicStoreProvider({
             categories,
             activity: addActivityEntry(
               current.activity,
-              "categorySavedActivity",
+              "activity.categorySaved",
               {
                 name: item.name,
               },
             ),
           };
         },
-        { kind: "success", key: "categorySavedFlash" },
+        { kind: "success", key: "flash.categorySaved" },
       );
     },
     saveBrand: async (input) => {
@@ -236,12 +236,16 @@ export function MusicStoreProvider({
           return {
             ...current,
             brands,
-            activity: addActivityEntry(current.activity, "brandSavedActivity", {
-              name: item.name,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.brandSaved",
+              {
+                name: item.name,
+              },
+            ),
           };
         },
-        { kind: "success", key: "brandSavedFlash" },
+        { kind: "success", key: "flash.brandSaved" },
       );
     },
     saveCustomer: async (input) => {
@@ -261,14 +265,14 @@ export function MusicStoreProvider({
             customers,
             activity: addActivityEntry(
               current.activity,
-              "customerSavedActivity",
+              "activity.customerSaved",
               {
                 name: item.name,
               },
             ),
           };
         },
-        { kind: "success", key: "customerSavedFlash" },
+        { kind: "success", key: "flash.customerSaved" },
       );
     },
     saveEmployee: async (input) => {
@@ -288,14 +292,14 @@ export function MusicStoreProvider({
             employees,
             activity: addActivityEntry(
               current.activity,
-              "employeeSavedActivity",
+              "activity.employeeSaved",
               {
                 name: item.name,
               },
             ),
           };
         },
-        { kind: "success", key: "employeeSavedFlash" },
+        { kind: "success", key: "flash.employeeSaved" },
       );
     },
     saveProduct: async (input) => {
@@ -315,14 +319,14 @@ export function MusicStoreProvider({
             products,
             activity: addActivityEntry(
               current.activity,
-              "productSavedActivity",
+              "activity.productSaved",
               {
                 name: product.name,
               },
             ),
           };
         },
-        { kind: "success", key: "productSavedFlash" },
+        { kind: "success", key: "flash.productSaved" },
       );
     },
     deleteEntity: async (type, id) => {
@@ -330,7 +334,7 @@ export function MusicStoreProvider({
         (current) => {
           const activity = addActivityEntry(
             current.activity,
-            "entityRemovedActivity",
+            "activity.entityRemoved",
             { entityType: type },
           );
           if (type === "categories") {
@@ -367,7 +371,7 @@ export function MusicStoreProvider({
             activity,
           };
         },
-        { kind: "success", key: "entityDeletedFlash" },
+        { kind: "success", key: "flash.entityDeleted" },
       );
     },
     adjustStock: async (productId, delta, reason) => {
@@ -396,7 +400,7 @@ export function MusicStoreProvider({
             ],
             activity: addActivityEntry(
               current.activity,
-              "stockAdjustedActivity",
+              "activity.stockAdjusted",
               {
                 delta: `${delta > 0 ? "+" : ""}${delta}`,
                 productId,
@@ -405,7 +409,7 @@ export function MusicStoreProvider({
             ),
           };
         },
-        { kind: "success", key: "inventoryUpdatedFlash" },
+        { kind: "success", key: "flash.inventoryUpdated" },
       );
     },
     changeOrderStatus: async (orderId, status) => {
@@ -419,13 +423,17 @@ export function MusicStoreProvider({
           return {
             ...current,
             orders,
-            activity: addActivityEntry(current.activity, "orderMovedActivity", {
-              orderId,
-              status,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.orderMoved",
+              {
+                orderId,
+                status,
+              },
+            ),
           };
         },
-        { kind: "success", key: "orderStatusUpdatedFlash" },
+        { kind: "success", key: "flash.orderStatusUpdated" },
       );
     },
     saveSettings: async (input) => {
@@ -443,10 +451,10 @@ export function MusicStoreProvider({
           ),
           activity: addActivityEntry(
             current.activity,
-            "businessSettingsUpdatedActivity",
+            "activity.businessSettingsUpdated",
           ),
         }),
-        { kind: "success", key: "settingsSavedFlash" },
+        { kind: "success", key: "flash.settingsSaved" },
       );
     },
     addProductImage: async (productId, label) => {
@@ -462,14 +470,14 @@ export function MusicStoreProvider({
                 }
               : product,
           ),
-          activity: addActivityEntry(current.activity, "mediaAddedActivity", {
+          activity: addActivityEntry(current.activity, "activity.mediaAdded", {
             productId,
             productName:
               current.products.find((product) => product.id === productId)
                 ?.name ?? productId,
           }),
         }),
-        { kind: "success", key: "imageAttachedFlash" },
+        { kind: "success", key: "flash.imageAttached" },
       );
     },
     setPrimaryImage: async (productId, label) => {
@@ -483,7 +491,7 @@ export function MusicStoreProvider({
           ),
           activity: addActivityEntry(
             current.activity,
-            "primaryImageChangedActivity",
+            "activity.primaryImageChanged",
             {
               productId,
               productName:
@@ -492,7 +500,7 @@ export function MusicStoreProvider({
             },
           ),
         }),
-        { kind: "success", key: "primaryImageSetFlash" },
+        { kind: "success", key: "flash.primaryImageSet" },
       );
     },
   };

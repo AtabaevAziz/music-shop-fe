@@ -1,7 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Badge, Money, PageHeader } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { Locale } from "@/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 
 const transitions = [
@@ -14,7 +17,7 @@ const transitions = [
 ] as const;
 
 export function OrdersModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const { db, changeOrderStatus } = useMusicStore();
 
   return (
@@ -24,10 +27,10 @@ export function OrdersModule({ locale }: { locale: Locale }) {
           <thead>
             <tr>
               <th>ID</th>
-              <th>{dict.customerLabel}</th>
-              <th>{dict.total}</th>
-              <th>{dict.paymentState}</th>
-              <th>{dict.status}</th>
+              <th>{t("labels.customer")}</th>
+              <th>{t("labels.total")}</th>
+              <th>{t("labels.paymentState")}</th>
+              <th>{t("common.status")}</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +63,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                             : "neutral"
                       }
                     >
-                      {translateDynamicLabel(locale, order.paymentStatus)}
+                      {dynamicLabel(t, order.paymentStatus)}
                     </Badge>
                   </td>
                   <td>
@@ -73,7 +76,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                             : "neutral"
                       }
                     >
-                      {translateDynamicLabel(locale, order.status)}
+                      {dynamicLabel(t, order.status)}
                     </Badge>
                   </td>
                 </tr>
@@ -84,8 +87,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
       </section>
       <section className="table-card">
         <PageHeader
-          title={dict.workflowControlsTitle}
-          subtitle={dict.workflowControlsSubtitle}
+          title={t("labels.workflowControlsTitle")}
+          subtitle={t("labels.workflowControlsSubtitle")}
         />
         <ul className="list-clean">
           {db.orders.map((order) => (
@@ -101,7 +104,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                         : "neutral"
                   }
                 >
-                  {translateDynamicLabel(locale, order.status)}
+                  {dynamicLabel(t, order.status)}
                 </Badge>
               </div>
               <p>{order.notes}</p>
@@ -112,7 +115,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     className="button-ghost"
                     onClick={() => void changeOrderStatus(order.id, status)}
                   >
-                    {translateDynamicLabel(locale, status)}
+                    {dynamicLabel(t, status)}
                   </button>
                 ))}
               </div>

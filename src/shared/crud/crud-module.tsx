@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ReactNode, useMemo, useState } from "react";
 
 import { Field, Modal } from "@/components/ui/primitives";
-import { Locale, getDictionary } from "@/lib/i18n";
 import {
   ModuleEmptyState,
   ModuleSection,
@@ -44,7 +44,6 @@ export type CrudField<TItem, TDraft extends CrudDraft> = {
 };
 
 type CrudModuleProps<TItem extends { id: string }, TDraft extends CrudDraft> = {
-  locale: Locale;
   title: string;
   subtitle: string;
   items: TItem[];
@@ -82,7 +81,6 @@ export function CrudModule<
   TItem extends { id: string },
   TDraft extends CrudDraft,
 >({
-  locale,
   title,
   subtitle,
   items,
@@ -94,7 +92,7 @@ export function CrudModule<
   onSave,
   onDelete,
 }: CrudModuleProps<TItem, TDraft>) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const [query, setQuery] = useState("");
   const [draft, setDraft] = useState<TDraft>(() => createDraft());
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -162,7 +160,7 @@ export function CrudModule<
               className="toolbar-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={dict.search}
+              placeholder={t("common.search")}
             />
             <button
               className="button"
@@ -172,7 +170,7 @@ export function CrudModule<
                 setIsEditorOpen(true);
               }}
             >
-              {dict.addNew}
+              {t("common.addNew")}
             </button>
           </div>
         }
@@ -184,7 +182,7 @@ export function CrudModule<
                 {tableFields.map((field) => (
                   <th key={field.name}>{field.label}</th>
                 ))}
-                <th>{dict.actions}</th>
+                <th>{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -203,14 +201,14 @@ export function CrudModule<
                           setIsEditorOpen(true);
                         }}
                       >
-                        {dict.edit}
+                        {t("common.edit")}
                       </button>
                       <button
                         className="button-danger"
                         type="button"
                         onClick={() => setDeleteTargetId(item.id)}
                       >
-                        {dict.delete}
+                        {t("common.delete")}
                       </button>
                     </div>
                   </td>
@@ -220,7 +218,7 @@ export function CrudModule<
           </table>
         ) : (
           <ModuleEmptyState
-            title={dict.noData}
+            title={t("common.noData")}
             description={emptyMessage ?? subtitle}
             action={
               <button
@@ -231,7 +229,7 @@ export function CrudModule<
                   setIsEditorOpen(true);
                 }}
               >
-                {dict.addNew}
+                {t("common.addNew")}
               </button>
             }
           />
@@ -240,9 +238,9 @@ export function CrudModule<
 
       {isEditorOpen ? (
         <Modal
-          title={draft.id ? dict.edit : dict.addNew}
+          title={draft.id ? t("common.edit") : t("common.addNew")}
           subtitle={title}
-          closeLabel={dict.close}
+          closeLabel={t("common.close")}
           onClose={closeEditor}
         >
           <form
@@ -292,14 +290,14 @@ export function CrudModule<
             ))}
             <div className="stack-row form-actions">
               <button className="button" type="submit">
-                {dict.save}
+                {t("common.save")}
               </button>
               <button
                 className="button-ghost"
                 type="button"
                 onClick={closeEditor}
               >
-                {dict.cancel}
+                {t("common.cancel")}
               </button>
             </div>
           </form>
@@ -308,9 +306,9 @@ export function CrudModule<
 
       {deleteTargetId ? (
         <Modal
-          title={dict.confirmDelete}
-          subtitle={dict.deletePrompt}
-          closeLabel={dict.close}
+          title={t("common.confirmDelete")}
+          subtitle={t("common.deletePrompt")}
+          closeLabel={t("common.close")}
           onClose={() => setDeleteTargetId(null)}
         >
           <div className="modal-actions">
@@ -323,14 +321,14 @@ export function CrudModule<
                 );
               }}
             >
-              {dict.delete}
+              {t("common.delete")}
             </button>
             <button
               className="button-ghost"
               type="button"
               onClick={() => setDeleteTargetId(null)}
             >
-              {dict.cancel}
+              {t("common.cancel")}
             </button>
           </div>
         </Modal>

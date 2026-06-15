@@ -1,11 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Badge, Money } from "@/components/ui/primitives";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { Locale } from "@/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 
 export function FinanceModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const { db } = useMusicStore();
   const rows = db.orders.map((order) => {
     const total = order.items.reduce(
@@ -33,7 +36,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
       <section className="table-card finance-section">
         <div className="stats-grid">
           <div className="card">
-            <div className="muted">{dict.revenue}</div>
+            <div className="muted">{t("labels.revenue")}</div>
             <div className="kpi-value">
               <Money
                 value={totalRevenue}
@@ -43,7 +46,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
             </div>
           </div>
           <div className="card">
-            <div className="muted">{dict.grossMargin}</div>
+            <div className="muted">{t("labels.grossMargin")}</div>
             <div className="kpi-value">
               <Money
                 value={totalMargin}
@@ -53,7 +56,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
             </div>
           </div>
           <div className="card">
-            <div className="muted">{dict.paidOrders}</div>
+            <div className="muted">{t("labels.paidOrders")}</div>
             <div className="kpi-value">
               {
                 db.orders.filter((order) => order.paymentStatus === "paid")
@@ -68,10 +71,10 @@ export function FinanceModule({ locale }: { locale: Locale }) {
           <table>
             <thead>
               <tr>
-                <th>{dict.order}</th>
-                <th>{dict.total}</th>
-                <th>{dict.margin}</th>
-                <th>{dict.paymentState}</th>
+                <th>{t("labels.order")}</th>
+                <th>{t("labels.total")}</th>
+                <th>{t("labels.margin")}</th>
+                <th>{t("labels.paymentState")}</th>
               </tr>
             </thead>
             <tbody>
@@ -96,7 +99,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
                     <Badge
                       tone={order.paymentStatus === "paid" ? "success" : "warn"}
                     >
-                      {translateDynamicLabel(locale, order.paymentStatus)}
+                      {dynamicLabel(t, order.paymentStatus)}
                     </Badge>
                   </td>
                 </tr>

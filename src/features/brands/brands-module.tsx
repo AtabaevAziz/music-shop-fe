@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { GenericCrudModule } from "@/features/shared/generic-crud";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Brand } from "@/types/music";
 
@@ -13,15 +15,14 @@ type BrandDraft = {
   status: Brand["status"];
 };
 
-export function BrandsModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function BrandsModule() {
+  const t = useTranslations();
   const { db, saveBrand, deleteEntity } = useMusicStore();
 
   return (
     <GenericCrudModule<Brand, BrandDraft>
-      locale={locale}
-      title={dict.brands}
-      subtitle={dict.brandsSubtitle}
+      title={t("nav.brands")}
+      subtitle={t("section.brandsSubtitle")}
       items={db.brands}
       createDraft={() => ({
         name: "",
@@ -40,19 +41,16 @@ export function BrandsModule({ locale }: { locale: Locale }) {
         `${brand.name} ${brand.country} ${brand.website}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: dict.nameLabel },
-        { name: "country", label: dict.countryLabel },
-        { name: "website", label: dict.websiteLabel, type: "url" },
+        { name: "name", label: t("labels.name") },
+        { name: "country", label: t("labels.country") },
+        { name: "website", label: t("labels.website"), type: "url" },
         {
           name: "status",
-          label: dict.status,
+          label: t("common.status"),
           type: "select",
           options: [
-            { label: translateDynamicLabel(locale, "active"), value: "active" },
-            {
-              label: translateDynamicLabel(locale, "inactive"),
-              value: "inactive",
-            },
+            { label: dynamicLabel(t, "active"), value: "active" },
+            { label: dynamicLabel(t, "inactive"), value: "inactive" },
           ],
         },
       ]}

@@ -1,19 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import { Badge, PageHeader } from "@/components/ui/primitives";
-import {
-  Locale,
-  formatStoreMessage,
-  getDictionary,
-  translateDynamicLabel,
-} from "@/lib/i18n";
-import { formatMoney } from "@/lib/utils";
+import { Locale } from "@/i18n";
+import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
+import { formatMoney, getIntlLocale } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
 export function DashboardModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+  const t = useTranslations();
   const { db } = useMusicStore();
 
   const revenue = db.orders
@@ -51,21 +48,21 @@ export function DashboardModule({ locale }: { locale: Locale }) {
       <section className="table-card dashboard-hero">
         <div className="dashboard-overview">
           <div className="card metric-card">
-            <div className="muted">{dict.revenue}</div>
+            <div className="muted">{t("labels.revenue")}</div>
             <div className="kpi-value">
               {formatMoney(revenue, db.settings.currency, locale)}
             </div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.lowStock}</div>
+            <div className="muted">{t("labels.lowStock")}</div>
             <div className="kpi-value">{lowStock.length}</div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.activeOrders}</div>
+            <div className="muted">{t("labels.activeOrders")}</div>
             <div className="kpi-value">{activeOrders.length}</div>
           </div>
           <div className="card metric-card">
-            <div className="muted">{dict.completedSales}</div>
+            <div className="muted">{t("labels.completedSales")}</div>
             <div className="kpi-value">{completedSales}</div>
           </div>
         </div>
@@ -74,16 +71,16 @@ export function DashboardModule({ locale }: { locale: Locale }) {
       <div className="dashboard-panel-grid">
         <section className="table-card dashboard-panel dashboard-panel-wide">
           <PageHeader
-            title={dict.lowStock}
-            subtitle={dict.dashboardLowStockSubtitle}
+            title={t("labels.lowStock")}
+            subtitle={t("dashboard.lowStockSubtitle")}
           />
           {lowStock.length ? (
             <table>
               <thead>
                 <tr>
-                  <th>{dict.product}</th>
-                  <th>{dict.sku}</th>
-                  <th>{dict.qty}</th>
+                  <th>{t("labels.product")}</th>
+                  <th>{t("labels.sku")}</th>
+                  <th>{t("labels.qty")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -101,21 +98,19 @@ export function DashboardModule({ locale }: { locale: Locale }) {
               </tbody>
             </table>
           ) : (
-            <div className="empty-state">{dict.noData}</div>
+            <div className="empty-state">{t("common.noData")}</div>
           )}
         </section>
 
         <section className="table-card dashboard-panel">
           <PageHeader
-            title={dict.orderPipeline}
-            subtitle={dict.dashboardPipelineSubtitle}
+            title={t("labels.orderPipeline")}
+            subtitle={t("dashboard.pipelineSubtitle")}
           />
           <div className="stats-grid dashboard-status-grid">
             {groupedStatuses.map((item) => (
               <div key={item.status} className="card">
-                <div className="muted">
-                  {translateDynamicLabel(locale, item.status)}
-                </div>
+                <div className="muted">{dynamicLabel(t, item.status)}</div>
                 <div className="kpi-value">{item.count}</div>
               </div>
             ))}
@@ -124,8 +119,8 @@ export function DashboardModule({ locale }: { locale: Locale }) {
 
         <section className="table-card dashboard-panel">
           <PageHeader
-            title={dict.dashboardFeaturedTitle}
-            subtitle={dict.dashboardFeaturedSubtitle}
+            title={t("dashboard.featuredTitle")}
+            subtitle={t("dashboard.featuredSubtitle")}
           />
           <div className="list-clean">
             {featuredProducts.map((product) => {
@@ -146,7 +141,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                   <div className="muted">{product.sku}</div>
                   <div className="heading-row">
                     <Badge tone="neutral">
-                      {translateDynamicLabel(locale, product.status)}
+                      {dynamicLabel(t, product.status)}
                     </Badge>
                     <span>
                       {formatMoney(product.price, db.settings.currency, locale)}
@@ -160,16 +155,16 @@ export function DashboardModule({ locale }: { locale: Locale }) {
 
         <section className="table-card dashboard-panel dashboard-panel-wide">
           <PageHeader
-            title={dict.recentActivity}
-            subtitle={dict.dashboardActivitySubtitle}
+            title={t("labels.recentActivity")}
+            subtitle={t("dashboard.activitySubtitle")}
           />
           <ul className="list-clean activity-feed">
             {db.activity.map((item) => (
               <li key={item.id} className="card">
                 <strong>
                   {item.messageKey
-                    ? formatStoreMessage(
-                        locale,
+                    ? formatTranslatedMessage(
+                        t,
                         item.messageKey,
                         item.messageParams,
                       )
@@ -177,7 +172,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                 </strong>
                 <div className="muted">
                   {new Date(item.timestamp).toLocaleString(
-                    locale === "ru" ? "ru-RU" : "en-US",
+                    getIntlLocale(locale),
                   )}
                 </div>
               </li>

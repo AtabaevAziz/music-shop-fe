@@ -1,7 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { GenericCrudModule } from "@/features/shared/generic-crud";
-import { Locale, getDictionary, translateDynamicLabel } from "@/lib/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Customer } from "@/types/music";
 
@@ -15,15 +17,14 @@ type CustomerDraft = {
   notes: string;
 };
 
-export function CustomersModule({ locale }: { locale: Locale }) {
-  const dict = getDictionary(locale);
+export function CustomersModule() {
+  const t = useTranslations();
   const { db, saveCustomer, deleteEntity } = useMusicStore();
 
   return (
     <GenericCrudModule<Customer, CustomerDraft>
-      locale={locale}
-      title={dict.customers}
-      subtitle={dict.customersSubtitle}
+      title={t("nav.customers")}
+      subtitle={t("section.customersSubtitle")}
       items={db.customers}
       createDraft={() => ({
         name: "",
@@ -46,35 +47,29 @@ export function CustomersModule({ locale }: { locale: Locale }) {
         `${customer.name} ${customer.phone} ${customer.email} ${customer.tier}`.toLowerCase()
       }
       fields={[
-        { name: "name", label: dict.nameLabel },
-        { name: "phone", label: dict.phoneLabel, type: "tel" },
-        { name: "email", label: dict.emailLabel, type: "email" },
+        { name: "name", label: t("labels.name") },
+        { name: "phone", label: t("labels.phone"), type: "tel" },
+        { name: "email", label: t("labels.email"), type: "email" },
         {
           name: "tier",
-          label: dict.tierLabel,
+          label: t("labels.tier"),
           type: "select",
           options: [
-            {
-              label: translateDynamicLabel(locale, "standard"),
-              value: "standard",
-            },
-            { label: translateDynamicLabel(locale, "studio"), value: "studio" },
-            { label: translateDynamicLabel(locale, "vip"), value: "vip" },
+            { label: dynamicLabel(t, "standard"), value: "standard" },
+            { label: dynamicLabel(t, "studio"), value: "studio" },
+            { label: dynamicLabel(t, "vip"), value: "vip" },
           ],
         },
         {
           name: "status",
-          label: dict.status,
+          label: t("common.status"),
           type: "select",
           options: [
-            { label: translateDynamicLabel(locale, "active"), value: "active" },
-            {
-              label: translateDynamicLabel(locale, "inactive"),
-              value: "inactive",
-            },
+            { label: dynamicLabel(t, "active"), value: "active" },
+            { label: dynamicLabel(t, "inactive"), value: "inactive" },
           ],
         },
-        { name: "notes", label: dict.notesLabel, type: "textarea" },
+        { name: "notes", label: t("labels.notes"), type: "textarea" },
       ]}
       onSave={(draft) =>
         saveCustomer({

@@ -1,5 +1,5 @@
 import { FinanceModule } from "@/features/finance/finance-module";
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export default async function FinancePage({
   params,

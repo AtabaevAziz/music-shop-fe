@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 import { formatMoney } from "@/lib/utils";
 
 export function Badge({

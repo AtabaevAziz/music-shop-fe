@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import { Locale } from "@/lib/i18n";
+import { Locale } from "@/i18n";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,11 +12,15 @@ export function formatMoney(
   currency = "USD",
   locale: Locale = "en",
 ) {
-  return new Intl.NumberFormat(locale === "ru" ? "ru-RU" : "en-US", {
+  return new Intl.NumberFormat(getIntlLocale(locale), {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+export function getIntlLocale(locale: Locale) {
+  return locale === "ru" ? "ru-RU" : "en-US";
 }
 
 export function slugify(value: string) {
