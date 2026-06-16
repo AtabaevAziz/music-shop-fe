@@ -115,121 +115,123 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             </button>
           </div>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>{t("labels.preview")}</th>
-              <th>{t("labels.product")}</th>
-              <th>{t("labels.category")}</th>
-              <th>{t("labels.brand")}</th>
-              <th>{t("labels.price")}</th>
-              <th>{t("labels.stock")}</th>
-              <th>{t("common.status")}</th>
-              <th>{t("common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((product) => {
-              const previewImage = product.primaryImage ?? product.images[0];
+        <div className="responsive-table">
+          <table>
+            <thead>
+              <tr>
+                <th>{t("labels.preview")}</th>
+                <th>{t("labels.product")}</th>
+                <th>{t("labels.category")}</th>
+                <th>{t("labels.brand")}</th>
+                <th>{t("labels.price")}</th>
+                <th>{t("labels.stock")}</th>
+                <th>{t("common.status")}</th>
+                <th>{t("common.actions")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((product) => {
+                const previewImage = product.primaryImage ?? product.images[0];
 
-              return (
-                <tr key={product.id}>
-                  <td>
-                    {previewImage ? (
-                      <Image
-                        src={previewImage}
-                        alt={product.name}
-                        width={96}
-                        height={72}
-                        className="product-thumb"
+                return (
+                  <tr key={product.id}>
+                    <td>
+                      {previewImage ? (
+                        <Image
+                          src={previewImage}
+                          alt={product.name}
+                          width={96}
+                          height={72}
+                          className="product-thumb"
+                        />
+                      ) : null}
+                    </td>
+                    <td>
+                      <div className="product-cell">
+                        <strong>{product.name}</strong>
+                        <div className="muted">{product.shortDescription}</div>
+                      </div>
+                      <div className="muted">{product.sku}</div>
+                    </td>
+                    <td>{categoryMap[product.categoryId]}</td>
+                    <td>{brandMap[product.brandId]}</td>
+                    <td>
+                      <Money
+                        value={product.price}
+                        currency={db.settings.currency}
+                        locale={locale}
                       />
-                    ) : null}
-                  </td>
-                  <td>
-                    <div className="product-cell">
-                      <strong>{product.name}</strong>
-                      <div className="muted">{product.shortDescription}</div>
-                    </div>
-                    <div className="muted">{product.sku}</div>
-                  </td>
-                  <td>{categoryMap[product.categoryId]}</td>
-                  <td>{brandMap[product.brandId]}</td>
-                  <td>
-                    <Money
-                      value={product.price}
-                      currency={db.settings.currency}
-                      locale={locale}
-                    />
-                  </td>
-                  <td>
-                    <Badge
-                      tone={
-                        product.stockQty <= db.settings.lowStockThreshold
-                          ? "warn"
-                          : "success"
-                      }
-                    >
-                      {product.stockQty}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Badge
-                      tone={
-                        product.status === "active"
-                          ? "success"
-                          : product.status === "archived"
-                            ? "danger"
-                            : "neutral"
-                      }
-                    >
-                      {dynamicLabel(t, product.status)}
-                    </Badge>
-                  </td>
-                  <td>
-                    <div className="stack-row">
-                      <button
-                        className="button-ghost"
-                        type="button"
-                        onClick={() => {
-                          setFormError("");
-                          setDraft({
-                            id: product.id,
-                            name: product.name,
-                            sku: product.sku,
-                            barcode: product.barcode ?? "",
-                            categoryId: product.categoryId,
-                            brandId: product.brandId,
-                            price: String(product.price),
-                            costPrice: String(product.costPrice),
-                            stockQty: String(product.stockQty),
-                            status: product.status,
-                            shortDescription: product.shortDescription,
-                            description: product.description,
-                            condition: product.condition,
-                            images: product.images.join("\n"),
-                            specs: Object.entries(product.specs)
-                              .map(([key, value]) => `${key}: ${value}`)
-                              .join("\n"),
-                          });
-                          setIsEditorOpen(true);
-                        }}
+                    </td>
+                    <td>
+                      <Badge
+                        tone={
+                          product.stockQty <= db.settings.lowStockThreshold
+                            ? "warn"
+                            : "success"
+                        }
                       >
-                        {t("common.edit")}
-                      </button>
-                      <button
-                        className="button-danger"
-                        type="button"
-                        onClick={() => setDeleteTargetId(product.id)}
+                        {product.stockQty}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge
+                        tone={
+                          product.status === "active"
+                            ? "success"
+                            : product.status === "archived"
+                              ? "danger"
+                              : "neutral"
+                        }
                       >
-                        {t("common.delete")}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {dynamicLabel(t, product.status)}
+                      </Badge>
+                    </td>
+                    <td>
+                      <div className="stack-row">
+                        <button
+                          className="button-ghost"
+                          type="button"
+                          onClick={() => {
+                            setFormError("");
+                            setDraft({
+                              id: product.id,
+                              name: product.name,
+                              sku: product.sku,
+                              barcode: product.barcode ?? "",
+                              categoryId: product.categoryId,
+                              brandId: product.brandId,
+                              price: String(product.price),
+                              costPrice: String(product.costPrice),
+                              stockQty: String(product.stockQty),
+                              status: product.status,
+                              shortDescription: product.shortDescription,
+                              description: product.description,
+                              condition: product.condition,
+                              images: product.images.join("\n"),
+                              specs: Object.entries(product.specs)
+                                .map(([key, value]) => `${key}: ${value}`)
+                                .join("\n"),
+                            });
+                            setIsEditorOpen(true);
+                          }}
+                        >
+                          {t("common.edit")}
+                        </button>
+                        <button
+                          className="button-danger"
+                          type="button"
+                          onClick={() => setDeleteTargetId(product.id)}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {isEditorOpen ? (

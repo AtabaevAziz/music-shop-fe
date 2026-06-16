@@ -67,7 +67,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
         </div>
       </section>
       <section className="table-card finance-section">
-        <div className="finance-table-scroll">
+        <div className="finance-table-scroll responsive-table">
           <table>
             <thead>
               <tr>

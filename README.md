@@ -10,6 +10,7 @@ Music Shop Online is a Next.js frontend demo of an online musical instrument sto
 - Client-side state via React Context
 - Zod for form validation
 - `next/font` for app typography
+- `next-themes` for light/dark theme switching
 - Shared visual system in `src/app/globals.css`
 - `shadcn/ui` integration via `components.json` and `src/components/ui`
 
@@ -59,6 +60,7 @@ music-shop-fe/
 │   │   └── ru.json              # Russian UI messages
 │   ├── components/
 │   │   ├── layout/              # App shell and auth guard
+│   │   ├── theme/               # Theme provider and navbar toggle
 │   │   └── ui/                  # Shared primitives and shadcn-derived UI components
 │   ├── features/
 │   │   ├── auth/                # Login experience
@@ -110,7 +112,8 @@ music-shop-fe/
 
 ## UI Notes
 
-- The app uses a custom light-theme backoffice visual system driven from `src/app/globals.css`
+- The app uses a custom backoffice visual system driven from `src/app/globals.css`
+- Light and dark themes are switched from the navbar and provided through `next-themes`
 - Shared surfaces, tables, forms, buttons, and modal styling are centralized so feature screens inherit the same design language
 - `src/components/ui/primitives.tsx` remains the lightweight shared UI layer, while `src/components/ui/` also contains shadcn-generated building blocks
 

@@ -23,67 +23,69 @@ export function OrdersModule({ locale }: { locale: Locale }) {
   return (
     <div className="two-columns">
       <section className="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>{t("labels.customer")}</th>
-              <th>{t("labels.total")}</th>
-              <th>{t("labels.paymentState")}</th>
-              <th>{t("common.status")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {db.orders.map((order) => {
-              const customer = db.customers.find(
-                (item) => item.id === order.customerId,
-              );
-              const total = order.items.reduce(
-                (sum, item) => sum + item.qty * item.unitPrice,
-                0,
-              );
-              return (
-                <tr key={order.id}>
-                  <td>{order.id}</td>
-                  <td>{customer?.name ?? order.customerId}</td>
-                  <td>
-                    <Money
-                      value={total}
-                      currency={db.settings.currency}
-                      locale={locale}
-                    />
-                  </td>
-                  <td>
-                    <Badge
-                      tone={
-                        order.paymentStatus === "paid"
-                          ? "success"
-                          : order.paymentStatus === "pending"
-                            ? "warn"
-                            : "neutral"
-                      }
-                    >
-                      {dynamicLabel(t, order.paymentStatus)}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Badge
-                      tone={
-                        order.status === "completed"
-                          ? "success"
-                          : order.status === "cancelled"
-                            ? "danger"
-                            : "neutral"
-                      }
-                    >
-                      {dynamicLabel(t, order.status)}
-                    </Badge>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="responsive-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>{t("labels.customer")}</th>
+                <th>{t("labels.total")}</th>
+                <th>{t("labels.paymentState")}</th>
+                <th>{t("common.status")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {db.orders.map((order) => {
+                const customer = db.customers.find(
+                  (item) => item.id === order.customerId,
+                );
+                const total = order.items.reduce(
+                  (sum, item) => sum + item.qty * item.unitPrice,
+                  0,
+                );
+                return (
+                  <tr key={order.id}>
+                    <td>{order.id}</td>
+                    <td>{customer?.name ?? order.customerId}</td>
+                    <td>
+                      <Money
+                        value={total}
+                        currency={db.settings.currency}
+                        locale={locale}
+                      />
+                    </td>
+                    <td>
+                      <Badge
+                        tone={
+                          order.paymentStatus === "paid"
+                            ? "success"
+                            : order.paymentStatus === "pending"
+                              ? "warn"
+                              : "neutral"
+                        }
+                      >
+                        {dynamicLabel(t, order.paymentStatus)}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge
+                        tone={
+                          order.status === "completed"
+                            ? "success"
+                            : order.status === "cancelled"
+                              ? "danger"
+                              : "neutral"
+                        }
+                      >
+                        {dynamicLabel(t, order.status)}
+                      </Badge>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </section>
       <section className="table-card">
         <PageHeader

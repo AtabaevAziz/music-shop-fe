@@ -66,43 +66,46 @@ export function InventoryModule({ locale }: { locale: Locale }) {
             title={t("nav.inventory")}
             subtitle={t("labels.stockHealth")}
           />
-          <table>
-            <thead>
-              <tr>
-                <th>{t("labels.product")}</th>
-                <th>{t("labels.sku")}</th>
-                <th>{t("labels.available")}</th>
-                <th>{t("labels.condition")}</th>
-                <th>{t("labels.replenishmentRisk")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {db.products.map((product) => {
-                const isLow = product.stockQty <= db.settings.lowStockThreshold;
-                return (
-                  <tr key={product.id}>
-                    <td>
-                      <strong>{product.name}</strong>
-                    </td>
-                    <td>{product.sku}</td>
-                    <td>
-                      <Badge tone={isLow ? "warn" : "success"}>
-                        {product.stockQty}
-                      </Badge>
-                    </td>
-                    <td>{dynamicLabel(t, product.condition)}</td>
-                    <td>
-                      <Badge tone={isLow ? "warn" : "neutral"}>
-                        {isLow
-                          ? `${t("labels.threshold")}: ${db.settings.lowStockThreshold}`
-                          : t("labels.stockHealthy")}
-                      </Badge>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="responsive-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("labels.product")}</th>
+                  <th>{t("labels.sku")}</th>
+                  <th>{t("labels.available")}</th>
+                  <th>{t("labels.condition")}</th>
+                  <th>{t("labels.replenishmentRisk")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {db.products.map((product) => {
+                  const isLow =
+                    product.stockQty <= db.settings.lowStockThreshold;
+                  return (
+                    <tr key={product.id}>
+                      <td>
+                        <strong>{product.name}</strong>
+                      </td>
+                      <td>{product.sku}</td>
+                      <td>
+                        <Badge tone={isLow ? "warn" : "success"}>
+                          {product.stockQty}
+                        </Badge>
+                      </td>
+                      <td>{dynamicLabel(t, product.condition)}</td>
+                      <td>
+                        <Badge tone={isLow ? "warn" : "neutral"}>
+                          {isLow
+                            ? `${t("labels.threshold")}: ${db.settings.lowStockThreshold}`
+                            : t("labels.stockHealthy")}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <div className="inventory-side">

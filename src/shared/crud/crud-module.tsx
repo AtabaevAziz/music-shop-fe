@@ -176,46 +176,50 @@ export function CrudModule<
         }
       >
         {filteredItems.length ? (
-          <table>
-            <thead>
-              <tr>
-                {tableFields.map((field) => (
-                  <th key={field.name}>{field.label}</th>
-                ))}
-                <th>{t("common.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id}>
+          <div className="responsive-table">
+            <table>
+              <thead>
+                <tr>
                   {tableFields.map((field) => (
-                    <td key={field.name}>{resolveDisplayValue(field, item)}</td>
+                    <th key={field.name}>{field.label}</th>
                   ))}
-                  <td>
-                    <div className="stack-row">
-                      <button
-                        className="button-ghost"
-                        type="button"
-                        onClick={() => {
-                          setDraft(toDraft(item));
-                          setIsEditorOpen(true);
-                        }}
-                      >
-                        {t("common.edit")}
-                      </button>
-                      <button
-                        className="button-danger"
-                        type="button"
-                        onClick={() => setDeleteTargetId(item.id)}
-                      >
-                        {t("common.delete")}
-                      </button>
-                    </div>
-                  </td>
+                  <th>{t("common.actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredItems.map((item) => (
+                  <tr key={item.id}>
+                    {tableFields.map((field) => (
+                      <td key={field.name}>
+                        {resolveDisplayValue(field, item)}
+                      </td>
+                    ))}
+                    <td>
+                      <div className="stack-row">
+                        <button
+                          className="button-ghost"
+                          type="button"
+                          onClick={() => {
+                            setDraft(toDraft(item));
+                            setIsEditorOpen(true);
+                          }}
+                        >
+                          {t("common.edit")}
+                        </button>
+                        <button
+                          className="button-danger"
+                          type="button"
+                          onClick={() => setDeleteTargetId(item.id)}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <ModuleEmptyState
             title={t("common.noData")}

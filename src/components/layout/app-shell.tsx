@@ -1,11 +1,15 @@
 "use client";
 
+import { Menu, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Locale } from "@/i18n";
 import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
+import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
@@ -50,8 +54,8 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const { db, session, logout, resetDemo, flash } = useMusicStore();
-
-  if (!session) return null;
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const sessionRole = session?.role;
 
   const navMap: Record<(typeof navOrder)[number], string> = {
     "": t("nav.dashboard"),
@@ -72,10 +76,21 @@ export function AppShell({
     label: navMap[segment],
     roles: accessMap[segment],
   }));
+  const visibleNavItems = useMemo(
+    () =>
+      sessionRole
+        ? navItems.filter(
+            (item) => !item.roles || item.roles.includes(sessionRole),
+          )
+        : [],
+    [navItems, sessionRole],
+  );
 
   const currentSegment = (pathname.split("/")[2] ??
     "") as (typeof navOrder)[number];
-  const isAllowed = accessMap[currentSegment]?.includes(session.role) ?? true;
+  const isAllowed = sessionRole
+    ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
+    : false;
   const pageMeta: Record<
     (typeof navOrder)[number],
     { title: string; subtitle: string }
@@ -115,53 +130,117 @@ export function AppShell({
   };
   const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
 
+  useEffect(() => {
+    setIsNavOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isNavOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsNavOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isNavOpen]);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setIsNavOpen(false);
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  if (!session) return null;
+
+  const navContent = (
+    <>
+      <div className="brand-mark">
+        <div className="sidebar-kicker">{t("common.brand")}</div>
+        <strong className="sidebar-title">{t("meta.appName")}</strong>
+        <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
+        <small className="sidebar-role">{dynamicLabel(t, session.role)}</small>
+      </div>
+      <div className="sidebar-body">
+        <nav className="nav-list">
+          {visibleNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn("nav-link", pathname === item.href && "active")}
+              onClick={() => setIsNavOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+      <div className="surface sidebar-metric sidebar-footer">
+        <div className="sidebar-metric-label muted">
+          {t("labels.inventoryThresholdTitle")}
+        </div>
+        <div className="sidebar-metric-value">
+          {db.settings.lowStockThreshold}
+        </div>
+        <div className="sidebar-metric-copy muted">
+          {t("labels.inventoryThresholdHelp")}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand-mark">
-          <div className="sidebar-kicker">{t("common.brand")}</div>
-          <strong className="sidebar-title">{t("meta.appName")}</strong>
-          <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
-          <small className="sidebar-role">
-            {dynamicLabel(t, session.role)}
-          </small>
+      <aside className="sidebar">{navContent}</aside>
+      <div
+        className={cn("sidebar-overlay", isNavOpen && "open")}
+        onClick={() => setIsNavOpen(false)}
+        role="presentation"
+      />
+      <aside className={cn("sidebar sidebar-mobile", isNavOpen && "open")}>
+        <div className="sidebar-mobile-head">
+          <button
+            className="button-ghost nav-toggle-button"
+            type="button"
+            onClick={() => setIsNavOpen(false)}
+            aria-label={t("common.close")}
+          >
+            <X size={18} />
+          </button>
         </div>
-        <div className="sidebar-body">
-          <nav className="nav-list">
-            {navItems
-              .filter(
-                (item) => !item.roles || item.roles.includes(session.role),
-              )
-              .map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`nav-link${pathname === item.href ? "active" : ""}`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-          </nav>
-        </div>
-        <div className="surface sidebar-metric sidebar-footer">
-          <div className="sidebar-metric-label muted">
-            {t("labels.inventoryThresholdTitle")}
-          </div>
-          <div className="sidebar-metric-value">
-            {db.settings.lowStockThreshold}
-          </div>
-          <div className="sidebar-metric-copy muted">
-            {t("labels.inventoryThresholdHelp")}
-          </div>
-        </div>
+        {navContent}
       </aside>
       <main className="content-area">
         <div className="topbar">
+          <button
+            className="button-ghost nav-toggle-button"
+            type="button"
+            onClick={() => setIsNavOpen(true)}
+            aria-label={t("nav.openMenu")}
+          >
+            <Menu size={18} />
+          </button>
           <div className="topbar-copy">
             <strong>{currentPage.title}</strong>
             <div className="muted">{currentPage.subtitle}</div>
           </div>
           <div className="topbar-actions">
+            <ThemeToggle />
             <button
               className="button-ghost"
               onClick={() =>

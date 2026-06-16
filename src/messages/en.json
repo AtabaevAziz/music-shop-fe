@@ -15,6 +15,8 @@
     "actions": "Actions",
     "status": "Status",
     "language": "Language",
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme",
     "noData": "No data yet",
     "close": "Close",
     "confirmDelete": "Confirm deletion",
@@ -34,6 +36,7 @@
     "finance": "Finance",
     "settings": "Settings",
     "media": "Media",
+    "openMenu": "Open menu",
     "logout": "Logout",
     "resetDemo": "Reset demo"
   },

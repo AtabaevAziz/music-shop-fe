@@ -75,28 +75,32 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             subtitle={t("dashboard.lowStockSubtitle")}
           />
           {lowStock.length ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>{t("labels.product")}</th>
-                  <th>{t("labels.sku")}</th>
-                  <th>{t("labels.qty")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lowStock.map((product) => (
-                  <tr key={product.id}>
-                    <td>{product.name}</td>
-                    <td>{product.sku}</td>
-                    <td>
-                      <Badge tone={product.stockQty === 0 ? "danger" : "warn"}>
-                        {product.stockQty}
-                      </Badge>
-                    </td>
+            <div className="responsive-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t("labels.product")}</th>
+                    <th>{t("labels.sku")}</th>
+                    <th>{t("labels.qty")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {lowStock.map((product) => (
+                    <tr key={product.id}>
+                      <td>{product.name}</td>
+                      <td>{product.sku}</td>
+                      <td>
+                        <Badge
+                          tone={product.stockQty === 0 ? "danger" : "warn"}
+                        >
+                          {product.stockQty}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <div className="empty-state">{t("common.noData")}</div>
           )}
