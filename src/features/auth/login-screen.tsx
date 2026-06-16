@@ -1,9 +1,11 @@
 "use client";
 
+import { Languages } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
@@ -18,10 +20,13 @@ const roles: Role[] = [
 
 export function LoginScreen({ locale }: { locale: Locale }) {
   const t = useTranslations();
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useMusicStore();
   const [isPending, startTransition] = useTransition();
+  const next = searchParams.get("next");
+  const targetLocale = locale === "ru" ? "en" : "ru";
   const roleBlurbs: Record<Role, string> = {
     admin: t("auth.adminBlurb"),
     store_manager: t("auth.storeManagerBlurb"),
@@ -33,7 +38,27 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     <div className="auth-page">
       <div className="auth-card">
         <section className="hero-panel">
-          <div className="hero-eyebrow">{t("common.brand")}</div>
+          <div className="hero-panel-top">
+            <div className="hero-eyebrow">{t("common.brand")}</div>
+            <div className="hero-panel-controls">
+              <button
+                className="hero-panel-locale"
+                type="button"
+                onClick={() =>
+                  router.push(
+                    `/${targetLocale}${pathname.slice(3)}${
+                      next ? `?next=${encodeURIComponent(next)}` : ""
+                    }`,
+                  )
+                }
+                aria-label={`${t("common.language")}: ${targetLocale.toUpperCase()}`}
+              >
+                <Languages size={16} />
+                <span>{targetLocale.toUpperCase()}</span>
+              </button>
+              <ThemeToggle variant="hero" />
+            </div>
+          </div>
           <h1>{t("auth.title")}</h1>
           <p className="hero-lead">{t("auth.text")}</p>
           <div className="hero-grid">

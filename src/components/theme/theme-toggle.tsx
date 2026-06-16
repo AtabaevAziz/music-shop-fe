@@ -5,7 +5,11 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-export function ThemeToggle() {
+export function ThemeToggle({
+  variant = "navbar",
+}: {
+  variant?: "navbar" | "hero";
+}) {
   const t = useTranslations();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -19,7 +23,7 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="button-ghost theme-toggle"
+      className={`button-ghost theme-toggle theme-toggle-${variant}`}
       type="button"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={label}
