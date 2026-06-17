@@ -104,33 +104,33 @@ export function OrdersModule({ locale }: { locale: Locale }) {
           {db.orders.map((order) => (
             <Card key={order.id}>
               <CardContent className="space-y-4 p-5">
-              <div className="flex items-start justify-between gap-3">
-                <strong>{order.id}</strong>
-                <Badge
-                  variant={
-                    order.status === "completed"
-                      ? "success"
-                      : order.status === "cancelled"
-                        ? "destructive"
-                        : "secondary"
-                  }
-                >
-                  {dynamicLabel(t, order.status)}
-                </Badge>
-              </div>
-              <p>{order.notes}</p>
-              <div className="flex flex-wrap gap-2">
-                {transitions.map((status) => (
-                  <Button
-                    key={status}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => void changeOrderStatus(order.id, status)}
+                <div className="flex items-start justify-between gap-3">
+                  <strong>{order.id}</strong>
+                  <Badge
+                    variant={
+                      order.status === "completed"
+                        ? "success"
+                        : order.status === "cancelled"
+                          ? "destructive"
+                          : "secondary"
+                    }
                   >
-                    {dynamicLabel(t, status)}
-                  </Button>
-                ))}
-              </div>
+                    {dynamicLabel(t, order.status)}
+                  </Badge>
+                </div>
+                <p>{order.notes}</p>
+                <div className="flex flex-wrap gap-2">
+                  {transitions.map((status) => (
+                    <Button
+                      key={status}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => void changeOrderStatus(order.id, status)}
+                    >
+                      {dynamicLabel(t, status)}
+                    </Button>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           ))}

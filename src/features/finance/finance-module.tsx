@@ -47,29 +47,29 @@ export function FinanceModule({ locale }: { locale: Locale }) {
         <div className="stats-grid">
           <Card>
             <CardContent className="p-6">
-            <div className="muted">{t("labels.revenue")}</div>
-            <div className="kpi-value">
-              {formatMoney(totalRevenue, db.settings.currency, locale)}
-            </div>
+              <div className="muted">{t("labels.revenue")}</div>
+              <div className="kpi-value">
+                {formatMoney(totalRevenue, db.settings.currency, locale)}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-            <div className="muted">{t("labels.grossMargin")}</div>
-            <div className="kpi-value">
-              {formatMoney(totalMargin, db.settings.currency, locale)}
-            </div>
+              <div className="muted">{t("labels.grossMargin")}</div>
+              <div className="kpi-value">
+                {formatMoney(totalMargin, db.settings.currency, locale)}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
-            <div className="muted">{t("labels.paidOrders")}</div>
-            <div className="kpi-value">
-              {
-                db.orders.filter((order) => order.paymentStatus === "paid")
-                  .length
-              }
-            </div>
+              <div className="muted">{t("labels.paidOrders")}</div>
+              <div className="kpi-value">
+                {
+                  db.orders.filter((order) => order.paymentStatus === "paid")
+                    .length
+                }
+              </div>
             </CardContent>
           </Card>
         </div>

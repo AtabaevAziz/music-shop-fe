@@ -6,7 +6,13 @@ import { useState } from "react";
 import { AppField } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { dynamicLabel } from "@/lib/translations";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
@@ -87,7 +93,9 @@ export function SettingsModule() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="draft">{dynamicLabel(t, "draft")}</SelectItem>
-              <SelectItem value="active">{dynamicLabel(t, "active")}</SelectItem>
+              <SelectItem value="active">
+                {dynamicLabel(t, "active")}
+              </SelectItem>
               <SelectItem value="archived">
                 {dynamicLabel(t, "archived")}
               </SelectItem>
@@ -107,9 +115,7 @@ export function SettingsModule() {
           />
         </AppField>
         <div className="flex gap-2 md:col-span-2">
-          <Button type="submit">
-            {t("common.save")}
-          </Button>
+          <Button type="submit">{t("common.save")}</Button>
         </div>
       </form>
     </ModuleSection>

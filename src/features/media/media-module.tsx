@@ -9,7 +9,13 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 
@@ -41,11 +47,11 @@ export function MediaModule() {
                 <SelectValue placeholder={t("labels.product")} />
               </SelectTrigger>
               <SelectContent>
-              {db.products.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.name}
-                </SelectItem>
-              ))}
+                {db.products.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </AppField>
@@ -56,9 +62,7 @@ export function MediaModule() {
             />
           </AppField>
           <div className="flex gap-2">
-            <Button type="submit">
-              {t("common.save")}
-            </Button>
+            <Button type="submit">{t("common.save")}</Button>
           </div>
         </form>
       </ModuleSection>

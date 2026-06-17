@@ -7,7 +7,7 @@ import { useTransition } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { getNextLocale, localeLabelKeyMap, Locale } from "@/i18n";
+import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
@@ -95,7 +95,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 <strong className="login-role-title">
                   {dynamicLabel(t, role)}
                 </strong>
-                <p className="muted">{roleBlurbs[role]}</p>
+                <p className="login-role-copy">{roleBlurbs[role]}</p>
               </Button>
             ))}
           </div>

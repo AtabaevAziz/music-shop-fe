@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { formatTranslatedMessage } from "@/lib/translations";

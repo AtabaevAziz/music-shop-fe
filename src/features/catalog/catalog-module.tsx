@@ -6,6 +6,16 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { AppField } from "@/components/shared/form-field";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,17 +27,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -336,11 +342,11 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue placeholder={t("common.select")} />
                 </SelectTrigger>
                 <SelectContent>
-                {db.categories.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name}
-                  </SelectItem>
-                ))}
+                  {db.categories.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </AppField>
@@ -358,11 +364,11 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue placeholder={t("common.select")} />
                 </SelectTrigger>
                 <SelectContent>
-                {db.brands.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name}
-                  </SelectItem>
-                ))}
+                  {db.brands.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </AppField>
@@ -381,7 +387,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="new">{dynamicLabel(t, "new")}</SelectItem>
-                  <SelectItem value="used">{dynamicLabel(t, "used")}</SelectItem>
+                  <SelectItem value="used">
+                    {dynamicLabel(t, "used")}
+                  </SelectItem>
                   <SelectItem value="showroom">
                     {dynamicLabel(t, "showroom")}
                   </SelectItem>
@@ -438,7 +446,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">{dynamicLabel(t, "draft")}</SelectItem>
+                  <SelectItem value="draft">
+                    {dynamicLabel(t, "draft")}
+                  </SelectItem>
                   <SelectItem value="active">
                     {dynamicLabel(t, "active")}
                   </SelectItem>
@@ -462,7 +472,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </AppField>
-            <AppField label={t("labels.fullDescription")} className="md:col-span-2">
+            <AppField
+              label={t("labels.fullDescription")}
+              className="md:col-span-2"
+            >
               <Textarea
                 value={draft.description ?? ""}
                 onChange={(event) =>
@@ -473,7 +486,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </AppField>
-            <AppField label={t("labels.imagesPerLine")} className="md:col-span-2">
+            <AppField
+              label={t("labels.imagesPerLine")}
+              className="md:col-span-2"
+            >
               <Textarea
                 value={draft.images ?? ""}
                 onChange={(event) =>
@@ -484,7 +500,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </AppField>
-            <AppField label={t("labels.specsKeyValue")} className="md:col-span-2">
+            <AppField
+              label={t("labels.specsKeyValue")}
+              className="md:col-span-2"
+            >
               <Textarea
                 value={draft.specs ?? ""}
                 onChange={(event) =>
@@ -496,9 +515,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               />
             </AppField>
             <DialogFooter className="md:col-span-2">
-              <Button type="submit">
-                {t("common.save")}
-              </Button>
+              <Button type="submit">{t("common.save")}</Button>
               <Button
                 variant="outline"
                 type="button"

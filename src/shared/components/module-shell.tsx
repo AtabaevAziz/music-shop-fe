@@ -6,9 +6,9 @@ import { PageHeader } from "@/components/shared/page-header";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -70,9 +70,7 @@ export function ModuleEmptyState({
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       {action ? (
-        <CardContent className="flex justify-center pt-0">
-          {action}
-        </CardContent>
+        <CardContent className="flex justify-center pt-0">{action}</CardContent>
       ) : null}
     </Card>
   );

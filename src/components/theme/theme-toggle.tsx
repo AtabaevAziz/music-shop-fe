@@ -33,11 +33,7 @@ export function ThemeToggle({
       aria-label={label}
       title={label}
     >
-      {isDark ? (
-        <Moon size={18} />
-      ) : (
-        <Sun size={18} />
-      )}
+      {isDark ? <Moon size={18} /> : <Sun size={18} />}
     </Button>
   );
 }

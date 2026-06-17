@@ -9,7 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -58,26 +64,26 @@ export function InventoryModule({ locale }: { locale: Locale }) {
         <div className="inventory-overview">
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.stockOnHand")}</div>
-            <div className="kpi-value">{totalUnits}</div>
+              <div className="muted">{t("labels.stockOnHand")}</div>
+              <div className="kpi-value">{totalUnits}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.replenishmentRisk")}</div>
-            <div className="kpi-value">{lowStockProducts.length}</div>
+              <div className="muted">{t("labels.replenishmentRisk")}</div>
+              <div className="kpi-value">{lowStockProducts.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.showroomUnits")}</div>
-            <div className="kpi-value">{showroomUnits}</div>
+              <div className="muted">{t("labels.showroomUnits")}</div>
+              <div className="kpi-value">{showroomUnits}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.movementCount")}</div>
-            <div className="kpi-value">{recentMovementCount}</div>
+              <div className="muted">{t("labels.movementCount")}</div>
+              <div className="kpi-value">{recentMovementCount}</div>
             </CardContent>
           </Card>
         </div>
@@ -115,7 +121,9 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                           {product.stockQty}
                         </Badge>
                       </TableCell>
-                      <TableCell>{dynamicLabel(t, product.condition)}</TableCell>
+                      <TableCell>
+                        {dynamicLabel(t, product.condition)}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={isLow ? "warning" : "secondary"}>
                           {isLow
@@ -141,23 +149,23 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               <div className="inventory-selected-summary">
                 <Card>
                   <CardContent className="space-y-2 p-6">
-                  <strong>{selectedProduct.name}</strong>
-                  <div className="muted">{selectedProduct.sku}</div>
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Badge
-                      variant={
-                        selectedProduct.stockQty <=
-                        db.settings.lowStockThreshold
-                          ? "warning"
-                          : "success"
-                      }
-                    >
-                      {t("labels.currentStock")}: {selectedProduct.stockQty}
-                    </Badge>
-                    <Badge variant="secondary">
-                      {dynamicLabel(t, selectedProduct.condition)}
-                    </Badge>
-                  </div>
+                    <strong>{selectedProduct.name}</strong>
+                    <div className="muted">{selectedProduct.sku}</div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Badge
+                        variant={
+                          selectedProduct.stockQty <=
+                          db.settings.lowStockThreshold
+                            ? "warning"
+                            : "success"
+                        }
+                      >
+                        {t("labels.currentStock")}: {selectedProduct.stockQty}
+                      </Badge>
+                      <Badge variant="secondary">
+                        {dynamicLabel(t, selectedProduct.condition)}
+                      </Badge>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -175,11 +183,11 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <SelectValue placeholder={t("labels.product")} />
                   </SelectTrigger>
                   <SelectContent>
-                  {db.products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
+                    {db.products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </AppField>
@@ -197,9 +205,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 />
               </AppField>
               <div className="flex gap-2">
-                <Button type="submit">
-                  {t("common.save")}
-                </Button>
+                <Button type="submit">{t("common.save")}</Button>
               </div>
             </form>
           </section>
@@ -217,20 +223,22 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 return (
                   <Card key={movement.id}>
                     <CardContent className="space-y-2 p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <strong>{product?.name ?? movement.productId}</strong>
-                      <Badge variant={movement.delta > 0 ? "success" : "warning"}>
-                        {movement.delta > 0 ? "+" : ""}
-                        {movement.delta}
-                      </Badge>
-                    </div>
-                    <div className="muted">{product?.sku}</div>
-                    <div>{movement.reason}</div>
-                    <div className="muted">
-                      {new Date(movement.createdAt).toLocaleString(
-                        getIntlLocale(locale),
-                      )}
-                    </div>
+                      <div className="flex items-start justify-between gap-3">
+                        <strong>{product?.name ?? movement.productId}</strong>
+                        <Badge
+                          variant={movement.delta > 0 ? "success" : "warning"}
+                        >
+                          {movement.delta > 0 ? "+" : ""}
+                          {movement.delta}
+                        </Badge>
+                      </div>
+                      <div className="muted">{product?.sku}</div>
+                      <div>{movement.reason}</div>
+                      <div className="muted">
+                        {new Date(movement.createdAt).toLocaleString(
+                          getIntlLocale(locale),
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 );

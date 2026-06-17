@@ -9,18 +9,12 @@ import { useEffect, useMemo, useState } from "react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { getNextLocale, localeLabelKeyMap, Locale } from "@/i18n";
+import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
@@ -216,38 +210,34 @@ export function AppShell({
           </div>
           <div className="topbar-actions">
             <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <Languages size={16} />
-                  {currentLocaleLabel}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() =>
-                    router.push(`/${nextLocale}${pathname.slice(3)}`)
-                  }
-                >
-                  <Languages size={16} />
-                  {t("common.language")}: {currentLocaleLabel}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => void resetDemo()}>
-                  <RotateCcw size={16} />
-                  {t("nav.resetDemo")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => {
-                    logout();
-                    router.replace(`/${locale}/login`);
-                  }}
-                >
-                  <LogOut size={16} />
-                  {t("nav.logout")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              className="topbar-action topbar-language"
+              variant="outline"
+              onClick={() => router.push(`/${nextLocale}${pathname.slice(3)}`)}
+              aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
+            >
+              <Languages size={16} />
+              {t("common.language")}: {currentLocaleLabel}
+            </Button>
+            <Button
+              className="topbar-action topbar-reset"
+              variant="outline"
+              onClick={() => void resetDemo()}
+            >
+              <RotateCcw size={16} />
+              {t("nav.resetDemo")}
+            </Button>
+            <Button
+              className="topbar-action topbar-logout"
+              variant="destructive"
+              onClick={() => {
+                logout();
+                router.replace(`/${locale}/login`);
+              }}
+            >
+              <LogOut size={16} />
+              {t("nav.logout")}
+            </Button>
           </div>
         </div>
         <div className="page-scroll">

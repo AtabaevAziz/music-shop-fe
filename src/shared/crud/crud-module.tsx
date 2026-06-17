@@ -4,17 +4,6 @@ import { useTranslations } from "next-intl";
 import { ReactNode, useMemo, useState } from "react";
 
 import { AppField } from "@/components/shared/form-field";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +14,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -270,7 +276,10 @@ export function CrudModule<
         )}
       </ModuleSection>
 
-      <Dialog open={isEditorOpen} onOpenChange={(open) => !open && closeEditor()}>
+      <Dialog
+        open={isEditorOpen}
+        onOpenChange={(open) => !open && closeEditor()}
+      >
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>
@@ -291,7 +300,9 @@ export function CrudModule<
               <AppField
                 key={field.name}
                 label={field.label}
-                className={field.type === "textarea" ? "md:col-span-2" : undefined}
+                className={
+                  field.type === "textarea" ? "md:col-span-2" : undefined
+                }
               >
                 {field.type === "textarea" ? (
                   <Textarea
@@ -304,10 +315,14 @@ export function CrudModule<
                 ) : field.type === "select" ? (
                   <Select
                     value={draft[field.name] ?? ""}
-                    onValueChange={(value) => updateDraftValue(field.name, value)}
+                    onValueChange={(value) =>
+                      updateDraftValue(field.name, value)
+                    }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={field.placeholder ?? field.label} />
+                      <SelectValue
+                        placeholder={field.placeholder ?? field.label}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {field.placeholder ? (
@@ -315,11 +330,11 @@ export function CrudModule<
                           {field.placeholder}
                         </SelectItem>
                       ) : null}
-                    {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                      {field.options?.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 ) : (
@@ -335,9 +350,7 @@ export function CrudModule<
               </AppField>
             ))}
             <DialogFooter className="md:col-span-2">
-              <Button type="submit">
-                {t("common.save")}
-              </Button>
+              <Button type="submit">{t("common.save")}</Button>
               <Button variant="outline" type="button" onClick={closeEditor}>
                 {t("common.cancel")}
               </Button>
@@ -364,7 +377,9 @@ export function CrudModule<
                   return;
                 }
 
-                void onDelete(deleteTargetId).then(() => setDeleteTargetId(null));
+                void onDelete(deleteTargetId).then(() =>
+                  setDeleteTargetId(null),
+                );
               }}
             >
               {t("common.delete")}

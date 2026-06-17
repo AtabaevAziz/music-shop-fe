@@ -59,28 +59,28 @@ export function DashboardModule({ locale }: { locale: Locale }) {
         <div className="dashboard-overview">
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.revenue")}</div>
-            <div className="kpi-value">
-              {formatMoney(revenue, db.settings.currency, locale)}
-            </div>
+              <div className="muted">{t("labels.revenue")}</div>
+              <div className="kpi-value">
+                {formatMoney(revenue, db.settings.currency, locale)}
+              </div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.lowStock")}</div>
-            <div className="kpi-value">{lowStock.length}</div>
+              <div className="muted">{t("labels.lowStock")}</div>
+              <div className="kpi-value">{lowStock.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.activeOrders")}</div>
-            <div className="kpi-value">{activeOrders.length}</div>
+              <div className="muted">{t("labels.activeOrders")}</div>
+              <div className="kpi-value">{activeOrders.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-            <div className="muted">{t("labels.completedSales")}</div>
-            <div className="kpi-value">{completedSales}</div>
+              <div className="muted">{t("labels.completedSales")}</div>
+              <div className="kpi-value">{completedSales}</div>
             </CardContent>
           </Card>
         </div>
@@ -135,8 +135,8 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             {groupedStatuses.map((item) => (
               <Card key={item.status}>
                 <CardContent className="space-y-2 p-5">
-                <div className="muted">{dynamicLabel(t, item.status)}</div>
-                <div className="kpi-value">{item.count}</div>
+                  <div className="muted">{dynamicLabel(t, item.status)}</div>
+                  <div className="kpi-value">{item.count}</div>
                 </CardContent>
               </Card>
             ))}
@@ -155,25 +155,29 @@ export function DashboardModule({ locale }: { locale: Locale }) {
               return (
                 <Card key={product.id}>
                   <CardContent className="space-y-4 p-5">
-                  {previewImage ? (
-                    <Image
-                      src={previewImage}
-                      alt={product.name}
-                      width={720}
-                      height={180}
-                      className="product-thumb product-thumb-featured"
-                    />
-                  ) : null}
-                  <strong>{product.name}</strong>
-                  <div className="muted">{product.sku}</div>
-                  <div className="heading-row">
-                    <Badge variant="secondary">
-                      {dynamicLabel(t, product.status)}
-                    </Badge>
-                    <span>
-                      {formatMoney(product.price, db.settings.currency, locale)}
-                    </span>
-                  </div>
+                    {previewImage ? (
+                      <Image
+                        src={previewImage}
+                        alt={product.name}
+                        width={720}
+                        height={180}
+                        className="product-thumb product-thumb-featured"
+                      />
+                    ) : null}
+                    <strong>{product.name}</strong>
+                    <div className="muted">{product.sku}</div>
+                    <div className="heading-row">
+                      <Badge variant="secondary">
+                        {dynamicLabel(t, product.status)}
+                      </Badge>
+                      <span>
+                        {formatMoney(
+                          product.price,
+                          db.settings.currency,
+                          locale,
+                        )}
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -190,20 +194,20 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             {db.activity.map((item) => (
               <Card key={item.id}>
                 <CardContent className="space-y-2 p-5">
-                <strong>
-                  {item.messageKey
-                    ? formatTranslatedMessage(
-                        t,
-                        item.messageKey,
-                        item.messageParams,
-                      )
-                    : item.title}
-                </strong>
-                <div className="muted">
-                  {new Date(item.timestamp).toLocaleString(
-                    getIntlLocale(locale),
-                  )}
-                </div>
+                  <strong>
+                    {item.messageKey
+                      ? formatTranslatedMessage(
+                          t,
+                          item.messageKey,
+                          item.messageParams,
+                        )
+                      : item.title}
+                  </strong>
+                  <div className="muted">
+                    {new Date(item.timestamp).toLocaleString(
+                      getIntlLocale(locale),
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
