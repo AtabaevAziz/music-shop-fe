@@ -1,5 +1,6 @@
 "use client";
 
+import { Pen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ReactNode, useMemo, useState } from "react";
 
@@ -40,6 +41,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   ModuleEmptyState,
   ModuleSection,
@@ -230,27 +237,43 @@ export function CrudModule<
                       </TableCell>
                     ))}
                     <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          type="button"
-                          onClick={() => {
-                            setDraft(toDraft(item));
-                            setIsEditorOpen(true);
-                          }}
-                        >
-                          {t("common.edit")}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="button"
-                          onClick={() => setDeleteTargetId(item.id)}
-                        >
-                          {t("common.delete")}
-                        </Button>
-                      </div>
+                      <TooltipProvider delayDuration={120}>
+                        <div className="flex flex-wrap gap-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                type="button"
+                                aria-label={t("common.edit")}
+                                onClick={() => {
+                                  setDraft(toDraft(item));
+                                  setIsEditorOpen(true);
+                                }}
+                              >
+                                <Pen />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t("common.edit")}</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                type="button"
+                                aria-label={t("common.delete")}
+                                onClick={() => setDeleteTargetId(item.id)}
+                              >
+                                <Trash2 />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {t("common.delete")}
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 ))}

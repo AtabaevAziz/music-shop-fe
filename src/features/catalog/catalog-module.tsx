@@ -1,5 +1,6 @@
 "use client";
 
+import { Pen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -43,6 +44,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, parseList } from "@/lib/utils";
@@ -219,46 +226,62 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          type="button"
-                          onClick={() => {
-                            setFormError("");
-                            setDraft({
-                              id: product.id,
-                              name: product.name,
-                              sku: product.sku,
-                              barcode: product.barcode ?? "",
-                              categoryId: product.categoryId,
-                              brandId: product.brandId,
-                              price: String(product.price),
-                              costPrice: String(product.costPrice),
-                              stockQty: String(product.stockQty),
-                              status: product.status,
-                              shortDescription: product.shortDescription,
-                              description: product.description,
-                              condition: product.condition,
-                              images: product.images.join("\n"),
-                              specs: Object.entries(product.specs)
-                                .map(([key, value]) => `${key}: ${value}`)
-                                .join("\n"),
-                            });
-                            setIsEditorOpen(true);
-                          }}
-                        >
-                          {t("common.edit")}
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="button"
-                          onClick={() => setDeleteTargetId(product.id)}
-                        >
-                          {t("common.delete")}
-                        </Button>
-                      </div>
+                      <TooltipProvider delayDuration={120}>
+                        <div className="flex flex-wrap gap-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                type="button"
+                                aria-label={t("common.edit")}
+                                onClick={() => {
+                                  setFormError("");
+                                  setDraft({
+                                    id: product.id,
+                                    name: product.name,
+                                    sku: product.sku,
+                                    barcode: product.barcode ?? "",
+                                    categoryId: product.categoryId,
+                                    brandId: product.brandId,
+                                    price: String(product.price),
+                                    costPrice: String(product.costPrice),
+                                    stockQty: String(product.stockQty),
+                                    status: product.status,
+                                    shortDescription: product.shortDescription,
+                                    description: product.description,
+                                    condition: product.condition,
+                                    images: product.images.join("\n"),
+                                    specs: Object.entries(product.specs)
+                                      .map(([key, value]) => `${key}: ${value}`)
+                                      .join("\n"),
+                                  });
+                                  setIsEditorOpen(true);
+                                }}
+                              >
+                                <Pen />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t("common.edit")}</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                type="button"
+                                aria-label={t("common.delete")}
+                                onClick={() => setDeleteTargetId(product.id)}
+                              >
+                                <Trash2 />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {t("common.delete")}
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                     </TableCell>
                   </TableRow>
                 );
