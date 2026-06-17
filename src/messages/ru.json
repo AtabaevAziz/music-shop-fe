@@ -15,6 +15,8 @@
     "actions": "Действия",
     "status": "Статус",
     "language": "Язык",
+    "localeNameRu": "Русский",
+    "localeNameEn": "Английский",
     "switchToDark": "Переключить на тёмную тему",
     "switchToLight": "Переключить на светлую тему",
     "noData": "Данных пока нет",

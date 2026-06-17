@@ -1,5 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   color-scheme: light;
+  --background: 210 43% 98%;
+  --foreground: 221 45% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 221 45% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 221 45% 14%;
+  --primary: 177 82% 31%;
+  --primary-foreground: 180 100% 98%;
+  --secondary: 210 38% 96%;
+  --secondary-foreground: 221 45% 14%;
+  --muted: 212 31% 92%;
+  --muted-foreground: 218 19% 46%;
+  --accent: 177 82% 31%;
+  --accent-foreground: 180 100% 98%;
+  --destructive: 5 45% 49%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 26% 83%;
+  --input: 214 26% 83%;
+  --ring: 177 82% 31%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 221 45% 14%;
+  --sidebar-primary: 177 82% 31%;
+  --sidebar-primary-foreground: 180 100% 98%;
+  --sidebar-accent: 210 38% 96%;
+  --sidebar-accent-foreground: 221 45% 14%;
+  --sidebar-border: 214 26% 83%;
+  --sidebar-ring: 177 82% 31%;
   --bg: #f4f7fb;
   --bg-soft: #eef3f9;
   --surface: rgba(255, 255, 255, 0.78);
@@ -28,6 +59,33 @@
 
 .dark {
   color-scheme: dark;
+  --background: 217 48% 10%;
+  --foreground: 210 40% 96%;
+  --card: 217 45% 12%;
+  --card-foreground: 210 40% 96%;
+  --popover: 217 45% 12%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 177 67% 45%;
+  --primary-foreground: 221 39% 11%;
+  --secondary: 217 32% 18%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 217 32% 18%;
+  --muted-foreground: 213 22% 71%;
+  --accent: 177 67% 45%;
+  --accent-foreground: 221 39% 11%;
+  --destructive: 6 52% 61%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 217 24% 26%;
+  --input: 217 24% 26%;
+  --ring: 177 67% 45%;
+  --sidebar-background: 217 45% 12%;
+  --sidebar-foreground: 210 40% 96%;
+  --sidebar-primary: 177 67% 45%;
+  --sidebar-primary-foreground: 221 39% 11%;
+  --sidebar-accent: 217 32% 18%;
+  --sidebar-accent-foreground: 210 40% 96%;
+  --sidebar-border: 217 24% 26%;
+  --sidebar-ring: 177 67% 45%;
   --bg: #0b1422;
   --bg-soft: #101b2d;
   --surface: rgba(13, 22, 38, 0.78);
@@ -66,6 +124,7 @@ html {
 
 body {
   min-height: 100vh;
+  background-color: hsl(var(--background));
   color: var(--text);
   font-family: var(--font-sans);
   background: radial-gradient(
@@ -161,6 +220,16 @@ h5,
 h6,
 p {
   margin: 0;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply text-foreground;
+  }
 }
 
 .muted {
@@ -440,14 +509,14 @@ p {
   padding: 0;
 }
 
-.theme-toggle-hero {
+.button-ghost.theme-toggle-hero {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.08);
-  color: #eff9ff;
+  color: #fff;
   backdrop-filter: blur(10px);
 }
 
-.theme-toggle-hero:hover {
+.button-ghost.theme-toggle-hero:hover {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }

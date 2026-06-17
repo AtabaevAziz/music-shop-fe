@@ -4,7 +4,12 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
-import { Badge, Field, PageHeader } from "@/components/ui/primitives";
+import { AppField } from "@/components/shared/form-field";
+import { PageHeader } from "@/components/shared/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
 
@@ -22,7 +27,7 @@ export function MediaModule() {
         subtitle={t("section.mediaSubtitle")}
       >
         <form
-          className="form-grid"
+          className="grid gap-4"
           onSubmit={(event) => {
             event.preventDefault();
             if (!label.trim()) return;
@@ -30,28 +35,30 @@ export function MediaModule() {
             setLabel("");
           }}
         >
-          <Field label={t("labels.product")}>
-            <select
-              value={productId}
-              onChange={(event) => setProductId(event.target.value)}
-            >
+          <AppField label={t("labels.product")}>
+            <Select value={productId} onValueChange={setProductId}>
+              <SelectTrigger>
+                <SelectValue placeholder={t("labels.product")} />
+              </SelectTrigger>
+              <SelectContent>
               {db.products.map((item) => (
-                <option key={item.id} value={item.id}>
+                <SelectItem key={item.id} value={item.id}>
                   {item.name}
-                </option>
+                </SelectItem>
               ))}
-            </select>
-          </Field>
-          <Field label={t("labels.imagePath")}>
-            <input
+              </SelectContent>
+            </Select>
+          </AppField>
+          <AppField label={t("labels.imagePath")}>
+            <Input
               value={label}
               onChange={(event) => setLabel(event.target.value)}
             />
-          </Field>
-          <div className="stack-row form-actions">
-            <button className="button" type="submit">
+          </AppField>
+          <div className="flex gap-2">
+            <Button type="submit">
               {t("common.save")}
-            </button>
+            </Button>
           </div>
         </form>
       </ModuleSection>
@@ -78,17 +85,17 @@ export function MediaModule() {
                 <div className="stack-row spread">
                   <span>{image.split("/").pop()}</span>
                   {product.primaryImage === image ? (
-                    <Badge tone="success">{t("labels.primary")}</Badge>
+                    <Badge variant="success">{t("labels.primary")}</Badge>
                   ) : null}
                 </div>
                 {product.primaryImage !== image ? (
-                  <button
-                    className="button-ghost"
+                  <Button
+                    variant="outline"
                     type="button"
                     onClick={() => void setPrimaryImage(product.id, image)}
                   >
                     {t("labels.setPrimary")}
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             ))}

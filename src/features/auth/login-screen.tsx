@@ -6,7 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Locale } from "@/i18n";
+import { Button } from "@/components/ui/button";
+import { getNextLocale, localeLabelKeyMap, Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
@@ -26,7 +27,8 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const { login } = useMusicStore();
   const [isPending, startTransition] = useTransition();
   const next = searchParams.get("next");
-  const targetLocale = locale === "ru" ? "en" : "ru";
+  const targetLocale = getNextLocale(locale);
+  const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const roleBlurbs: Record<Role, string> = {
     admin: t("auth.adminBlurb"),
     store_manager: t("auth.storeManagerBlurb"),
@@ -41,8 +43,9 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           <div className="hero-panel-top">
             <div className="hero-eyebrow">{t("common.brand")}</div>
             <div className="hero-panel-controls">
-              <button
+              <Button
                 className="hero-panel-locale"
+                variant="secondary"
                 type="button"
                 onClick={() =>
                   router.push(
@@ -51,11 +54,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                     }`,
                   )
                 }
-                aria-label={`${t("common.language")}: ${targetLocale.toUpperCase()}`}
+                aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
               >
                 <Languages size={16} />
-                <span>{targetLocale.toUpperCase()}</span>
-              </button>
+                <span>{currentLocaleLabel}</span>
+              </Button>
               <ThemeToggle variant="hero" />
             </div>
           </div>
@@ -76,9 +79,10 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           <h2>{t("auth.enterAs")}</h2>
           <div className="login-role-grid">
             {roles.map((role) => (
-              <button
+              <Button
                 key={role}
-                className="login-role"
+                className="login-role h-auto justify-start whitespace-normal p-5 text-left"
+                variant="outline"
                 disabled={isPending}
                 onClick={() => {
                   startTransition(() => {
@@ -92,7 +96,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   {dynamicLabel(t, role)}
                 </strong>
                 <p className="muted">{roleBlurbs[role]}</p>
-              </button>
+              </Button>
             ))}
           </div>
         </section>

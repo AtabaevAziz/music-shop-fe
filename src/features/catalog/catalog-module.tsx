@@ -5,10 +5,41 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-import { Badge, Field, Modal, Money } from "@/components/ui/primitives";
+import { AppField } from "@/components/shared/form-field";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
-import { parseList } from "@/lib/utils";
+import { formatMoney, parseList } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
 const productSchema = z.object({
@@ -95,15 +126,14 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     <>
       <section className="table-card">
         <div className="toolbar page-actions">
-          <div className="stack-row">
-            <input
-              className="toolbar-search"
+          <div className="flex flex-wrap gap-2">
+            <Input
+              className="w-full min-w-[220px] md:w-72"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t("common.search")}
             />
-            <button
-              className="button"
+            <Button
               type="button"
               onClick={() => {
                 setFormError("");
@@ -112,30 +142,30 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               }}
             >
               {t("common.addNew")}
-            </button>
+            </Button>
           </div>
         </div>
         <div className="responsive-table">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("labels.preview")}</th>
-                <th>{t("labels.product")}</th>
-                <th>{t("labels.category")}</th>
-                <th>{t("labels.brand")}</th>
-                <th>{t("labels.price")}</th>
-                <th>{t("labels.stock")}</th>
-                <th>{t("common.status")}</th>
-                <th>{t("common.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("labels.preview")}</TableHead>
+                <TableHead>{t("labels.product")}</TableHead>
+                <TableHead>{t("labels.category")}</TableHead>
+                <TableHead>{t("labels.brand")}</TableHead>
+                <TableHead>{t("labels.price")}</TableHead>
+                <TableHead>{t("labels.stock")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead>{t("common.actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filtered.map((product) => {
                 const previewImage = product.primaryImage ?? product.images[0];
 
                 return (
-                  <tr key={product.id}>
-                    <td>
+                  <TableRow key={product.id}>
+                    <TableCell>
                       {previewImage ? (
                         <Image
                           src={previewImage}
@@ -145,51 +175,48 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                           className="product-thumb"
                         />
                       ) : null}
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <div className="product-cell">
                         <strong>{product.name}</strong>
                         <div className="muted">{product.shortDescription}</div>
                       </div>
                       <div className="muted">{product.sku}</div>
-                    </td>
-                    <td>{categoryMap[product.categoryId]}</td>
-                    <td>{brandMap[product.brandId]}</td>
-                    <td>
-                      <Money
-                        value={product.price}
-                        currency={db.settings.currency}
-                        locale={locale}
-                      />
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{categoryMap[product.categoryId]}</TableCell>
+                    <TableCell>{brandMap[product.brandId]}</TableCell>
+                    <TableCell>
+                      {formatMoney(product.price, db.settings.currency, locale)}
+                    </TableCell>
+                    <TableCell>
                       <Badge
-                        tone={
+                        variant={
                           product.stockQty <= db.settings.lowStockThreshold
-                            ? "warn"
+                            ? "warning"
                             : "success"
                         }
                       >
                         {product.stockQty}
                       </Badge>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <Badge
-                        tone={
+                        variant={
                           product.status === "active"
                             ? "success"
                             : product.status === "archived"
-                              ? "danger"
-                              : "neutral"
+                              ? "destructive"
+                              : "secondary"
                         }
                       >
                         {dynamicLabel(t, product.status)}
                       </Badge>
-                    </td>
-                    <td>
-                      <div className="stack-row">
-                        <button
-                          className="button-ghost"
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
                           type="button"
                           onClick={() => {
                             setFormError("");
@@ -216,45 +243,54 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                           }}
                         >
                           {t("common.edit")}
-                        </button>
-                        <button
-                          className="button-danger"
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
                           type="button"
                           onClick={() => setDeleteTargetId(product.id)}
                         >
                           {t("common.delete")}
-                        </button>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
 
-      {isEditorOpen ? (
-        <Modal
-          title={draft.id ? t("common.edit") : t("common.addNew")}
-          subtitle={t("labels.productRecordSubtitle")}
-          closeLabel={t("common.close")}
-          onClose={() => {
+      <Dialog
+        open={isEditorOpen}
+        onOpenChange={(open) => {
+          if (!open) {
             setFormError("");
             resetDraft();
             setIsEditorOpen(false);
-          }}
-        >
+          }
+        }}
+      >
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              {draft.id ? t("common.edit") : t("common.addNew")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("labels.productRecordSubtitle")}
+            </DialogDescription>
+          </DialogHeader>
           {formError ? <div className="error">{formError}</div> : null}
           <form
             onSubmit={(event) => {
               event.preventDefault();
               void submit();
             }}
-            className="form-grid"
+            className="grid gap-4 md:grid-cols-2"
           >
-            <Field label={t("labels.name")}>
-              <input
+            <AppField label={t("labels.name")}>
+              <Input
                 value={draft.name ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -263,9 +299,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.sku")}>
-              <input
+            </AppField>
+            <AppField label={t("labels.sku")}>
+              <Input
                 value={draft.sku ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -274,9 +310,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.barcode")}>
-              <input
+            </AppField>
+            <AppField label={t("labels.barcode")}>
+              <Input
                 value={draft.barcode ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -285,60 +321,75 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.category")}>
-              <select
+            </AppField>
+            <AppField label={t("labels.category")}>
+              <Select
                 value={draft.categoryId ?? ""}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
-                    categoryId: event.target.value,
+                    categoryId: value,
                   }))
                 }
               >
-                <option value="">{t("common.select")}</option>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.select")} />
+                </SelectTrigger>
+                <SelectContent>
                 {db.categories.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <SelectItem key={item.id} value={item.id}>
                     {item.name}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </Field>
-            <Field label={t("labels.brand")}>
-              <select
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField label={t("labels.brand")}>
+              <Select
                 value={draft.brandId ?? ""}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
-                    brandId: event.target.value,
+                    brandId: value,
                   }))
                 }
               >
-                <option value="">{t("common.select")}</option>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.select")} />
+                </SelectTrigger>
+                <SelectContent>
                 {db.brands.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <SelectItem key={item.id} value={item.id}>
                     {item.name}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </Field>
-            <Field label={t("labels.condition")}>
-              <select
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField label={t("labels.condition")}>
+              <Select
                 value={draft.condition ?? "new"}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
-                    condition: event.target.value,
+                    condition: value,
                   }))
                 }
               >
-                <option value="new">{dynamicLabel(t, "new")}</option>
-                <option value="used">{dynamicLabel(t, "used")}</option>
-                <option value="showroom">{dynamicLabel(t, "showroom")}</option>
-              </select>
-            </Field>
-            <Field label={t("labels.price")}>
-              <input
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">{dynamicLabel(t, "new")}</SelectItem>
+                  <SelectItem value="used">{dynamicLabel(t, "used")}</SelectItem>
+                  <SelectItem value="showroom">
+                    {dynamicLabel(t, "showroom")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField label={t("labels.price")}>
+              <Input
                 type="number"
                 value={draft.price ?? ""}
                 onChange={(event) =>
@@ -348,9 +399,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.costPrice")}>
-              <input
+            </AppField>
+            <AppField label={t("labels.costPrice")}>
+              <Input
                 type="number"
                 value={draft.costPrice ?? ""}
                 onChange={(event) =>
@@ -360,9 +411,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.stockQty")}>
-              <input
+            </AppField>
+            <AppField label={t("labels.stockQty")}>
+              <Input
                 type="number"
                 value={draft.stockQty ?? ""}
                 onChange={(event) =>
@@ -372,24 +423,36 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("common.status")}>
-              <select
+            </AppField>
+            <AppField label={t("common.status")}>
+              <Select
                 value={draft.status ?? db.settings.defaultProductStatus}
-                onChange={(event) =>
+                onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
-                    status: event.target.value,
+                    status: value,
                   }))
                 }
               >
-                <option value="draft">{dynamicLabel(t, "draft")}</option>
-                <option value="active">{dynamicLabel(t, "active")}</option>
-                <option value="archived">{dynamicLabel(t, "archived")}</option>
-              </select>
-            </Field>
-            <Field label={t("labels.shortDescription")}>
-              <textarea
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">{dynamicLabel(t, "draft")}</SelectItem>
+                  <SelectItem value="active">
+                    {dynamicLabel(t, "active")}
+                  </SelectItem>
+                  <SelectItem value="archived">
+                    {dynamicLabel(t, "archived")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField
+              label={t("labels.shortDescription")}
+              className="md:col-span-2"
+            >
+              <Textarea
                 value={draft.shortDescription ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -398,9 +461,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.fullDescription")}>
-              <textarea
+            </AppField>
+            <AppField label={t("labels.fullDescription")} className="md:col-span-2">
+              <Textarea
                 value={draft.description ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -409,9 +472,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.imagesPerLine")}>
-              <textarea
+            </AppField>
+            <AppField label={t("labels.imagesPerLine")} className="md:col-span-2">
+              <Textarea
                 value={draft.images ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -420,9 +483,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <Field label={t("labels.specsKeyValue")}>
-              <textarea
+            </AppField>
+            <AppField label={t("labels.specsKeyValue")} className="md:col-span-2">
+              <Textarea
                 value={draft.specs ?? ""}
                 onChange={(event) =>
                   setDraft((current) => ({
@@ -431,13 +494,13 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   }))
                 }
               />
-            </Field>
-            <div className="stack-row form-actions">
-              <button className="button" type="submit">
+            </AppField>
+            <DialogFooter className="md:col-span-2">
+              <Button type="submit">
                 {t("common.save")}
-              </button>
-              <button
-                className="button-ghost"
+              </Button>
+              <Button
+                variant="outline"
                 type="button"
                 onClick={() => {
                   setFormError("");
@@ -446,41 +509,43 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }}
               >
                 {t("common.cancel")}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           </form>
-        </Modal>
-      ) : null}
+        </DialogContent>
+      </Dialog>
 
-      {deleteTargetId ? (
-        <Modal
-          title={t("common.confirmDelete")}
-          subtitle={t("common.deletePrompt")}
-          closeLabel={t("common.close")}
-          onClose={() => setDeleteTargetId(null)}
-        >
-          <div className="modal-actions">
-            <button
-              className="button-danger"
-              type="button"
+      <AlertDialog
+        open={Boolean(deleteTargetId)}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("common.deletePrompt")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
               onClick={() => {
+                if (!deleteTargetId) {
+                  return;
+                }
+
                 void deleteEntity("products", deleteTargetId).then(() =>
                   setDeleteTargetId(null),
                 );
               }}
             >
               {t("common.delete")}
-            </button>
-            <button
-              className="button-ghost"
-              type="button"
-              onClick={() => setDeleteTargetId(null)}
-            >
+            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => setDeleteTargetId(null)}>
               {t("common.cancel")}
-            </button>
-          </div>
-        </Modal>
-      ) : null}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

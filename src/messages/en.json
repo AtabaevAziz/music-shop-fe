@@ -15,6 +15,8 @@
     "actions": "Actions",
     "status": "Status",
     "language": "Language",
+    "localeNameRu": "Russian",
+    "localeNameEn": "English",
     "switchToDark": "Switch to dark theme",
     "switchToLight": "Switch to light theme",
     "noData": "No data yet",

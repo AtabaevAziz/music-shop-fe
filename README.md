@@ -11,6 +11,8 @@ Music Shop Online is a Next.js frontend demo of an online musical instrument sto
 - Zod for form validation
 - `next/font` for app typography
 - `next-themes` for light/dark theme switching
+- Radix UI primitives through `shadcn/ui` components
+- `sonner` for toast notifications
 - Shared visual system in `src/app/globals.css`
 - `shadcn/ui` integration via `components.json` and `src/components/ui`
 
@@ -60,8 +62,9 @@ music-shop-fe/
 │   │   └── ru.json              # Russian UI messages
 │   ├── components/
 │   │   ├── layout/              # App shell and auth guard
+│   │   ├── shared/              # App-specific shared UI wrappers and helpers
 │   │   ├── theme/               # Theme provider and navbar toggle
-│   │   └── ui/                  # Shared primitives and shadcn-derived UI components
+│   │   └── ui/                  # shadcn-derived UI building blocks
 │   ├── features/
 │   │   ├── auth/                # Login experience
 │   │   ├── dashboard/           # Operational dashboard
@@ -114,8 +117,11 @@ music-shop-fe/
 
 - The app uses a custom backoffice visual system driven from `src/app/globals.css`
 - Light and dark themes are switched from the navbar and provided through `next-themes`
-- Shared surfaces, tables, forms, buttons, and modal styling are centralized so feature screens inherit the same design language
-- `src/components/ui/primitives.tsx` remains the lightweight shared UI layer, while `src/components/ui/` also contains shadcn-generated building blocks
+- Most shared controls now come from `shadcn/ui`-style components in `src/components/ui/`
+- App-specific wrappers such as shared page headers, form field composition, and flash-to-toast bridging live in `src/components/shared/`
+- Dialogs, sheets, dropdowns, tables, selects, and form controls follow Radix-based `shadcn/ui` patterns
+- User feedback is shown through toast notifications powered by `sonner`
+- `src/components/ui/primitives.tsx` is now limited to small domain-specific helpers instead of being the main UI layer
 
 ## Demo Assets
 

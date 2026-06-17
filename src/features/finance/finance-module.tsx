@@ -2,9 +2,19 @@
 
 import { useTranslations } from "next-intl";
 
-import { Badge, Money } from "@/components/ui/primitives";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
+import { formatMoney } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 
 export function FinanceModule({ locale }: { locale: Locale }) {
@@ -35,27 +45,24 @@ export function FinanceModule({ locale }: { locale: Locale }) {
     <div className="finance-shell">
       <section className="table-card finance-section">
         <div className="stats-grid">
-          <div className="card">
+          <Card>
+            <CardContent className="p-6">
             <div className="muted">{t("labels.revenue")}</div>
             <div className="kpi-value">
-              <Money
-                value={totalRevenue}
-                currency={db.settings.currency}
-                locale={locale}
-              />
+              {formatMoney(totalRevenue, db.settings.currency, locale)}
             </div>
-          </div>
-          <div className="card">
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
             <div className="muted">{t("labels.grossMargin")}</div>
             <div className="kpi-value">
-              <Money
-                value={totalMargin}
-                currency={db.settings.currency}
-                locale={locale}
-              />
+              {formatMoney(totalMargin, db.settings.currency, locale)}
             </div>
-          </div>
-          <div className="card">
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
             <div className="muted">{t("labels.paidOrders")}</div>
             <div className="kpi-value">
               {
@@ -63,49 +70,44 @@ export function FinanceModule({ locale }: { locale: Locale }) {
                   .length
               }
             </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
       <section className="table-card finance-section">
         <div className="finance-table-scroll responsive-table">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("labels.order")}</th>
-                <th>{t("labels.total")}</th>
-                <th>{t("labels.margin")}</th>
-                <th>{t("labels.paymentState")}</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("labels.order")}</TableHead>
+                <TableHead>{t("labels.total")}</TableHead>
+                <TableHead>{t("labels.margin")}</TableHead>
+                <TableHead>{t("labels.paymentState")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {tableRows.map(({ order, total, margin, rowKey }) => (
-                <tr key={rowKey}>
-                  <td>{order.id}</td>
-                  <td>
-                    <Money
-                      value={total}
-                      currency={db.settings.currency}
-                      locale={locale}
-                    />
-                  </td>
-                  <td>
-                    <Money
-                      value={margin}
-                      currency={db.settings.currency}
-                      locale={locale}
-                    />
-                  </td>
-                  <td>
+                <TableRow key={rowKey}>
+                  <TableCell>{order.id}</TableCell>
+                  <TableCell>
+                    {formatMoney(total, db.settings.currency, locale)}
+                  </TableCell>
+                  <TableCell>
+                    {formatMoney(margin, db.settings.currency, locale)}
+                  </TableCell>
+                  <TableCell>
                     <Badge
-                      tone={order.paymentStatus === "paid" ? "success" : "warn"}
+                      variant={
+                        order.paymentStatus === "paid" ? "success" : "warning"
+                      }
                     >
                       {dynamicLabel(t, order.paymentStatus)}
                     </Badge>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </section>
     </div>

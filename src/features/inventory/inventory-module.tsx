@@ -3,7 +3,22 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { Badge, Field, PageHeader } from "@/components/ui/primitives";
+import { AppField } from "@/components/shared/form-field";
+import { PageHeader } from "@/components/shared/page-header";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";
@@ -41,22 +56,30 @@ export function InventoryModule({ locale }: { locale: Locale }) {
     <div className="inventory-shell">
       <section className="table-card">
         <div className="inventory-overview">
-          <div className="card metric-card">
+          <Card className="metric-card">
+            <CardContent className="p-6">
             <div className="muted">{t("labels.stockOnHand")}</div>
             <div className="kpi-value">{totalUnits}</div>
-          </div>
-          <div className="card metric-card">
+            </CardContent>
+          </Card>
+          <Card className="metric-card">
+            <CardContent className="p-6">
             <div className="muted">{t("labels.replenishmentRisk")}</div>
             <div className="kpi-value">{lowStockProducts.length}</div>
-          </div>
-          <div className="card metric-card">
+            </CardContent>
+          </Card>
+          <Card className="metric-card">
+            <CardContent className="p-6">
             <div className="muted">{t("labels.showroomUnits")}</div>
             <div className="kpi-value">{showroomUnits}</div>
-          </div>
-          <div className="card metric-card">
+            </CardContent>
+          </Card>
+          <Card className="metric-card">
+            <CardContent className="p-6">
             <div className="muted">{t("labels.movementCount")}</div>
             <div className="kpi-value">{recentMovementCount}</div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -67,44 +90,44 @@ export function InventoryModule({ locale }: { locale: Locale }) {
             subtitle={t("labels.stockHealth")}
           />
           <div className="responsive-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>{t("labels.product")}</th>
-                  <th>{t("labels.sku")}</th>
-                  <th>{t("labels.available")}</th>
-                  <th>{t("labels.condition")}</th>
-                  <th>{t("labels.replenishmentRisk")}</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("labels.product")}</TableHead>
+                  <TableHead>{t("labels.sku")}</TableHead>
+                  <TableHead>{t("labels.available")}</TableHead>
+                  <TableHead>{t("labels.condition")}</TableHead>
+                  <TableHead>{t("labels.replenishmentRisk")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {db.products.map((product) => {
                   const isLow =
                     product.stockQty <= db.settings.lowStockThreshold;
                   return (
-                    <tr key={product.id}>
-                      <td>
+                    <TableRow key={product.id}>
+                      <TableCell>
                         <strong>{product.name}</strong>
-                      </td>
-                      <td>{product.sku}</td>
-                      <td>
-                        <Badge tone={isLow ? "warn" : "success"}>
+                      </TableCell>
+                      <TableCell>{product.sku}</TableCell>
+                      <TableCell>
+                        <Badge variant={isLow ? "warning" : "success"}>
                           {product.stockQty}
                         </Badge>
-                      </td>
-                      <td>{dynamicLabel(t, product.condition)}</td>
-                      <td>
-                        <Badge tone={isLow ? "warn" : "neutral"}>
+                      </TableCell>
+                      <TableCell>{dynamicLabel(t, product.condition)}</TableCell>
+                      <TableCell>
+                        <Badge variant={isLow ? "warning" : "secondary"}>
                           {isLow
                             ? `${t("labels.threshold")}: ${db.settings.lowStockThreshold}`
                             : t("labels.stockHealthy")}
                         </Badge>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </section>
 
@@ -116,63 +139,67 @@ export function InventoryModule({ locale }: { locale: Locale }) {
             />
             {selectedProduct ? (
               <div className="inventory-selected-summary">
-                <div className="card">
+                <Card>
+                  <CardContent className="space-y-2 p-6">
                   <strong>{selectedProduct.name}</strong>
                   <div className="muted">{selectedProduct.sku}</div>
-                  <div className="stack-row" style={{ marginTop: 10 }}>
+                  <div className="flex flex-wrap gap-2 pt-2">
                     <Badge
-                      tone={
+                      variant={
                         selectedProduct.stockQty <=
                         db.settings.lowStockThreshold
-                          ? "warn"
+                          ? "warning"
                           : "success"
                       }
                     >
                       {t("labels.currentStock")}: {selectedProduct.stockQty}
                     </Badge>
-                    <Badge tone="neutral">
+                    <Badge variant="secondary">
                       {dynamicLabel(t, selectedProduct.condition)}
                     </Badge>
                   </div>
-                </div>
+                  </CardContent>
+                </Card>
               </div>
             ) : null}
             <form
-              className="inventory-form"
+              className="inventory-form grid gap-4"
               onSubmit={(event) => {
                 event.preventDefault();
                 void adjustStock(productId, Number(delta), reason);
               }}
             >
-              <Field label={t("labels.product")}>
-                <select
-                  value={productId}
-                  onChange={(event) => setProductId(event.target.value)}
-                >
+              <AppField label={t("labels.product")}>
+                <Select value={productId} onValueChange={setProductId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("labels.product")} />
+                  </SelectTrigger>
+                  <SelectContent>
                   {db.products.map((product) => (
-                    <option key={product.id} value={product.id}>
+                    <SelectItem key={product.id} value={product.id}>
                       {product.name}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-              </Field>
-              <Field label={t("labels.delta")}>
-                <input
+                  </SelectContent>
+                </Select>
+              </AppField>
+              <AppField label={t("labels.delta")}>
+                <Input
                   type="number"
                   value={delta}
                   onChange={(event) => setDelta(event.target.value)}
                 />
-              </Field>
-              <Field label={t("labels.reason")}>
-                <textarea
+              </AppField>
+              <AppField label={t("labels.reason")}>
+                <Textarea
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
                 />
-              </Field>
-              <div className="stack-row">
-                <button className="button" type="submit">
+              </AppField>
+              <div className="flex gap-2">
+                <Button type="submit">
                   {t("common.save")}
-                </button>
+                </Button>
               </div>
             </form>
           </section>
@@ -188,10 +215,11 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                   (item) => item.id === movement.productId,
                 );
                 return (
-                  <li key={movement.id} className="card">
-                    <div className="stack-row spread">
+                  <Card key={movement.id}>
+                    <CardContent className="space-y-2 p-5">
+                    <div className="flex items-start justify-between gap-3">
                       <strong>{product?.name ?? movement.productId}</strong>
-                      <Badge tone={movement.delta > 0 ? "success" : "warn"}>
+                      <Badge variant={movement.delta > 0 ? "success" : "warning"}>
                         {movement.delta > 0 ? "+" : ""}
                         {movement.delta}
                       </Badge>
@@ -203,7 +231,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                         getIntlLocale(locale),
                       )}
                     </div>
-                  </li>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </ul>

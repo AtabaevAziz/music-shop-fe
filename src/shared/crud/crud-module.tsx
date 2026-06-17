@@ -3,7 +3,37 @@
 import { useTranslations } from "next-intl";
 import { ReactNode, useMemo, useState } from "react";
 
-import { Field, Modal } from "@/components/ui/primitives";
+import { AppField } from "@/components/shared/form-field";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ModuleEmptyState,
   ModuleSection,
@@ -155,15 +185,14 @@ export function CrudModule<
         title={title}
         subtitle={subtitle}
         actions={
-          <div className="stack-row module-toolbar-actions">
-            <input
-              className="toolbar-search"
+          <div className="flex flex-wrap gap-2">
+            <Input
+              className="w-full min-w-[220px] md:w-72"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t("common.search")}
             />
-            <button
-              className="button"
+            <Button
               type="button"
               onClick={() => {
                 resetDraft();
@@ -171,33 +200,34 @@ export function CrudModule<
               }}
             >
               {t("common.addNew")}
-            </button>
+            </Button>
           </div>
         }
       >
         {filteredItems.length ? (
           <div className="responsive-table">
-            <table>
-              <thead>
-                <tr>
+            <Table>
+              <TableHeader>
+                <TableRow>
                   {tableFields.map((field) => (
-                    <th key={field.name}>{field.label}</th>
+                    <TableHead key={field.name}>{field.label}</TableHead>
                   ))}
-                  <th>{t("common.actions")}</th>
-                </tr>
-              </thead>
-              <tbody>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredItems.map((item) => (
-                  <tr key={item.id}>
+                  <TableRow key={item.id}>
                     {tableFields.map((field) => (
-                      <td key={field.name}>
+                      <TableCell key={field.name}>
                         {resolveDisplayValue(field, item)}
-                      </td>
+                      </TableCell>
                     ))}
-                    <td>
-                      <div className="stack-row">
-                        <button
-                          className="button-ghost"
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
                           type="button"
                           onClick={() => {
                             setDraft(toDraft(item));
@@ -205,28 +235,28 @@ export function CrudModule<
                           }}
                         >
                           {t("common.edit")}
-                        </button>
-                        <button
-                          className="button-danger"
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
                           type="button"
                           onClick={() => setDeleteTargetId(item.id)}
                         >
                           {t("common.delete")}
-                        </button>
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <ModuleEmptyState
             title={t("common.noData")}
             description={emptyMessage ?? subtitle}
             action={
-              <button
-                className="button"
+              <Button
                 type="button"
                 onClick={() => {
                   resetDraft();
@@ -234,19 +264,20 @@ export function CrudModule<
                 }}
               >
                 {t("common.addNew")}
-              </button>
+              </Button>
             }
           />
         )}
       </ModuleSection>
 
-      {isEditorOpen ? (
-        <Modal
-          title={draft.id ? t("common.edit") : t("common.addNew")}
-          subtitle={title}
-          closeLabel={t("common.close")}
-          onClose={closeEditor}
-        >
+      <Dialog open={isEditorOpen} onOpenChange={(open) => !open && closeEditor()}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {draft.id ? t("common.edit") : t("common.addNew")}
+            </DialogTitle>
+            <DialogDescription>{title}</DialogDescription>
+          </DialogHeader>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -254,12 +285,16 @@ export function CrudModule<
                 closeEditor();
               });
             }}
-            className="form-grid"
+            className="grid gap-4 md:grid-cols-2"
           >
             {formFields.map((field) => (
-              <Field key={field.name} label={field.label}>
+              <AppField
+                key={field.name}
+                label={field.label}
+                className={field.type === "textarea" ? "md:col-span-2" : undefined}
+              >
                 {field.type === "textarea" ? (
-                  <textarea
+                  <Textarea
                     value={draft[field.name] ?? ""}
                     placeholder={field.placeholder}
                     onChange={(event) =>
@@ -267,21 +302,28 @@ export function CrudModule<
                     }
                   />
                 ) : field.type === "select" ? (
-                  <select
+                  <Select
                     value={draft[field.name] ?? ""}
-                    onChange={(event) =>
-                      updateDraftValue(field.name, event.target.value)
-                    }
+                    onValueChange={(value) => updateDraftValue(field.name, value)}
                   >
-                    <option value="">{field.placeholder ?? field.label}</option>
+                    <SelectTrigger>
+                      <SelectValue placeholder={field.placeholder ?? field.label} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.placeholder ? (
+                        <SelectItem value="__empty__" disabled>
+                          {field.placeholder}
+                        </SelectItem>
+                      ) : null}
                     {field.options?.map((option) => (
-                      <option key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
+                    </SelectContent>
+                  </Select>
                 ) : (
-                  <input
+                  <Input
                     type={field.type ?? "text"}
                     value={draft[field.name] ?? ""}
                     placeholder={field.placeholder}
@@ -290,53 +332,49 @@ export function CrudModule<
                     }
                   />
                 )}
-              </Field>
+              </AppField>
             ))}
-            <div className="stack-row form-actions">
-              <button className="button" type="submit">
+            <DialogFooter className="md:col-span-2">
+              <Button type="submit">
                 {t("common.save")}
-              </button>
-              <button
-                className="button-ghost"
-                type="button"
-                onClick={closeEditor}
-              >
+              </Button>
+              <Button variant="outline" type="button" onClick={closeEditor}>
                 {t("common.cancel")}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           </form>
-        </Modal>
-      ) : null}
+        </DialogContent>
+      </Dialog>
 
-      {deleteTargetId ? (
-        <Modal
-          title={t("common.confirmDelete")}
-          subtitle={t("common.deletePrompt")}
-          closeLabel={t("common.close")}
-          onClose={() => setDeleteTargetId(null)}
-        >
-          <div className="modal-actions">
-            <button
-              className="button-danger"
-              type="button"
+      <AlertDialog
+        open={Boolean(deleteTargetId)}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("common.deletePrompt")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
               onClick={() => {
-                void onDelete(deleteTargetId).then(() =>
-                  setDeleteTargetId(null),
-                );
+                if (!deleteTargetId) {
+                  return;
+                }
+
+                void onDelete(deleteTargetId).then(() => setDeleteTargetId(null));
               }}
             >
               {t("common.delete")}
-            </button>
-            <button
-              className="button-ghost"
-              type="button"
-              onClick={() => setDeleteTargetId(null)}
-            >
+            </AlertDialogAction>
+            <AlertDialogCancel onClick={() => setDeleteTargetId(null)}>
               {t("common.cancel")}
-            </button>
-          </div>
-        </Modal>
-      ) : null}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

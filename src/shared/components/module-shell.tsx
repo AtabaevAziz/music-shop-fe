@@ -2,7 +2,14 @@
 
 import { ReactNode } from "react";
 
-import { PageHeader } from "@/components/ui/primitives";
+import { PageHeader } from "@/components/shared/page-header";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type ModuleSectionProps = {
@@ -28,16 +35,20 @@ export function ModuleSection({
   className,
 }: ModuleSectionProps) {
   return (
-    <section className={cn("table-card", className)}>
+    <Card className={cn("table-card border-border/60 bg-card/90", className)}>
       {title || subtitle || actions ? (
-        <PageHeader
-          title={title ?? ""}
-          subtitle={subtitle ?? ""}
-          actions={actions}
-        />
+        <CardHeader className="space-y-0">
+          <PageHeader
+            title={title ?? ""}
+            subtitle={subtitle ?? ""}
+            actions={actions}
+          />
+        </CardHeader>
       ) : null}
-      {children}
-    </section>
+      <CardContent className={cn((title || subtitle || actions) && "pt-0")}>
+        {children}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -48,10 +59,21 @@ export function ModuleEmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn("empty-state empty-state-detailed", className)}>
-      <strong>{title}</strong>
-      {description ? <p>{description}</p> : null}
-      {action ? <div className="stack-row form-actions">{action}</div> : null}
-    </div>
+    <Card
+      className={cn(
+        "empty-state empty-state-detailed border-dashed bg-background/70 shadow-none",
+        className,
+      )}
+    >
+      <CardHeader className="items-center text-center">
+        <CardTitle>{title}</CardTitle>
+        {description ? <CardDescription>{description}</CardDescription> : null}
+      </CardHeader>
+      {action ? (
+        <CardContent className="flex justify-center pt-0">
+          {action}
+        </CardContent>
+      ) : null}
+    </Card>
   );
 }

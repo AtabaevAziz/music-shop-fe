@@ -1,14 +1,27 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { Languages, LogOut, Menu, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Locale } from "@/i18n";
-import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { getNextLocale, localeLabelKeyMap, Locale } from "@/i18n";
+import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useMusicStore } from "@/store/music-store";
 import { Role } from "@/types/music";
@@ -53,9 +66,11 @@ export function AppShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const { db, session, logout, resetDemo, flash } = useMusicStore();
+  const { db, session, logout, resetDemo } = useMusicStore();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sessionRole = session?.role;
+  const currentLocaleLabel = t(localeLabelKeyMap[locale]);
+  const nextLocale = getNextLocale(locale);
 
   const navMap: Record<(typeof navOrder)[number], string> = {
     "": t("nav.dashboard"),
@@ -134,38 +149,6 @@ export function AppShell({
     setIsNavOpen(false);
   }, [pathname]);
 
-  useEffect(() => {
-    if (!isNavOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsNavOpen(false);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isNavOpen]);
-
-  useEffect(() => {
-    function handleResize() {
-      if (window.innerWidth >= 1024) {
-        setIsNavOpen(false);
-      }
-    }
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   if (!session) return null;
 
   const navContent = (
@@ -207,73 +190,67 @@ export function AppShell({
   return (
     <div className="app-shell">
       <aside className="sidebar">{navContent}</aside>
-      <div
-        className={cn("sidebar-overlay", isNavOpen && "open")}
-        onClick={() => setIsNavOpen(false)}
-        role="presentation"
-      />
-      <aside className={cn("sidebar sidebar-mobile", isNavOpen && "open")}>
-        <div className="sidebar-mobile-head">
-          <button
-            className="button-ghost nav-toggle-button"
-            type="button"
-            onClick={() => setIsNavOpen(false)}
-            aria-label={t("common.close")}
-          >
-            <X size={18} />
-          </button>
-        </div>
-        {navContent}
-      </aside>
+      <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
+        <SheetContent side="left" className="sidebar sidebar-mobile p-0">
+          <SheetHeader className="sr-only">
+            <SheetTitle>{t("nav.openMenu")}</SheetTitle>
+          </SheetHeader>
+          <div className="p-6">{navContent}</div>
+        </SheetContent>
+      </Sheet>
       <main className="content-area">
         <div className="topbar">
-          <button
-            className="button-ghost nav-toggle-button"
+          <Button
+            className="nav-toggle-button"
+            variant="ghost"
+            size="icon"
             type="button"
             onClick={() => setIsNavOpen(true)}
             aria-label={t("nav.openMenu")}
           >
             <Menu size={18} />
-          </button>
+          </Button>
           <div className="topbar-copy">
             <strong>{currentPage.title}</strong>
             <div className="muted">{currentPage.subtitle}</div>
           </div>
           <div className="topbar-actions">
             <ThemeToggle />
-            <button
-              className="button-ghost"
-              onClick={() =>
-                router.push(
-                  `/${locale === "ru" ? "en" : "ru"}${pathname.slice(3)}`,
-                )
-              }
-            >
-              {t("common.language")}: {locale.toUpperCase()}
-            </button>
-            <button className="button-ghost" onClick={() => void resetDemo()}>
-              {t("nav.resetDemo")}
-            </button>
-            <button
-              className="button-danger"
-              onClick={() => {
-                logout();
-                router.replace(`/${locale}/login`);
-              }}
-            >
-              {t("nav.logout")}
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Languages size={16} />
+                  {currentLocaleLabel}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(`/${nextLocale}${pathname.slice(3)}`)
+                  }
+                >
+                  <Languages size={16} />
+                  {t("common.language")}: {currentLocaleLabel}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void resetDemo()}>
+                  <RotateCcw size={16} />
+                  {t("nav.resetDemo")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => {
+                    logout();
+                    router.replace(`/${locale}/login`);
+                  }}
+                >
+                  <LogOut size={16} />
+                  {t("nav.logout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="page-scroll">
-          {flash ? (
-            <div className={flash.kind === "error" ? "error" : "flash"}>
-              {flash.message ??
-                (flash.key
-                  ? formatTranslatedMessage(t, flash.key, flash.params)
-                  : "")}
-            </div>
-          ) : null}
           {isAllowed ? (
             children
           ) : (

@@ -3,7 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { Field } from "@/components/ui/primitives";
+import { AppField } from "@/components/shared/form-field";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { dynamicLabel } from "@/lib/translations";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { useMusicStore } from "@/store/music-store";
@@ -32,7 +35,7 @@ export function SettingsModule() {
       subtitle={t("section.settingsSubtitle")}
     >
       <form
-        className="form-grid"
+        className="grid gap-4 md:grid-cols-2"
         onSubmit={(event) => {
           event.preventDefault();
           void saveSettings({
@@ -46,8 +49,8 @@ export function SettingsModule() {
           });
         }}
       >
-        <Field label={t("labels.currency")}>
-          <input
+        <AppField label={t("labels.currency")}>
+          <Input
             value={draft.currency}
             onChange={(event) =>
               setDraft((current) => ({
@@ -56,9 +59,9 @@ export function SettingsModule() {
               }))
             }
           />
-        </Field>
-        <Field label={t("labels.lowStockThreshold")}>
-          <input
+        </AppField>
+        <AppField label={t("labels.lowStockThreshold")}>
+          <Input
             type="number"
             value={draft.lowStockThreshold}
             onChange={(event) =>
@@ -68,24 +71,31 @@ export function SettingsModule() {
               }))
             }
           />
-        </Field>
-        <Field label={t("labels.defaultProductStatus")}>
-          <select
+        </AppField>
+        <AppField label={t("labels.defaultProductStatus")}>
+          <Select
             value={draft.defaultProductStatus}
-            onChange={(event) =>
+            onValueChange={(value) =>
               setDraft((current) => ({
                 ...current,
-                defaultProductStatus: event.target.value as ProductStatus,
+                defaultProductStatus: value as ProductStatus,
               }))
             }
           >
-            <option value="draft">{dynamicLabel(t, "draft")}</option>
-            <option value="active">{dynamicLabel(t, "active")}</option>
-            <option value="archived">{dynamicLabel(t, "archived")}</option>
-          </select>
-        </Field>
-        <Field label={t("labels.defaultMarkup")}>
-          <input
+            <SelectTrigger>
+              <SelectValue placeholder={t("labels.defaultProductStatus")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="draft">{dynamicLabel(t, "draft")}</SelectItem>
+              <SelectItem value="active">{dynamicLabel(t, "active")}</SelectItem>
+              <SelectItem value="archived">
+                {dynamicLabel(t, "archived")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </AppField>
+        <AppField label={t("labels.defaultMarkup")}>
+          <Input
             type="number"
             value={draft.defaultMarkupPercent}
             onChange={(event) =>
@@ -95,11 +105,11 @@ export function SettingsModule() {
               }))
             }
           />
-        </Field>
-        <div className="stack-row form-actions">
-          <button className="button" type="submit">
+        </AppField>
+        <div className="flex gap-2 md:col-span-2">
+          <Button type="submit">
             {t("common.save")}
-          </button>
+          </Button>
         </div>
       </form>
     </ModuleSection>
