@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
-import { useMusicStore } from "@/store/music-store";
+import { useSessionStore } from "@/store/music-store";
 import { Role } from "@/types/music";
 
 const roles: Role[] = [
@@ -24,7 +24,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useMusicStore();
+  const { login } = useSessionStore();
   const [isPending, startTransition] = useTransition();
   const next = searchParams.get("next");
   const targetLocale = getNextLocale(locale);

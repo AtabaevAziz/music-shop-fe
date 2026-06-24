@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ import {
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useOrdersStore } from "@/store/music-store";
 
 const transitions = [
   "new",
@@ -28,9 +29,20 @@ const transitions = [
   "cancelled",
 ] as const;
 
+const nextTransitions = {
+  new: ["confirmed", "cancelled"],
+  confirmed: ["packed", "cancelled"],
+  packed: ["ready_for_pickup", "cancelled"],
+  ready_for_pickup: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+} as const;
+
 export function OrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { db, changeOrderStatus } = useMusicStore();
+  const { orders, customers, settings, changeOrderStatus } = useOrdersStore();
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   return (
     <div className="two-columns">
@@ -47,8 +59,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {db.orders.map((order) => {
-                const customer = db.customers.find(
+              {orders.map((order) => {
+                const customer = customers.find(
                   (item) => item.id === order.customerId,
                 );
                 const total = order.items.reduce(
@@ -60,7 +72,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <TableCell>{order.id}</TableCell>
                     <TableCell>{customer?.name ?? order.customerId}</TableCell>
                     <TableCell>
-                      {formatMoney(total, db.settings.currency, locale)}
+                      {formatMoney(total, settings.currency, locale)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -100,8 +112,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
           title={t("labels.workflowControlsTitle")}
           subtitle={t("labels.workflowControlsSubtitle")}
         />
+        {actionError ? <div className="error">{actionError}</div> : null}
         <ul className="list-clean">
-          {db.orders.map((order) => (
+          {orders.map((order) => (
             <Card key={order.id}>
               <CardContent className="space-y-4 p-5">
                 <div className="flex items-start justify-between gap-3">
@@ -125,7 +138,26 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       key={status}
                       variant="outline"
                       size="sm"
-                      onClick={() => void changeOrderStatus(order.id, status)}
+                      disabled={
+                        pendingOrderId === order.id ||
+                        order.status === status ||
+                        !nextTransitions[order.status].includes(status)
+                      }
+                      onClick={async () => {
+                        setActionError("");
+                        setPendingOrderId(order.id);
+                        try {
+                          await changeOrderStatus(order.id, status);
+                        } catch (error) {
+                          setActionError(
+                            error instanceof Error
+                              ? error.message
+                              : t("common.unexpectedError"),
+                          );
+                        } finally {
+                          setPendingOrderId(null);
+                        }
+                      }}
                     >
                       {dynamicLabel(t, status)}
                     </Button>

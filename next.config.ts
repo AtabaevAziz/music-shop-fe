@@ -6,20 +6,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "@radix-ui/react-icons",
-      "recharts",
-      "date-fns",
-      "@lexical/react",
-    ],
+    optimizePackageImports: ["lucide-react"],
   },
   webpack(config) {
     config.resolve.alias = {

@@ -15,11 +15,11 @@ import {
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useStoreDb } from "@/store/music-store";
 
 export function FinanceModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { db } = useMusicStore();
+  const db = useStoreDb();
   const rows = db.orders.map((order) => {
     const total = order.items.reduce(
       (sum, item) => sum + item.qty * item.unitPrice,

@@ -17,7 +17,7 @@ import {
 import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useSessionStore, useStoreDb } from "@/store/music-store";
 import { Role } from "@/types/music";
 
 type NavItem = { href: string; label: string; roles?: Role[] };
@@ -60,7 +60,8 @@ export function AppShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const { db, session, logout, resetDemo } = useMusicStore();
+  const db = useStoreDb();
+  const { session, logout, resetDemo } = useSessionStore();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sessionRole = session?.role;
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { dynamicLabel } from "@/lib/translations";
 import { ModuleSection } from "@/shared/components/module-shell";
-import { useMusicStore } from "@/store/music-store";
+import { useSettingsStore } from "@/store/music-store";
 import { ProductStatus } from "@/types/music";
 
 type SettingsDraft = {
@@ -27,12 +27,14 @@ type SettingsDraft = {
 
 export function SettingsModule() {
   const t = useTranslations();
-  const { db, saveSettings } = useMusicStore();
+  const { settings, saveSettings } = useSettingsStore();
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [draft, setDraft] = useState<SettingsDraft>({
-    currency: db.settings.currency,
-    lowStockThreshold: String(db.settings.lowStockThreshold),
-    defaultProductStatus: db.settings.defaultProductStatus,
-    defaultMarkupPercent: String(db.settings.defaultMarkupPercent),
+    currency: settings.currency,
+    lowStockThreshold: String(settings.lowStockThreshold),
+    defaultProductStatus: settings.defaultProductStatus,
+    defaultMarkupPercent: String(settings.defaultMarkupPercent),
   });
 
   return (
@@ -40,24 +42,38 @@ export function SettingsModule() {
       title={t("nav.settings")}
       subtitle={t("section.settingsSubtitle")}
     >
+      {formError ? <div className="error">{formError}</div> : null}
       <form
         className="grid gap-4 md:grid-cols-2"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
-          void saveSettings({
-            currency: draft.currency,
-            lowStockThreshold: Number(draft.lowStockThreshold),
-            defaultProductStatus: draft.defaultProductStatus as
-              | "draft"
-              | "active"
-              | "archived",
-            defaultMarkupPercent: Number(draft.defaultMarkupPercent),
-          });
+          setFormError("");
+          setIsSaving(true);
+          try {
+            await saveSettings({
+              currency: draft.currency,
+              lowStockThreshold: Number(draft.lowStockThreshold),
+              defaultProductStatus: draft.defaultProductStatus as
+                | "draft"
+                | "active"
+                | "archived",
+              defaultMarkupPercent: Number(draft.defaultMarkupPercent),
+            });
+          } catch (error) {
+            setFormError(
+              error instanceof Error
+                ? error.message
+                : t("common.unexpectedError"),
+            );
+          } finally {
+            setIsSaving(false);
+          }
         }}
       >
         <AppField label={t("labels.currency")}>
           <Input
             value={draft.currency}
+            disabled={isSaving}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
@@ -70,6 +86,7 @@ export function SettingsModule() {
           <Input
             type="number"
             value={draft.lowStockThreshold}
+            disabled={isSaving}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
@@ -81,6 +98,7 @@ export function SettingsModule() {
         <AppField label={t("labels.defaultProductStatus")}>
           <Select
             value={draft.defaultProductStatus}
+            disabled={isSaving}
             onValueChange={(value) =>
               setDraft((current) => ({
                 ...current,
@@ -106,6 +124,7 @@ export function SettingsModule() {
           <Input
             type="number"
             value={draft.defaultMarkupPercent}
+            disabled={isSaving}
             onChange={(event) =>
               setDraft((current) => ({
                 ...current,
@@ -115,7 +134,9 @@ export function SettingsModule() {
           />
         </AppField>
         <div className="flex gap-2 md:col-span-2">
-          <Button type="submit">{t("common.save")}</Button>
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? t("common.saving") : t("common.save")}
+          </Button>
         </div>
       </form>
     </ModuleSection>

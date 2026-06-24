@@ -53,7 +53,7 @@ import {
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, parseList } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useCatalogStore } from "@/store/music-store";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -73,36 +73,39 @@ type ProductDraft = Record<string, string>;
 
 export function CatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { db, saveProduct, deleteEntity } = useMusicStore();
+  const { products, categories, brands, settings, saveProduct, deleteEntity } =
+    useCatalogStore();
   const [query, setQuery] = useState("");
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [draft, setDraft] = useState<ProductDraft>({
-    status: db.settings.defaultProductStatus,
+    status: settings.defaultProductStatus,
     condition: "new",
   });
 
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase();
-    if (!value) return db.products;
-    return db.products.filter((product) =>
+    if (!value) return products;
+    return products.filter((product) =>
       `${product.name} ${product.sku} ${product.shortDescription}`
         .toLowerCase()
         .includes(value),
     );
-  }, [db.products, query]);
+  }, [products, query]);
 
   const categoryMap = Object.fromEntries(
-    db.categories.map((item) => [item.id, item.name]),
+    categories.map((item) => [item.id, item.name]),
   );
   const brandMap = Object.fromEntries(
-    db.brands.map((item) => [item.id, item.name]),
+    brands.map((item) => [item.id, item.name]),
   );
 
   function resetDraft() {
     setDraft({
-      status: db.settings.defaultProductStatus,
+      status: settings.defaultProductStatus,
       condition: "new",
     });
   }
@@ -113,26 +116,35 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       setFormError(t("labels.validationFailed"));
       return;
     }
+    setIsSaving(true);
     const specs = Object.fromEntries(
       parseList(draft.specs ?? "").map((row) => {
         const [key, ...rest] = row.split(":");
         return [key.trim(), rest.join(":").trim()];
       }),
     );
-    await saveProduct({
-      id: draft.id,
-      ...parsed.data,
-      barcode: draft.barcode,
-      specs,
-      images: parseList(draft.images ?? ""),
-      primaryImage: parseList(draft.images ?? "")[0],
-      price: Number(draft.price),
-      costPrice: Number(draft.costPrice),
-      stockQty: Number(draft.stockQty),
-    });
-    setFormError("");
-    resetDraft();
-    setIsEditorOpen(false);
+    try {
+      await saveProduct({
+        id: draft.id,
+        ...parsed.data,
+        barcode: draft.barcode,
+        specs,
+        images: parseList(draft.images ?? ""),
+        primaryImage: parseList(draft.images ?? "")[0],
+        price: Number(draft.price),
+        costPrice: Number(draft.costPrice),
+        stockQty: Number(draft.stockQty),
+      });
+      setFormError("");
+      resetDraft();
+      setIsEditorOpen(false);
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : t("common.unexpectedError"),
+      );
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -199,12 +211,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                     <TableCell>{categoryMap[product.categoryId]}</TableCell>
                     <TableCell>{brandMap[product.brandId]}</TableCell>
                     <TableCell>
-                      {formatMoney(product.price, db.settings.currency, locale)}
+                      {formatMoney(product.price, settings.currency, locale)}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant={
-                          product.stockQty <= db.settings.lowStockThreshold
+                          product.stockQty <= settings.lowStockThreshold
                             ? "warning"
                             : "success"
                         }
@@ -234,6 +246,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                                 variant="outline"
                                 size="icon"
                                 type="button"
+                                disabled={isSaving || isDeleting}
                                 aria-label={t("common.edit")}
                                 onClick={() => {
                                   setFormError("");
@@ -270,6 +283,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                                 variant="destructive"
                                 size="icon"
                                 type="button"
+                                disabled={isSaving || isDeleting}
                                 aria-label={t("common.delete")}
                                 onClick={() => setDeleteTargetId(product.id)}
                               >
@@ -321,6 +335,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.name")}>
               <Input
                 value={draft.name ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -332,6 +347,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.sku")}>
               <Input
                 value={draft.sku ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -343,6 +359,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.barcode")}>
               <Input
                 value={draft.barcode ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -354,6 +371,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.category")}>
               <Select
                 value={draft.categoryId ?? ""}
+                disabled={isSaving}
                 onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
@@ -365,7 +383,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue placeholder={t("common.select")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {db.categories.map((item) => (
+                  {categories.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.name}
                     </SelectItem>
@@ -376,6 +394,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.brand")}>
               <Select
                 value={draft.brandId ?? ""}
+                disabled={isSaving}
                 onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
@@ -387,7 +406,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue placeholder={t("common.select")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {db.brands.map((item) => (
+                  {brands.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
                       {item.name}
                     </SelectItem>
@@ -398,6 +417,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             <AppField label={t("labels.condition")}>
               <Select
                 value={draft.condition ?? "new"}
+                disabled={isSaving}
                 onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
@@ -423,6 +443,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               <Input
                 type="number"
                 value={draft.price ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -435,6 +456,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               <Input
                 type="number"
                 value={draft.costPrice ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -447,6 +469,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               <Input
                 type="number"
                 value={draft.stockQty ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -457,7 +480,8 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             </AppField>
             <AppField label={t("common.status")}>
               <Select
-                value={draft.status ?? db.settings.defaultProductStatus}
+                value={draft.status ?? settings.defaultProductStatus}
+                disabled={isSaving}
                 onValueChange={(value) =>
                   setDraft((current) => ({
                     ...current,
@@ -487,6 +511,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             >
               <Textarea
                 value={draft.shortDescription ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -501,6 +526,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             >
               <Textarea
                 value={draft.description ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -515,6 +541,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             >
               <Textarea
                 value={draft.images ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -529,6 +556,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             >
               <Textarea
                 value={draft.specs ?? ""}
+                disabled={isSaving}
                 onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
@@ -538,10 +566,13 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               />
             </AppField>
             <DialogFooter className="md:col-span-2">
-              <Button type="submit">{t("common.save")}</Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? t("common.saving") : t("common.save")}
+              </Button>
               <Button
                 variant="outline"
                 type="button"
+                disabled={isSaving}
                 onClick={() => {
                   setFormError("");
                   resetDraft();
@@ -568,19 +599,32 @@ export function CatalogModule({ locale }: { locale: Locale }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 if (!deleteTargetId) {
                   return;
                 }
-
-                void deleteEntity("products", deleteTargetId).then(() =>
-                  setDeleteTargetId(null),
-                );
+                setFormError("");
+                setIsDeleting(true);
+                try {
+                  await deleteEntity("products", deleteTargetId);
+                  setDeleteTargetId(null);
+                } catch (error) {
+                  setFormError(
+                    error instanceof Error
+                      ? error.message
+                      : t("common.unexpectedError"),
+                  );
+                } finally {
+                  setIsDeleting(false);
+                }
               }}
             >
-              {t("common.delete")}
+              {isDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
-            <AlertDialogCancel onClick={() => setDeleteTargetId(null)}>
+            <AlertDialogCancel
+              disabled={isDeleting}
+              onClick={() => setDeleteTargetId(null)}
+            >
               {t("common.cancel")}
             </AlertDialogCancel>
           </AlertDialogFooter>

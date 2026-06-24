@@ -28,27 +28,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useInventoryStore } from "@/store/music-store";
 
 export function InventoryModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { db, adjustStock } = useMusicStore();
-  const [productId, setProductId] = useState(db.products[0]?.id ?? "");
+  const { products, inventoryMovements, settings, adjustStock } =
+    useInventoryStore();
+  const [productId, setProductId] = useState(products[0]?.id ?? "");
   const [delta, setDelta] = useState("1");
   const [reason, setReason] = useState(t("labels.manualCorrection"));
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const selectedProduct =
-    db.products.find((product) => product.id === productId) ?? db.products[0];
-  const lowStockProducts = db.products.filter(
-    (product) => product.stockQty <= db.settings.lowStockThreshold,
+    products.find((product) => product.id === productId) ?? products[0];
+  const lowStockProducts = products.filter(
+    (product) => product.stockQty <= settings.lowStockThreshold,
   );
-  const showroomUnits = db.products.filter(
+  const showroomUnits = products.filter(
     (product) => product.condition === "showroom",
   ).length;
-  const totalUnits = db.products.reduce(
+  const totalUnits = products.reduce(
     (sum, product) => sum + product.stockQty,
     0,
   );
-  const recentMovementCount = db.inventoryMovements.filter((movement) => {
+  const recentMovementCount = inventoryMovements.filter((movement) => {
     const movementDate = new Date(movement.createdAt);
     const now = new Date();
     return (
@@ -107,9 +110,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {db.products.map((product) => {
-                  const isLow =
-                    product.stockQty <= db.settings.lowStockThreshold;
+                  {products.map((product) => {
+                  const isLow = product.stockQty <= settings.lowStockThreshold;
                   return (
                     <TableRow key={product.id}>
                       <TableCell>
@@ -127,7 +129,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                       <TableCell>
                         <Badge variant={isLow ? "warning" : "secondary"}>
                           {isLow
-                            ? `${t("labels.threshold")}: ${db.settings.lowStockThreshold}`
+                            ? `${t("labels.threshold")}: ${settings.lowStockThreshold}`
                             : t("labels.stockHealthy")}
                         </Badge>
                       </TableCell>
@@ -154,8 +156,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <div className="flex flex-wrap gap-2 pt-2">
                       <Badge
                         variant={
-                          selectedProduct.stockQty <=
-                          db.settings.lowStockThreshold
+                          selectedProduct.stockQty <= settings.lowStockThreshold
                             ? "warning"
                             : "success"
                         }
@@ -172,18 +173,35 @@ export function InventoryModule({ locale }: { locale: Locale }) {
             ) : null}
             <form
               className="inventory-form grid gap-4"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                void adjustStock(productId, Number(delta), reason);
+                setFormError("");
+                setIsSaving(true);
+                try {
+                  await adjustStock(productId, Number(delta), reason);
+                } catch (error) {
+                  setFormError(
+                    error instanceof Error
+                      ? error.message
+                      : t("common.unexpectedError"),
+                  );
+                } finally {
+                  setIsSaving(false);
+                }
               }}
             >
+              {formError ? <div className="error">{formError}</div> : null}
               <AppField label={t("labels.product")}>
-                <Select value={productId} onValueChange={setProductId}>
+                <Select
+                  value={productId}
+                  disabled={isSaving}
+                  onValueChange={setProductId}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder={t("labels.product")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {db.products.map((product) => (
+                    {products.map((product) => (
                       <SelectItem key={product.id} value={product.id}>
                         {product.name}
                       </SelectItem>
@@ -195,17 +213,21 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 <Input
                   type="number"
                   value={delta}
+                  disabled={isSaving}
                   onChange={(event) => setDelta(event.target.value)}
                 />
               </AppField>
               <AppField label={t("labels.reason")}>
                 <Textarea
                   value={reason}
+                  disabled={isSaving}
                   onChange={(event) => setReason(event.target.value)}
                 />
               </AppField>
               <div className="flex gap-2">
-                <Button type="submit">{t("common.save")}</Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? t("common.saving") : t("common.save")}
+                </Button>
               </div>
             </form>
           </section>
@@ -216,8 +238,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               subtitle={t("labels.recentMovementsSubtitle")}
             />
             <ul className="list-clean inventory-movement-list">
-              {db.inventoryMovements.slice(0, 8).map((movement) => {
-                const product = db.products.find(
+              {inventoryMovements.slice(0, 8).map((movement) => {
+                const product = products.find(
                   (item) => item.id === movement.productId,
                 );
                 return (

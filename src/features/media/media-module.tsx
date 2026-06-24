@@ -17,14 +17,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ModuleSection } from "@/shared/components/module-shell";
-import { useMusicStore } from "@/store/music-store";
+import { useMediaStore } from "@/store/music-store";
 
 export function MediaModule() {
   const t = useTranslations();
-  const { db, addProductImage, setPrimaryImage } = useMusicStore();
-  const [productId, setProductId] = useState(db.products[0]?.id ?? "");
+  const { products, addProductImage, setPrimaryImage } = useMediaStore();
+  const [productId, setProductId] = useState(products[0]?.id ?? "");
   const [label, setLabel] = useState("");
-  const product = db.products.find((item) => item.id === productId);
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const product = products.find((item) => item.id === productId);
 
   return (
     <div className="two-columns">
@@ -34,20 +37,36 @@ export function MediaModule() {
       >
         <form
           className="grid gap-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
-            if (!label.trim()) return;
-            void addProductImage(productId, label.trim());
-            setLabel("");
+            setFormError("");
+            setIsSaving(true);
+            try {
+              await addProductImage(productId, label.trim());
+              setLabel("");
+            } catch (error) {
+              setFormError(
+                error instanceof Error
+                  ? error.message
+                  : t("common.unexpectedError"),
+              );
+            } finally {
+              setIsSaving(false);
+            }
           }}
         >
+          {formError ? <div className="error">{formError}</div> : null}
           <AppField label={t("labels.product")}>
-            <Select value={productId} onValueChange={setProductId}>
+            <Select
+              value={productId}
+              disabled={isSaving || isPromoting}
+              onValueChange={setProductId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder={t("labels.product")} />
               </SelectTrigger>
               <SelectContent>
-                {db.products.map((item) => (
+                {products.map((item) => (
                   <SelectItem key={item.id} value={item.id}>
                     {item.name}
                   </SelectItem>
@@ -58,11 +77,14 @@ export function MediaModule() {
           <AppField label={t("labels.imagePath")}>
             <Input
               value={label}
+              disabled={isSaving}
               onChange={(event) => setLabel(event.target.value)}
             />
           </AppField>
           <div className="flex gap-2">
-            <Button type="submit">{t("common.save")}</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? t("common.saving") : t("common.save")}
+            </Button>
           </div>
         </form>
       </ModuleSection>
@@ -96,7 +118,22 @@ export function MediaModule() {
                   <Button
                     variant="outline"
                     type="button"
-                    onClick={() => void setPrimaryImage(product.id, image)}
+                    disabled={isPromoting}
+                    onClick={async () => {
+                      setFormError("");
+                      setIsPromoting(true);
+                      try {
+                        await setPrimaryImage(product.id, image);
+                      } catch (error) {
+                        setFormError(
+                          error instanceof Error
+                            ? error.message
+                            : t("common.unexpectedError"),
+                        );
+                      } finally {
+                        setIsPromoting(false);
+                      }
+                    }}
                   >
                     {t("labels.setPrimary")}
                   </Button>

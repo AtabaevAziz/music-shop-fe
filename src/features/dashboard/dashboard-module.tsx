@@ -17,11 +17,11 @@ import {
 import { Locale } from "@/i18n";
 import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
-import { useMusicStore } from "@/store/music-store";
+import { useStoreDb } from "@/store/music-store";
 
 export function DashboardModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { db } = useMusicStore();
+  const db = useStoreDb();
 
   const revenue = db.orders
     .filter((order) => order.paymentStatus !== "refunded")

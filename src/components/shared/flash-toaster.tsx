@@ -5,11 +5,11 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { formatTranslatedMessage } from "@/lib/translations";
-import { useMusicStore } from "@/store/music-store";
+import { useFlashState } from "@/store/music-store";
 
 export function FlashToaster() {
   const t = useTranslations();
-  const { flash } = useMusicStore();
+  const flash = useFlashState();
   const previousKey = useRef<string>("");
 
   useEffect(() => {

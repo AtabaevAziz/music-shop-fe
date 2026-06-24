@@ -95,6 +95,7 @@ type CrudModuleProps<TItem extends { id: string }, TDraft extends CrudDraft> = {
   toDraft: (item: TItem) => TDraft;
   getSearchText?: (item: TItem) => string;
   emptyMessage?: string;
+  validateDraft?: (draft: TDraft) => string | null;
   onSave: (draft: TDraft) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 };
@@ -132,6 +133,7 @@ export function CrudModule<
   toDraft,
   getSearchText,
   emptyMessage,
+  validateDraft,
   onSave,
   onDelete,
 }: CrudModuleProps<TItem, TDraft>) {
@@ -140,6 +142,9 @@ export function CrudModule<
   const [draft, setDraft] = useState<TDraft>(() => createDraft());
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [formError, setFormError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const tableFields = fields.filter((field) => field.inTable !== false);
   const formFields = fields.filter((field) => field.inForm !== false);
@@ -161,6 +166,7 @@ export function CrudModule<
   }
 
   function closeEditor() {
+    setFormError("");
     resetDraft();
     setIsEditorOpen(false);
   }
@@ -176,6 +182,45 @@ export function CrudModule<
           [name]: value,
         }) as TDraft,
     );
+  }
+
+  async function handleSave() {
+    const validationMessage = validateDraft?.(draft) ?? null;
+    if (validationMessage) {
+      setFormError(validationMessage);
+      return;
+    }
+
+    setIsSaving(true);
+    setFormError("");
+    try {
+      await onSave(draft);
+      closeEditor();
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : t("common.unexpectedError"),
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTargetId) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await onDelete(deleteTargetId);
+      setDeleteTargetId(null);
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : t("common.unexpectedError"),
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   function resolveDisplayValue(field: CrudField<TItem, TDraft>, item: TItem) {
@@ -209,6 +254,7 @@ export function CrudModule<
               type="button"
               onClick={() => {
                 resetDraft();
+                setFormError("");
                 setIsEditorOpen(true);
               }}
             >
@@ -245,8 +291,10 @@ export function CrudModule<
                                 variant="outline"
                                 size="icon"
                                 type="button"
+                                disabled={isSaving || isDeleting}
                                 aria-label={t("common.edit")}
                                 onClick={() => {
+                                  setFormError("");
                                   setDraft(toDraft(item));
                                   setIsEditorOpen(true);
                                 }}
@@ -262,6 +310,7 @@ export function CrudModule<
                                 variant="destructive"
                                 size="icon"
                                 type="button"
+                                disabled={isSaving || isDeleting}
                                 aria-label={t("common.delete")}
                                 onClick={() => setDeleteTargetId(item.id)}
                               >
@@ -289,6 +338,7 @@ export function CrudModule<
                 type="button"
                 onClick={() => {
                   resetDraft();
+                  setFormError("");
                   setIsEditorOpen(true);
                 }}
               >
@@ -310,12 +360,11 @@ export function CrudModule<
             </DialogTitle>
             <DialogDescription>{title}</DialogDescription>
           </DialogHeader>
+          {formError ? <div className="error">{formError}</div> : null}
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              void onSave(draft).then(() => {
-                closeEditor();
-              });
+              void handleSave();
             }}
             className="grid gap-4 md:grid-cols-2"
           >
@@ -331,6 +380,7 @@ export function CrudModule<
                   <Textarea
                     value={draft[field.name] ?? ""}
                     placeholder={field.placeholder}
+                    disabled={isSaving}
                     onChange={(event) =>
                       updateDraftValue(field.name, event.target.value)
                     }
@@ -338,6 +388,7 @@ export function CrudModule<
                 ) : field.type === "select" ? (
                   <Select
                     value={draft[field.name] ?? ""}
+                    disabled={isSaving}
                     onValueChange={(value) =>
                       updateDraftValue(field.name, value)
                     }
@@ -365,6 +416,7 @@ export function CrudModule<
                     type={field.type ?? "text"}
                     value={draft[field.name] ?? ""}
                     placeholder={field.placeholder}
+                    disabled={isSaving}
                     onChange={(event) =>
                       updateDraftValue(field.name, event.target.value)
                     }
@@ -373,8 +425,15 @@ export function CrudModule<
               </AppField>
             ))}
             <DialogFooter className="md:col-span-2">
-              <Button type="submit">{t("common.save")}</Button>
-              <Button variant="outline" type="button" onClick={closeEditor}>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? t("common.saving") : t("common.save")}
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                disabled={isSaving}
+                onClick={closeEditor}
+              >
                 {t("common.cancel")}
               </Button>
             </DialogFooter>
@@ -395,19 +454,14 @@ export function CrudModule<
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
-              onClick={() => {
-                if (!deleteTargetId) {
-                  return;
-                }
-
-                void onDelete(deleteTargetId).then(() =>
-                  setDeleteTargetId(null),
-                );
-              }}
+              onClick={() => void handleDelete()}
             >
-              {t("common.delete")}
+              {isDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
-            <AlertDialogCancel onClick={() => setDeleteTargetId(null)}>
+            <AlertDialogCancel
+              disabled={isDeleting}
+              onClick={() => setDeleteTargetId(null)}
+            >
               {t("common.cancel")}
             </AlertDialogCancel>
           </AlertDialogFooter>

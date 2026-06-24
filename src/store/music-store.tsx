@@ -1,9 +1,31 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { Locale } from "@/i18n";
 import { slugify } from "@/lib/utils";
+import {
+  DeleteEntityType,
+  StoreActionError,
+  validateBrandInput,
+  validateCategoryInput,
+  validateCustomerInput,
+  validateDeleteEntity,
+  validateEmployeeInput,
+  validateOrderStatusTransition,
+  validatePrimaryImageSelection,
+  validateProductImageInput,
+  validateProductInput,
+  validateSettingsInput,
+  validateStockAdjustment,
+} from "@/store/music-store-domain";
 import { localizeDemoDatabase, nextId, seedDatabase } from "@/store/seed";
 import {
   Activity,
@@ -45,10 +67,7 @@ type StoreContextValue = {
     input: Omit<Employee, "id"> & { id?: string },
   ) => Promise<void>;
   saveProduct: (input: Omit<Product, "id"> & { id?: string }) => Promise<void>;
-  deleteEntity: (
-    type: "categories" | "brands" | "customers" | "employees" | "products",
-    id: string,
-  ) => Promise<void>;
+  deleteEntity: (type: DeleteEntityType, id: string) => Promise<void>;
   adjustStock: (
     productId: string,
     delta: number,
@@ -63,7 +82,8 @@ type StoreContextValue = {
 const DB_KEY = "music-shop-db";
 const SESSION_KEY = "music-shop-session";
 const DB_VERSION_KEY = "music-shop-db-version";
-const DB_VERSION = "2";
+const DB_VERSION = "3";
+const DEFAULT_ERROR_MESSAGE = "Unable to complete the requested action.";
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
@@ -84,6 +104,60 @@ function simulateDelay() {
   return new Promise((resolve) => setTimeout(resolve, 280));
 }
 
+function readStoredDb() {
+  const rawDb = window.localStorage.getItem(DB_KEY);
+  const rawDbVersion = window.localStorage.getItem(DB_VERSION_KEY);
+  if (!rawDb || rawDbVersion !== DB_VERSION) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawDb) as Database;
+  } catch {
+    return null;
+  }
+}
+
+function persistDb(db: Database) {
+  window.localStorage.setItem(DB_KEY, JSON.stringify(db));
+  window.localStorage.setItem(DB_VERSION_KEY, DB_VERSION);
+}
+
+function persistSession(session: Session | null) {
+  if (session) {
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return;
+  }
+
+  window.localStorage.removeItem(SESSION_KEY);
+}
+
+function addActivityEntry(
+  activity: Activity[],
+  messageKey: string,
+  params: Record<string, string | number> = {},
+) {
+  const identitySource =
+    String(
+      params.name ??
+        params.orderId ??
+        params.productName ??
+        params.productId ??
+        messageKey,
+    ) || messageKey;
+
+  return [
+    {
+      id: nextId("activity", identitySource),
+      title: messageKey,
+      messageKey,
+      messageParams: params,
+      timestamp: new Date().toISOString(),
+    },
+    ...activity,
+  ].slice(0, 12);
+}
+
 export function MusicStoreProvider({
   locale,
   children,
@@ -95,85 +169,90 @@ export function MusicStoreProvider({
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  const dbRef = useRef<Database>(db);
   const localizedDb = useMemo(
     () => localizeDemoDatabase(db, locale),
     [db, locale],
   );
 
   useEffect(() => {
-    const rawDb = window.localStorage.getItem(DB_KEY);
+    dbRef.current = db;
+  }, [db]);
+
+  useEffect(() => {
+    const storedDb = readStoredDb();
     const rawSession = window.localStorage.getItem(SESSION_KEY);
-    const rawDbVersion = window.localStorage.getItem(DB_VERSION_KEY);
-    if (rawDb && rawDbVersion === DB_VERSION) {
-      setDb(JSON.parse(rawDb) as Database);
+
+    if (storedDb) {
+      dbRef.current = storedDb;
+      setDb(storedDb);
+    } else {
+      const nextDb = cloneSeed();
+      dbRef.current = nextDb;
+      setDb(nextDb);
+      persistDb(nextDb);
     }
+
     if (rawSession) {
-      setSession(JSON.parse(rawSession) as Session);
+      try {
+        setSession(JSON.parse(rawSession) as Session);
+      } catch {
+        window.localStorage.removeItem(SESSION_KEY);
+      }
     }
-    if (rawDbVersion !== DB_VERSION) {
-      window.localStorage.setItem(DB_KEY, JSON.stringify(cloneSeed()));
-      window.localStorage.setItem(DB_VERSION_KEY, DB_VERSION);
-    }
+
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    window.localStorage.setItem(DB_KEY, JSON.stringify(db));
-    window.localStorage.setItem(DB_VERSION_KEY, DB_VERSION);
+    if (!ready) {
+      return;
+    }
+
+    persistDb(db);
   }, [db, ready]);
 
   useEffect(() => {
-    if (!ready) return;
-    if (session) {
-      window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    } else {
-      window.localStorage.removeItem(SESSION_KEY);
+    if (!ready) {
+      return;
     }
+
+    persistSession(session);
   }, [ready, session]);
 
   useEffect(() => {
-    if (!flash) return;
+    if (!flash) {
+      return;
+    }
+
     const timer = window.setTimeout(() => setFlash(null), 2200);
     return () => window.clearTimeout(timer);
   }, [flash]);
+
+  const failAction = (error: unknown) => {
+    const message =
+      error instanceof Error ? error.message : DEFAULT_ERROR_MESSAGE;
+    setFlash({ kind: "error", message });
+    throw error instanceof Error ? error : new StoreActionError(message);
+  };
 
   const patchDb = async (
     updater: (current: Database) => Database,
     flashConfig?: Flash,
   ) => {
     await simulateDelay();
-    setDb((current) => updater(current));
-    if (flashConfig) {
-      setFlash(flashConfig);
+
+    try {
+      const nextDb = updater(dbRef.current);
+      dbRef.current = nextDb;
+      setDb(nextDb);
+      if (flashConfig) {
+        setFlash(flashConfig);
+      }
+    } catch (error) {
+      failAction(error);
     }
   };
-
-  function addActivityEntry(
-    activity: Activity[],
-    messageKey: string,
-    params: Record<string, string | number> = {},
-  ) {
-    const identitySource =
-      String(
-        params.name ??
-          params.orderId ??
-          params.productName ??
-          params.productId ??
-          messageKey,
-      ) || messageKey;
-
-    return [
-      {
-        id: nextId("activity", identitySource),
-        title: messageKey,
-        messageKey,
-        messageParams: params,
-        timestamp: new Date().toISOString(),
-      },
-      ...activity,
-    ].slice(0, 12);
-  }
 
   const value: StoreContextValue = {
     db: localizedDb,
@@ -187,19 +266,22 @@ export function MusicStoreProvider({
     logout: () => setSession(null),
     resetDemo: async () => {
       await simulateDelay();
-      setDb(cloneSeed());
+      const nextDb = cloneSeed();
+      dbRef.current = nextDb;
+      setDb(nextDb);
       setFlash({ kind: "success", key: "flash.demoResetDone" });
     },
     saveCategory: async (input) => {
       await patchDb(
         (current) => {
+          validateCategoryInput(current, input);
           const item: Category = {
             id: input.id ?? nextId("category", input.name),
-            name: input.name,
+            name: input.name.trim(),
             slug: slugify(input.name),
             parentId: input.parentId || undefined,
             status: input.status,
-            description: input.description,
+            description: input.description.trim(),
           };
           const categories = input.id
             ? current.categories.map((category) =>
@@ -209,13 +291,9 @@ export function MusicStoreProvider({
           return {
             ...current,
             categories,
-            activity: addActivityEntry(
-              current.activity,
-              "activity.categorySaved",
-              {
-                name: item.name,
-              },
-            ),
+            activity: addActivityEntry(current.activity, "activity.categorySaved", {
+              name: item.name,
+            }),
           };
         },
         { kind: "success", key: "flash.categorySaved" },
@@ -224,9 +302,13 @@ export function MusicStoreProvider({
     saveBrand: async (input) => {
       await patchDb(
         (current) => {
+          validateBrandInput(current, input);
           const item: Brand = {
             ...input,
             id: input.id ?? nextId("brand", input.name),
+            name: input.name.trim(),
+            country: input.country.trim(),
+            website: input.website.trim(),
           };
           const brands = input.id
             ? current.brands.map((brand) =>
@@ -236,13 +318,9 @@ export function MusicStoreProvider({
           return {
             ...current,
             brands,
-            activity: addActivityEntry(
-              current.activity,
-              "activity.brandSaved",
-              {
-                name: item.name,
-              },
-            ),
+            activity: addActivityEntry(current.activity, "activity.brandSaved", {
+              name: item.name,
+            }),
           };
         },
         { kind: "success", key: "flash.brandSaved" },
@@ -251,9 +329,14 @@ export function MusicStoreProvider({
     saveCustomer: async (input) => {
       await patchDb(
         (current) => {
+          validateCustomerInput(current, input);
           const item: Customer = {
             ...input,
             id: input.id ?? nextId("customer", input.name),
+            name: input.name.trim(),
+            phone: input.phone.trim(),
+            email: input.email.trim(),
+            notes: input.notes.trim(),
           };
           const customers = input.id
             ? current.customers.map((customer) =>
@@ -278,9 +361,13 @@ export function MusicStoreProvider({
     saveEmployee: async (input) => {
       await patchDb(
         (current) => {
+          validateEmployeeInput(current, input);
           const item: Employee = {
             ...input,
             id: input.id ?? nextId("employee", input.name),
+            name: input.name.trim(),
+            phone: input.phone.trim(),
+            email: input.email.trim(),
           };
           const employees = input.id
             ? current.employees.map((employee) =>
@@ -305,9 +392,18 @@ export function MusicStoreProvider({
     saveProduct: async (input) => {
       await patchDb(
         (current) => {
+          validateProductInput(current, input);
+          const images = Array.from(new Set(input.images.map((image) => image.trim())));
           const product: Product = {
             ...input,
             id: input.id ?? nextId("product", input.name),
+            name: input.name.trim(),
+            sku: input.sku.trim(),
+            barcode: input.barcode?.trim() || undefined,
+            shortDescription: input.shortDescription.trim(),
+            description: input.description.trim(),
+            images,
+            primaryImage: input.primaryImage?.trim() || images[0],
           };
           const products = input.id
             ? current.products.map((item) =>
@@ -317,13 +413,9 @@ export function MusicStoreProvider({
           return {
             ...current,
             products,
-            activity: addActivityEntry(
-              current.activity,
-              "activity.productSaved",
-              {
-                name: product.name,
-              },
-            ),
+            activity: addActivityEntry(current.activity, "activity.productSaved", {
+              name: product.name,
+            }),
           };
         },
         { kind: "success", key: "flash.productSaved" },
@@ -332,6 +424,7 @@ export function MusicStoreProvider({
     deleteEntity: async (type, id) => {
       await patchDb(
         (current) => {
+          validateDeleteEntity(current, type, id);
           const activity = addActivityEntry(
             current.activity,
             "activity.entityRemoved",
@@ -377,13 +470,12 @@ export function MusicStoreProvider({
     adjustStock: async (productId, delta, reason) => {
       await patchDb(
         (current) => {
-          const product = current.products.find(
-            (item) => item.id === productId,
-          );
-          const products = current.products.map((product) =>
-            product.id === productId
-              ? { ...product, stockQty: Math.max(product.stockQty + delta, 0) }
-              : product,
+          validateStockAdjustment(current, productId, reason);
+          const product = current.products.find((item) => item.id === productId);
+          const products = current.products.map((item) =>
+            item.id === productId
+              ? { ...item, stockQty: Math.max(item.stockQty + delta, 0) }
+              : item,
           );
           return {
             ...current,
@@ -393,7 +485,7 @@ export function MusicStoreProvider({
                 id: nextId("movement", reason),
                 productId,
                 delta,
-                reason,
+                reason: reason.trim(),
                 createdAt: new Date().toISOString(),
               },
               ...current.inventoryMovements,
@@ -415,6 +507,7 @@ export function MusicStoreProvider({
     changeOrderStatus: async (orderId, status) => {
       await patchDb(
         (current) => {
+          validateOrderStatusTransition(current, orderId, status);
           const orders = current.orders.map((order) =>
             order.id === orderId
               ? { ...order, status, updatedAt: new Date().toISOString() }
@@ -423,14 +516,10 @@ export function MusicStoreProvider({
           return {
             ...current,
             orders,
-            activity: addActivityEntry(
-              current.activity,
-              "activity.orderMoved",
-              {
-                orderId,
-                status,
-              },
-            ),
+            activity: addActivityEntry(current.activity, "activity.orderMoved", {
+              orderId,
+              status,
+            }),
           };
         },
         { kind: "success", key: "flash.orderStatusUpdated" },
@@ -438,68 +527,80 @@ export function MusicStoreProvider({
     },
     saveSettings: async (input) => {
       await patchDb(
-        (current) => ({
-          ...current,
-          settings: input,
-          products: current.products.map((product) =>
-            product.status === "draft"
-              ? {
-                  ...product,
-                  status: input.defaultProductStatus as ProductStatus,
-                }
-              : product,
-          ),
-          activity: addActivityEntry(
-            current.activity,
-            "activity.businessSettingsUpdated",
-          ),
-        }),
+        (current) => {
+          validateSettingsInput(input);
+          return {
+            ...current,
+            settings: {
+              ...input,
+              currency: input.currency.trim().toUpperCase(),
+            },
+            products: current.products.map((product) =>
+              product.status === "draft"
+                ? {
+                    ...product,
+                    status: input.defaultProductStatus as ProductStatus,
+                  }
+                : product,
+            ),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.businessSettingsUpdated",
+            ),
+          };
+        },
         { kind: "success", key: "flash.settingsSaved" },
       );
     },
     addProductImage: async (productId, label) => {
       await patchDb(
-        (current) => ({
-          ...current,
-          products: current.products.map((product) =>
-            product.id === productId
-              ? {
-                  ...product,
-                  images: [...product.images, label],
-                  primaryImage: product.primaryImage ?? label,
-                }
-              : product,
-          ),
-          activity: addActivityEntry(current.activity, "activity.mediaAdded", {
-            productId,
-            productName:
-              current.products.find((product) => product.id === productId)
-                ?.name ?? productId,
-          }),
-        }),
+        (current) => {
+          validateProductImageInput(current, productId, label);
+          return {
+            ...current,
+            products: current.products.map((product) =>
+              product.id === productId
+                ? {
+                    ...product,
+                    images: [...product.images, label.trim()],
+                    primaryImage: product.primaryImage ?? label.trim(),
+                  }
+                : product,
+            ),
+            activity: addActivityEntry(current.activity, "activity.mediaAdded", {
+              productId,
+              productName:
+                current.products.find((product) => product.id === productId)
+                  ?.name ?? productId,
+            }),
+          };
+        },
         { kind: "success", key: "flash.imageAttached" },
       );
     },
     setPrimaryImage: async (productId, label) => {
       await patchDb(
-        (current) => ({
-          ...current,
-          products: current.products.map((product) =>
-            product.id === productId
-              ? { ...product, primaryImage: label }
-              : product,
-          ),
-          activity: addActivityEntry(
-            current.activity,
-            "activity.primaryImageChanged",
-            {
-              productId,
-              productName:
-                current.products.find((product) => product.id === productId)
-                  ?.name ?? productId,
-            },
-          ),
-        }),
+        (current) => {
+          validatePrimaryImageSelection(current, productId, label);
+          return {
+            ...current,
+            products: current.products.map((product) =>
+              product.id === productId
+                ? { ...product, primaryImage: label }
+                : product,
+            ),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.primaryImageChanged",
+              {
+                productId,
+                productName:
+                  current.products.find((product) => product.id === productId)
+                    ?.name ?? productId,
+              },
+            ),
+          };
+        },
         { kind: "success", key: "flash.primaryImageSet" },
       );
     },
@@ -516,4 +617,102 @@ export function useMusicStore() {
     throw new Error("useMusicStore must be used within MusicStoreProvider");
   }
   return context;
+}
+
+export function useStoreDb() {
+  return useMusicStore().db;
+}
+
+export function useFlashState() {
+  return useMusicStore().flash;
+}
+
+export function useSessionStore() {
+  const { ready, session, login, logout, resetDemo } = useMusicStore();
+  return { ready, session, login, logout, resetDemo };
+}
+
+export function useCategoryStore() {
+  const { db, saveCategory, deleteEntity } = useMusicStore();
+  return {
+    categories: db.categories,
+    saveCategory,
+    deleteEntity,
+  };
+}
+
+export function useBrandStore() {
+  const { db, saveBrand, deleteEntity } = useMusicStore();
+  return {
+    brands: db.brands,
+    saveBrand,
+    deleteEntity,
+  };
+}
+
+export function useCustomerStore() {
+  const { db, saveCustomer, deleteEntity } = useMusicStore();
+  return {
+    customers: db.customers,
+    saveCustomer,
+    deleteEntity,
+  };
+}
+
+export function useEmployeeStore() {
+  const { db, saveEmployee, deleteEntity } = useMusicStore();
+  return {
+    employees: db.employees,
+    saveEmployee,
+    deleteEntity,
+  };
+}
+
+export function useCatalogStore() {
+  const { db, saveProduct, deleteEntity } = useMusicStore();
+  return {
+    products: db.products,
+    categories: db.categories,
+    brands: db.brands,
+    settings: db.settings,
+    saveProduct,
+    deleteEntity,
+  };
+}
+
+export function useInventoryStore() {
+  const { db, adjustStock } = useMusicStore();
+  return {
+    products: db.products,
+    inventoryMovements: db.inventoryMovements,
+    settings: db.settings,
+    adjustStock,
+  };
+}
+
+export function useOrdersStore() {
+  const { db, changeOrderStatus } = useMusicStore();
+  return {
+    orders: db.orders,
+    customers: db.customers,
+    settings: db.settings,
+    changeOrderStatus,
+  };
+}
+
+export function useMediaStore() {
+  const { db, addProductImage, setPrimaryImage } = useMusicStore();
+  return {
+    products: db.products,
+    addProductImage,
+    setPrimaryImage,
+  };
+}
+
+export function useSettingsStore() {
+  const { db, saveSettings } = useMusicStore();
+  return {
+    settings: db.settings,
+    saveSettings,
+  };
 }

@@ -24,7 +24,10 @@
     "confirmDelete": "Confirm deletion",
     "deletePrompt": "This action cannot be undone.",
     "loadingWorkspace": "Loading workspace...",
-    "select": "Select"
+    "select": "Select",
+    "saving": "Saving...",
+    "deleting": "Deleting...",
+    "unexpectedError": "Unexpected error."
   },
   "nav": {
     "dashboard": "Dashboard",

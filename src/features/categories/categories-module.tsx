@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { dynamicLabel } from "@/lib/translations";
-import { useMusicStore } from "@/store/music-store";
+import { useCategoryStore } from "@/store/music-store";
 import { Category } from "@/types/music";
 
 type CategoryDraft = {
@@ -18,16 +18,16 @@ type CategoryDraft = {
 
 export function CategoriesModule() {
   const t = useTranslations();
-  const { db, saveCategory, deleteEntity } = useMusicStore();
+  const { categories, saveCategory, deleteEntity } = useCategoryStore();
   const categoryNameMap = Object.fromEntries(
-    db.categories.map((category) => [category.id, category.name]),
+    categories.map((category) => [category.id, category.name]),
   );
 
   return (
     <GenericCrudModule<Category, CategoryDraft>
       title={t("nav.categories")}
       subtitle={t("section.categoriesSubtitle")}
-      items={db.categories}
+      items={categories}
       createDraft={() => ({
         name: "",
         slug: "",
@@ -35,6 +35,11 @@ export function CategoriesModule() {
         status: "active",
         description: "",
       })}
+      validateDraft={(draft) =>
+        draft.name.trim().length < 2 || draft.description.trim().length < 4
+          ? t("labels.validationFailed")
+          : null
+      }
       toDraft={(category) => ({
         id: category.id,
         name: category.name,
@@ -57,7 +62,7 @@ export function CategoriesModule() {
           name: "parentId",
           label: t("labels.parent"),
           type: "select",
-          options: db.categories.map((category) => ({
+          options: categories.map((category) => ({
             label: category.name,
             value: category.id,
           })),

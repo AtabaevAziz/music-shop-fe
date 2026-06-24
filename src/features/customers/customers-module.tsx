@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { dynamicLabel } from "@/lib/translations";
-import { useMusicStore } from "@/store/music-store";
+import { useCustomerStore } from "@/store/music-store";
 import { Customer } from "@/types/music";
 
 type CustomerDraft = {
@@ -19,13 +19,13 @@ type CustomerDraft = {
 
 export function CustomersModule() {
   const t = useTranslations();
-  const { db, saveCustomer, deleteEntity } = useMusicStore();
+  const { customers, saveCustomer, deleteEntity } = useCustomerStore();
 
   return (
     <GenericCrudModule<Customer, CustomerDraft>
       title={t("nav.customers")}
       subtitle={t("section.customersSubtitle")}
-      items={db.customers}
+      items={customers}
       createDraft={() => ({
         name: "",
         phone: "",
@@ -34,6 +34,13 @@ export function CustomersModule() {
         status: "active",
         notes: "",
       })}
+      validateDraft={(draft) =>
+        draft.name.trim().length < 2 ||
+        draft.phone.trim().length < 6 ||
+        draft.email.trim().length < 5
+          ? t("labels.validationFailed")
+          : null
+      }
       toDraft={(customer) => ({
         id: customer.id,
         name: customer.name,

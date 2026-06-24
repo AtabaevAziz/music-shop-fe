@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { Locale } from "@/i18n";
-import { useMusicStore } from "@/store/music-store";
+import { useSessionStore } from "@/store/music-store";
 
 export function AuthGuard({
   locale,
@@ -14,7 +14,7 @@ export function AuthGuard({
   locale: Locale;
   children: React.ReactNode;
 }) {
-  const { ready, session } = useMusicStore();
+  const { ready, session } = useSessionStore();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
