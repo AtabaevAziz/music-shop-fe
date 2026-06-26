@@ -19,6 +19,7 @@ import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
 import { useOrdersStore } from "@/store/music-store";
+import type { OrderStatus } from "@/types/music";
 
 const transitions = [
   "new",
@@ -29,7 +30,7 @@ const transitions = [
   "cancelled",
 ] as const;
 
-const nextTransitions = {
+const nextTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
   new: ["confirmed", "cancelled"],
   confirmed: ["packed", "cancelled"],
   packed: ["ready_for_pickup", "cancelled"],

@@ -117,7 +117,7 @@ music-shop-fe/
 
 - The app uses a custom backoffice visual system driven from `src/app/globals.css`
 - Light and dark themes are switched from the navbar and provided through `next-themes`
-- Most shared controls now come from `shadcn/ui`-style components in `src/components/ui/`
+- Most shared controls now come from `shadcn/ui`-style components inсщвуч `src/components/ui/`
 - App-specific wrappers such as shared page headers, form field composition, and flash-to-toast bridging live in `src/components/shared/`
 - Dialogs, sheets, dropdowns, tables, selects, and form controls follow Radix-based `shadcn/ui` patterns
 - User feedback is shown through toast notifications powered by `sonner`

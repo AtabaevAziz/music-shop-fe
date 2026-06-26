@@ -291,9 +291,13 @@ export function MusicStoreProvider({
           return {
             ...current,
             categories,
-            activity: addActivityEntry(current.activity, "activity.categorySaved", {
-              name: item.name,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.categorySaved",
+              {
+                name: item.name,
+              },
+            ),
           };
         },
         { kind: "success", key: "flash.categorySaved" },
@@ -318,9 +322,13 @@ export function MusicStoreProvider({
           return {
             ...current,
             brands,
-            activity: addActivityEntry(current.activity, "activity.brandSaved", {
-              name: item.name,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.brandSaved",
+              {
+                name: item.name,
+              },
+            ),
           };
         },
         { kind: "success", key: "flash.brandSaved" },
@@ -393,7 +401,9 @@ export function MusicStoreProvider({
       await patchDb(
         (current) => {
           validateProductInput(current, input);
-          const images = Array.from(new Set(input.images.map((image) => image.trim())));
+          const images = Array.from(
+            new Set(input.images.map((image) => image.trim())),
+          );
           const product: Product = {
             ...input,
             id: input.id ?? nextId("product", input.name),
@@ -413,9 +423,13 @@ export function MusicStoreProvider({
           return {
             ...current,
             products,
-            activity: addActivityEntry(current.activity, "activity.productSaved", {
-              name: product.name,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.productSaved",
+              {
+                name: product.name,
+              },
+            ),
           };
         },
         { kind: "success", key: "flash.productSaved" },
@@ -471,7 +485,9 @@ export function MusicStoreProvider({
       await patchDb(
         (current) => {
           validateStockAdjustment(current, productId, reason);
-          const product = current.products.find((item) => item.id === productId);
+          const product = current.products.find(
+            (item) => item.id === productId,
+          );
           const products = current.products.map((item) =>
             item.id === productId
               ? { ...item, stockQty: Math.max(item.stockQty + delta, 0) }
@@ -516,10 +532,14 @@ export function MusicStoreProvider({
           return {
             ...current,
             orders,
-            activity: addActivityEntry(current.activity, "activity.orderMoved", {
-              orderId,
-              status,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.orderMoved",
+              {
+                orderId,
+                status,
+              },
+            ),
           };
         },
         { kind: "success", key: "flash.orderStatusUpdated" },
@@ -567,12 +587,16 @@ export function MusicStoreProvider({
                   }
                 : product,
             ),
-            activity: addActivityEntry(current.activity, "activity.mediaAdded", {
-              productId,
-              productName:
-                current.products.find((product) => product.id === productId)
-                  ?.name ?? productId,
-            }),
+            activity: addActivityEntry(
+              current.activity,
+              "activity.mediaAdded",
+              {
+                productId,
+                productName:
+                  current.products.find((product) => product.id === productId)
+                    ?.name ?? productId,
+              },
+            ),
           };
         },
         { kind: "success", key: "flash.imageAttached" },

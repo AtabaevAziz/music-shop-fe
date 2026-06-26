@@ -60,7 +60,10 @@ export function validateCategoryInput(
   input: Omit<Category, "id" | "slug"> & { id?: string },
 ) {
   validateSharedName(input.name, "Category name");
-  assert(input.description.trim().length >= 4, "Category description is too short.");
+  assert(
+    input.description.trim().length >= 4,
+    "Category description is too short.",
+  );
   if (input.parentId) {
     assert(
       db.categories.some((category) => category.id === input.parentId),
@@ -100,8 +103,8 @@ export function validateCustomerInput(
   assert(isValidEmail(input.email), "Customer email must be valid.");
   const duplicateEmail = db.customers.some(
     (customer) =>
-      customer.email.trim().toLowerCase() === input.email.trim().toLowerCase() &&
-      customer.id !== input.id,
+      customer.email.trim().toLowerCase() ===
+        input.email.trim().toLowerCase() && customer.id !== input.id,
   );
   assert(!duplicateEmail, "Customer email must be unique.");
 }
@@ -115,8 +118,8 @@ export function validateEmployeeInput(
   assert(input.phone.trim().length >= 6, "Employee phone is required.");
   const duplicateEmail = db.employees.some(
     (employee) =>
-      employee.email.trim().toLowerCase() === input.email.trim().toLowerCase() &&
-      employee.id !== input.id,
+      employee.email.trim().toLowerCase() ===
+        input.email.trim().toLowerCase() && employee.id !== input.id,
   );
   assert(!duplicateEmail, "Employee email must be unique.");
 }
@@ -142,7 +145,10 @@ export function validateProductInput(
     input.shortDescription.trim().length >= 4,
     "Product short description is too short.",
   );
-  assert(input.description.trim().length >= 4, "Product description is too short.");
+  assert(
+    input.description.trim().length >= 4,
+    "Product description is too short.",
+  );
   const duplicateSku = db.products.some(
     (product) =>
       product.sku.trim().toLowerCase() === input.sku.trim().toLowerCase() &&
@@ -181,7 +187,11 @@ export function validateSettingsInput(input: Database["settings"]) {
   );
 }
 
-export function validateDeleteEntity(db: Database, type: DeleteEntityType, id: string) {
+export function validateDeleteEntity(
+  db: Database,
+  type: DeleteEntityType,
+  id: string,
+) {
   if (type === "categories") {
     assert(
       !db.products.some((product) => product.categoryId === id),
@@ -224,7 +234,11 @@ export function validateDeleteEntity(db: Database, type: DeleteEntityType, id: s
   }
 }
 
-export function validateStockAdjustment(db: Database, productId: string, reason: string) {
+export function validateStockAdjustment(
+  db: Database,
+  productId: string,
+  reason: string,
+) {
   assert(
     db.products.some((product) => product.id === productId),
     "Selected product does not exist.",
@@ -257,7 +271,7 @@ export function validateProductImageInput(
   image: string,
 ) {
   const product = db.products.find((entry) => entry.id === productId);
-  assert(Boolean(product), "Selected product does not exist.");
+  assert(product !== undefined, "Selected product does not exist.");
   const nextImage = image.trim();
   assert(nextImage.length > 0, "Image path is required.");
   assert(
@@ -265,7 +279,7 @@ export function validateProductImageInput(
     "Image path must be a valid absolute path or URL.",
   );
   assert(
-    !product?.images.includes(nextImage),
+    !product.images.includes(nextImage),
     "This image is already attached to the product.",
   );
 }
@@ -276,9 +290,9 @@ export function validatePrimaryImageSelection(
   image: string,
 ) {
   const product = db.products.find((entry) => entry.id === productId);
-  assert(Boolean(product), "Selected product does not exist.");
+  assert(product !== undefined, "Selected product does not exist.");
   assert(
-    product?.images.includes(image),
+    product.images.includes(image),
     "Primary image must belong to the selected product.",
   );
 }

@@ -110,7 +110,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                  {products.map((product) => {
+                {products.map((product) => {
                   const isLow = product.stockQty <= settings.lowStockThreshold;
                   return (
                     <TableRow key={product.id}>

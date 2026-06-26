@@ -453,9 +453,7 @@ export function CrudModule<
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => void handleDelete()}
-            >
+            <AlertDialogAction onClick={() => void handleDelete()}>
               {isDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
             <AlertDialogCancel
