@@ -50,9 +50,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { BrandsModule } from "@/features/brands/brands-module";
+import { CategoriesModule } from "@/features/categories/categories-module";
+import { MediaModule } from "@/features/media/media-module";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, parseList } from "@/lib/utils";
+import { ModuleSection } from "@/shared/components/module-shell";
 import { useCatalogStore } from "@/store/music-store";
 
 const productSchema = z.object({
@@ -149,161 +159,199 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <section className="table-card">
-        <div className="toolbar page-actions">
-          <div className="flex flex-wrap gap-2">
-            <Input
-              className="w-full min-w-[220px] md:w-72"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t("common.search")}
-            />
-            <Button
-              type="button"
-              onClick={() => {
-                setFormError("");
-                resetDraft();
-                setIsEditorOpen(true);
-              }}
-            >
-              {t("common.addNew")}
-            </Button>
-          </div>
-        </div>
-        <div className="responsive-table">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("labels.preview")}</TableHead>
-                <TableHead>{t("labels.product")}</TableHead>
-                <TableHead>{t("labels.category")}</TableHead>
-                <TableHead>{t("labels.brand")}</TableHead>
-                <TableHead>{t("labels.price")}</TableHead>
-                <TableHead>{t("labels.stock")}</TableHead>
-                <TableHead>{t("common.status")}</TableHead>
-                <TableHead>{t("common.actions")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((product) => {
-                const previewImage = product.primaryImage ?? product.images[0];
+      <Tabs defaultValue="products" className="space-y-4">
+        <ModuleSection>
+          <TabsList className="h-auto w-full flex-wrap justify-start gap-2 bg-transparent p-0">
+            <TabsTrigger value="products">{t("labels.product")}</TabsTrigger>
+            <TabsTrigger value="categories">{t("nav.categories")}</TabsTrigger>
+            <TabsTrigger value="brands">{t("nav.brands")}</TabsTrigger>
+            <TabsTrigger value="media">{t("nav.media")}</TabsTrigger>
+          </TabsList>
+        </ModuleSection>
 
-                return (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      {previewImage ? (
-                        <Image
-                          src={previewImage}
-                          alt={product.name}
-                          width={96}
-                          height={72}
-                          className="product-thumb"
-                        />
-                      ) : null}
-                    </TableCell>
-                    <TableCell>
-                      <div className="product-cell">
-                        <strong>{product.name}</strong>
-                        <div className="muted">{product.shortDescription}</div>
-                      </div>
-                      <div className="muted">{product.sku}</div>
-                    </TableCell>
-                    <TableCell>{categoryMap[product.categoryId]}</TableCell>
-                    <TableCell>{brandMap[product.brandId]}</TableCell>
-                    <TableCell>
-                      {formatMoney(product.price, settings.currency, locale)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          product.stockQty <= settings.lowStockThreshold
-                            ? "warning"
-                            : "success"
-                        }
-                      >
-                        {product.stockQty}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          product.status === "active"
-                            ? "success"
-                            : product.status === "archived"
-                              ? "destructive"
-                              : "secondary"
-                        }
-                      >
-                        {dynamicLabel(t, product.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <TooltipProvider delayDuration={120}>
-                        <div className="flex flex-wrap gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                type="button"
-                                disabled={isSaving || isDeleting}
-                                aria-label={t("common.edit")}
-                                onClick={() => {
-                                  setFormError("");
-                                  setDraft({
-                                    id: product.id,
-                                    name: product.name,
-                                    sku: product.sku,
-                                    barcode: product.barcode ?? "",
-                                    categoryId: product.categoryId,
-                                    brandId: product.brandId,
-                                    price: String(product.price),
-                                    costPrice: String(product.costPrice),
-                                    stockQty: String(product.stockQty),
-                                    status: product.status,
-                                    shortDescription: product.shortDescription,
-                                    description: product.description,
-                                    condition: product.condition,
-                                    images: product.images.join("\n"),
-                                    specs: Object.entries(product.specs)
-                                      .map(([key, value]) => `${key}: ${value}`)
-                                      .join("\n"),
-                                  });
-                                  setIsEditorOpen(true);
-                                }}
-                              >
-                                <Pen />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>{t("common.edit")}</TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="destructive"
-                                size="icon"
-                                type="button"
-                                disabled={isSaving || isDeleting}
-                                aria-label={t("common.delete")}
-                                onClick={() => setDeleteTargetId(product.id)}
-                              >
-                                <Trash2 />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {t("common.delete")}
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </TooltipProvider>
-                    </TableCell>
+        <TabsContent value="products" className="mt-0">
+          <section className="table-card">
+            <div className="toolbar page-actions">
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  className="w-full min-w-[220px] md:w-72"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={t("common.search")}
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setFormError("");
+                    resetDraft();
+                    setIsEditorOpen(true);
+                  }}
+                >
+                  {t("common.addNew")}
+                </Button>
+              </div>
+            </div>
+            <div className="responsive-table">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("labels.preview")}</TableHead>
+                    <TableHead>{t("labels.product")}</TableHead>
+                    <TableHead>{t("labels.category")}</TableHead>
+                    <TableHead>{t("labels.brand")}</TableHead>
+                    <TableHead>{t("labels.price")}</TableHead>
+                    <TableHead>{t("labels.stock")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </section>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((product) => {
+                    const previewImage =
+                      product.primaryImage ?? product.images[0];
+
+                    return (
+                      <TableRow key={product.id}>
+                        <TableCell>
+                          {previewImage ? (
+                            <Image
+                              src={previewImage}
+                              alt={product.name}
+                              width={96}
+                              height={72}
+                              className="product-thumb"
+                            />
+                          ) : null}
+                        </TableCell>
+                        <TableCell>
+                          <div className="product-cell">
+                            <strong>{product.name}</strong>
+                            <div className="muted">
+                              {product.shortDescription}
+                            </div>
+                          </div>
+                          <div className="muted">{product.sku}</div>
+                        </TableCell>
+                        <TableCell>{categoryMap[product.categoryId]}</TableCell>
+                        <TableCell>{brandMap[product.brandId]}</TableCell>
+                        <TableCell>
+                          {formatMoney(
+                            product.price,
+                            settings.currency,
+                            locale,
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              product.stockQty <= settings.lowStockThreshold
+                                ? "warning"
+                                : "success"
+                            }
+                          >
+                            {product.stockQty}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              product.status === "active"
+                                ? "success"
+                                : product.status === "archived"
+                                  ? "destructive"
+                                  : "secondary"
+                            }
+                          >
+                            {dynamicLabel(t, product.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <TooltipProvider delayDuration={120}>
+                            <div className="flex flex-wrap gap-2">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    type="button"
+                                    disabled={isSaving || isDeleting}
+                                    aria-label={t("common.edit")}
+                                    onClick={() => {
+                                      setFormError("");
+                                      setDraft({
+                                        id: product.id,
+                                        name: product.name,
+                                        sku: product.sku,
+                                        barcode: product.barcode ?? "",
+                                        categoryId: product.categoryId,
+                                        brandId: product.brandId,
+                                        price: String(product.price),
+                                        costPrice: String(product.costPrice),
+                                        stockQty: String(product.stockQty),
+                                        status: product.status,
+                                        shortDescription:
+                                          product.shortDescription,
+                                        description: product.description,
+                                        condition: product.condition,
+                                        images: product.images.join("\n"),
+                                        specs: Object.entries(product.specs)
+                                          .map(
+                                            ([key, value]) =>
+                                              `${key}: ${value}`,
+                                          )
+                                          .join("\n"),
+                                      });
+                                      setIsEditorOpen(true);
+                                    }}
+                                  >
+                                    <Pen />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {t("common.edit")}
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    type="button"
+                                    disabled={isSaving || isDeleting}
+                                    aria-label={t("common.delete")}
+                                    onClick={() => setDeleteTargetId(product.id)}
+                                  >
+                                    <Trash2 />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {t("common.delete")}
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+                          </TooltipProvider>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="categories" className="mt-0">
+          <CategoriesModule />
+        </TabsContent>
+
+        <TabsContent value="brands" className="mt-0">
+          <BrandsModule />
+        </TabsContent>
+
+        <TabsContent value="media" className="mt-0">
+          <MediaModule />
+        </TabsContent>
+      </Tabs>
 
       <Dialog
         open={isEditorOpen}

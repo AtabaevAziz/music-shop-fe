@@ -22,32 +22,15 @@ import { Role } from "@/types/music";
 
 type NavItem = { href: string; label: string; roles?: Role[] };
 
-const navOrder = [
-  "",
-  "catalog",
-  "categories",
-  "brands",
-  "inventory",
-  "orders",
-  "customers",
-  "employees",
-  "finance",
-  "settings",
-  "media",
-] as const;
+const navOrder = ["", "catalog", "inventory", "orders", "customers"] as const;
+type NavSegment = (typeof navOrder)[number];
 
-const accessMap: Record<(typeof navOrder)[number], Role[]> = {
+const accessMap: Record<NavSegment, Role[]> = {
   "": ["admin", "store_manager", "catalog_manager", "sales_operator"],
   catalog: ["admin", "store_manager", "catalog_manager"],
-  categories: ["admin", "store_manager", "catalog_manager"],
-  brands: ["admin", "store_manager", "catalog_manager"],
   inventory: ["admin", "store_manager", "catalog_manager"],
   orders: ["admin", "store_manager", "sales_operator"],
   customers: ["admin", "store_manager", "sales_operator"],
-  employees: ["admin", "store_manager"],
-  finance: ["admin", "store_manager"],
-  settings: ["admin"],
-  media: ["admin", "store_manager", "catalog_manager"],
 };
 
 export function AppShell({
@@ -67,18 +50,12 @@ export function AppShell({
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const nextLocale = getNextLocale(locale);
 
-  const navMap: Record<(typeof navOrder)[number], string> = {
+  const navMap: Record<NavSegment, string> = {
     "": t("nav.dashboard"),
     catalog: t("nav.catalog"),
-    categories: t("nav.categories"),
-    brands: t("nav.brands"),
     inventory: t("nav.inventory"),
     orders: t("nav.orders"),
     customers: t("nav.customers"),
-    employees: t("nav.employees"),
-    finance: t("nav.finance"),
-    settings: t("nav.settings"),
-    media: t("nav.media"),
   };
 
   const navItems: NavItem[] = navOrder.map((segment) => ({
@@ -96,25 +73,17 @@ export function AppShell({
     [navItems, sessionRole],
   );
 
-  const currentSegment = (pathname.split("/")[2] ??
-    "") as (typeof navOrder)[number];
+  const rawSegment = pathname.split("/")[2] ?? "";
+  const currentSegment = navOrder.find((segment) => segment === rawSegment) ?? "";
   const isAllowed = sessionRole
     ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
     : false;
-  const pageMeta: Record<
-    (typeof navOrder)[number],
-    { title: string; subtitle: string }
-  > = {
+  const pageMeta: Record<NavSegment, { title: string; subtitle: string }> = {
     "": { title: t("nav.dashboard"), subtitle: t("meta.appSubtitle") },
     catalog: {
       title: t("nav.catalog"),
       subtitle: t("section.catalogSubtitle"),
     },
-    categories: {
-      title: t("nav.categories"),
-      subtitle: t("section.categoriesSubtitle"),
-    },
-    brands: { title: t("nav.brands"), subtitle: t("section.brandsSubtitle") },
     inventory: {
       title: t("nav.inventory"),
       subtitle: t("section.inventorySubtitle"),
@@ -124,19 +93,6 @@ export function AppShell({
       title: t("nav.customers"),
       subtitle: t("section.customersSubtitle"),
     },
-    employees: {
-      title: t("nav.employees"),
-      subtitle: t("section.employeesSubtitle"),
-    },
-    finance: {
-      title: t("nav.finance"),
-      subtitle: t("section.financeSubtitle"),
-    },
-    settings: {
-      title: t("nav.settings"),
-      subtitle: t("section.settingsSubtitle"),
-    },
-    media: { title: t("nav.media"), subtitle: t("section.mediaSubtitle") },
   };
   const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
 

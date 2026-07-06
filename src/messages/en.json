@@ -30,7 +30,7 @@
     "unexpectedError": "Unexpected error."
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Home",
     "catalog": "Catalog",
     "categories": "Categories",
     "brands": "Brands",
@@ -47,15 +47,15 @@
   },
   "auth": {
     "title": "Online musical instrument store and operations backoffice",
-    "text": "Browser-only demo of a musical instrument ecommerce operation with products, orders, customers, inventory, and settings running fully on the client.",
+    "text": "Browser-only demo of a musical instrument ecommerce operation with products, orders, customers, and inventory running fully on the client.",
     "modulesLabel": "Modules",
-    "modulesValue": "Dashboard, Catalog, Inventory, Orders, and Finance",
+    "modulesValue": "Home, Catalog, Inventory, Orders, and Customers",
     "demoLabel": "Demo mode",
     "demoValue": "Frontend-only state with local persistence",
     "enterAs": "Enter as",
-    "adminBlurb": "Full operational access with user and settings control.",
-    "storeManagerBlurb": "Orders, inventory, staff overview, and finance visibility.",
-    "catalogManagerBlurb": "Products, brands, categories, and media workflows.",
+    "adminBlurb": "Full access to catalog, inventory, orders, and customers.",
+    "storeManagerBlurb": "Orders, inventory, customers, and daily store operations.",
+    "catalogManagerBlurb": "Products, brands, categories, and catalog imagery.",
     "salesOperatorBlurb": "Orders, customers, and pickup processing."
   },
   "dashboard": {
@@ -66,7 +66,7 @@
     "activitySubtitle": "Latest browser-side demo events"
   },
   "section": {
-    "catalogSubtitle": "Products, pricing, descriptions, and merchandising status.",
+    "catalogSubtitle": "Products, categories, brands, and imagery in one catalog workspace.",
     "categoriesSubtitle": "Structured product taxonomy for the music retail catalog.",
     "brandsSubtitle": "Reusable vendor and manufacturer records.",
     "ordersSubtitle": "Internal order processing and fulfillment progression.",
