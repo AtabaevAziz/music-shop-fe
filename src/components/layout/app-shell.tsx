@@ -74,7 +74,8 @@ export function AppShell({
   );
 
   const rawSegment = pathname.split("/")[2] ?? "";
-  const currentSegment = navOrder.find((segment) => segment === rawSegment) ?? "";
+  const currentSegment =
+    navOrder.find((segment) => segment === rawSegment) ?? "";
   const isAllowed = sessionRole
     ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
     : false;

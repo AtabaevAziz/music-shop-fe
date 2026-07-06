@@ -43,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -50,12 +51,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { BrandsModule } from "@/features/brands/brands-module";
 import { CategoriesModule } from "@/features/categories/categories-module";
 import { MediaModule } from "@/features/media/media-module";
@@ -319,7 +314,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                                     type="button"
                                     disabled={isSaving || isDeleting}
                                     aria-label={t("common.delete")}
-                                    onClick={() => setDeleteTargetId(product.id)}
+                                    onClick={() =>
+                                      setDeleteTargetId(product.id)
+                                    }
                                   >
                                     <Trash2 />
                                   </Button>
