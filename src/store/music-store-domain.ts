@@ -5,8 +5,10 @@ import {
   Customer,
   Database,
   Employee,
+  OrderItem,
   OrderStatus,
   Product,
+  RepairRequest,
 } from "@/types/music";
 
 export class StoreActionError extends Error {
@@ -217,6 +219,10 @@ export function validateDeleteEntity(
       !db.orders.some((order) => order.customerId === id),
       "Customer is used by orders and cannot be deleted.",
     );
+    assert(
+      !db.repairRequests.some((request) => request.customerId === id),
+      "Customer is used by repair requests and cannot be deleted.",
+    );
     return;
   }
 
@@ -263,6 +269,59 @@ export function validateOrderStatusTransition(
     orderTransitions[order.status].includes(nextStatus),
     `Order cannot move from ${order.status} to ${nextStatus}.`,
   );
+}
+
+export function validateClientLogin(db: Database, customerId: string) {
+  const customer = db.customers.find((entry) => entry.id === customerId);
+  assert(Boolean(customer), "Customer account does not exist.");
+  assert(customer?.status === "active", "Customer account is inactive.");
+}
+
+export function validateClientOrderInput(
+  db: Database,
+  customerId: string,
+  items: OrderItem[],
+  notes: string,
+) {
+  validateClientLogin(db, customerId);
+  assert(items.length > 0, "Order must contain at least one item.");
+  assert(notes.trim().length >= 4, "Order note is too short.");
+
+  items.forEach((item) => {
+    const product = db.products.find((entry) => entry.id === item.productId);
+    assert(Boolean(product), "Selected product does not exist.");
+    assert(item.qty > 0, "Order quantity must be greater than 0.");
+    assert(
+      Number.isFinite(item.unitPrice) && item.unitPrice > 0,
+      "Order price must be greater than 0.",
+    );
+    assert(
+      product?.status === "active",
+      "Only active products can be ordered.",
+    );
+    assert(
+      (product?.stockQty ?? 0) >= item.qty,
+      `Not enough stock for ${product?.name ?? item.productId}.`,
+    );
+  });
+}
+
+export function validateRepairRequestInput(
+  db: Database,
+  customerId: string,
+  input: Omit<
+    RepairRequest,
+    "id" | "customerId" | "status" | "createdAt" | "updatedAt"
+  >,
+) {
+  validateClientLogin(db, customerId);
+  validateSharedName(input.instrumentName, "Instrument name");
+  validateSharedName(input.brand, "Instrument brand");
+  assert(
+    input.issue.trim().length >= 8,
+    "Repair issue description is too short.",
+  );
+  assert(input.notes.trim().length >= 4, "Repair notes are too short.");
 }
 
 export function validateProductImageInput(

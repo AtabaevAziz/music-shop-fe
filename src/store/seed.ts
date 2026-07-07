@@ -264,6 +264,30 @@ export const seedDatabase: Database = {
       updatedAt: new Date(now.getTime() - 1000 * 60 * 60 * 1).toISOString(),
     },
   ],
+  repairRequests: [
+    {
+      id: "REP-24061",
+      customerId: "cust-2",
+      instrumentName: "Yamaha Clavinova CLP-725",
+      brand: "Yamaha",
+      issue: "Right speaker crackles after 20 minutes of playing.",
+      status: "diagnostics",
+      notes: "Customer asked for an estimate before any part replacement.",
+      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 22).toISOString(),
+      updatedAt: new Date(now.getTime() - 1000 * 60 * 60 * 6).toISOString(),
+    },
+    {
+      id: "REP-24062",
+      customerId: "cust-3",
+      instrumentName: "Pearl Export Kit",
+      brand: "Pearl",
+      issue: "Kick pedal tension slips during rehearsals.",
+      status: "ready",
+      notes: "Pickup expected this evening if testing passes.",
+      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 16).toISOString(),
+      updatedAt: new Date(now.getTime() - 1000 * 60 * 60 * 2).toISOString(),
+    },
+  ],
   employees: [
     {
       id: "emp-1",
@@ -537,6 +561,38 @@ const localizedOrderNotes = {
   },
 } as const;
 
+const localizedRepairContent = {
+  "REP-24061": {
+    ru: {
+      instrumentName: "Yamaha Clavinova CLP-725",
+      brand: "Yamaha",
+      issue: "Правый динамик начинает хрипеть примерно через 20 минут игры.",
+      notes:
+        "Клиент просил сначала согласовать смету, прежде чем менять детали.",
+    },
+    en: {
+      instrumentName: "Yamaha Clavinova CLP-725",
+      brand: "Yamaha",
+      issue: "Right speaker crackles after 20 minutes of playing.",
+      notes: "Customer asked for an estimate before any part replacement.",
+    },
+  },
+  "REP-24062": {
+    ru: {
+      instrumentName: "Pearl Export Kit",
+      brand: "Pearl",
+      issue: "Натяжение педали бас-бочки сбивается во время репетиций.",
+      notes: "Самовывоз ожидается вечером после финальной проверки.",
+    },
+    en: {
+      instrumentName: "Pearl Export Kit",
+      brand: "Pearl",
+      issue: "Kick pedal tension slips during rehearsals.",
+      notes: "Pickup expected this evening if testing passes.",
+    },
+  },
+} as const;
+
 function localizeText(
   value: string,
   translations: Record<Locale, string> | undefined,
@@ -659,6 +715,48 @@ export function localizeDemoDatabase(db: Database, locale: Locale): Database {
         locale,
       ),
     })),
+    repairRequests: db.repairRequests.map((request) => {
+      const translations =
+        localizedRepairContent[
+          request.id as keyof typeof localizedRepairContent
+        ];
+
+      return {
+        ...request,
+        instrumentName: localizeText(
+          request.instrumentName,
+          translations && {
+            ru: translations.ru.instrumentName,
+            en: translations.en.instrumentName,
+          },
+          locale,
+        ),
+        brand: localizeText(
+          request.brand,
+          translations && {
+            ru: translations.ru.brand,
+            en: translations.en.brand,
+          },
+          locale,
+        ),
+        issue: localizeText(
+          request.issue,
+          translations && {
+            ru: translations.ru.issue,
+            en: translations.en.issue,
+          },
+          locale,
+        ),
+        notes: localizeText(
+          request.notes,
+          translations && {
+            ru: translations.ru.notes,
+            en: translations.en.notes,
+          },
+          locale,
+        ),
+      };
+    }),
     activity: db.activity,
   };
 }

@@ -9,10 +9,10 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
-import { useSessionStore } from "@/store/music-store";
+import { useSessionStore, useStoreDb } from "@/store/music-store";
 import { Role } from "@/types/music";
 
-const roles: Role[] = [
+const staffRoles: Role[] = [
   "admin",
   "store_manager",
   "catalog_manager",
@@ -24,6 +24,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const db = useStoreDb();
   const { login } = useSessionStore();
   const [isPending, startTransition] = useTransition();
   const next = searchParams.get("next");
@@ -34,7 +35,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     store_manager: t("auth.storeManagerBlurb"),
     catalog_manager: t("auth.catalogManagerBlurb"),
     sales_operator: t("auth.salesOperatorBlurb"),
+    client: t("auth.clientBlurb"),
   };
+  const demoCustomers = db.customers.filter(
+    (customer) => customer.status === "active",
+  );
 
   return (
     <div className="auth-page">
@@ -77,27 +82,57 @@ export function LoginScreen({ locale }: { locale: Locale }) {
         </section>
         <section>
           <h2>{t("auth.enterAs")}</h2>
-          <div className="login-role-grid">
-            {roles.map((role) => (
-              <Button
-                key={role}
-                className="login-role h-auto justify-start whitespace-normal p-5 text-left"
-                variant="outline"
-                disabled={isPending}
-                onClick={() => {
-                  startTransition(() => {
-                    void login(role).then(() =>
-                      router.push(searchParams.get("next") || `/${locale}`),
-                    );
-                  });
-                }}
-              >
-                <strong className="login-role-title">
-                  {dynamicLabel(t, role)}
-                </strong>
-                <p className="login-role-copy">{roleBlurbs[role]}</p>
-              </Button>
-            ))}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="hero-note-label">{t("auth.staffAccess")}</div>
+              <div className="login-role-grid">
+                {staffRoles.map((role) => (
+                  <Button
+                    key={role}
+                    className="login-role h-auto justify-start whitespace-normal p-5 text-left"
+                    variant="outline"
+                    disabled={isPending}
+                    onClick={() => {
+                      startTransition(() => {
+                        void login(role).then(() =>
+                          router.push(searchParams.get("next") || `/${locale}`),
+                        );
+                      });
+                    }}
+                  >
+                    <strong className="login-role-title">
+                      {dynamicLabel(t, role)}
+                    </strong>
+                    <p className="login-role-copy">{roleBlurbs[role]}</p>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="hero-note-label">{t("auth.clientAccess")}</div>
+              <div className="login-role-grid">
+                {demoCustomers.map((customer) => (
+                  <Button
+                    key={customer.id}
+                    className="login-role h-auto justify-start whitespace-normal p-5 text-left"
+                    variant="outline"
+                    disabled={isPending}
+                    onClick={() => {
+                      startTransition(() => {
+                        void login("client", customer.id).then(() =>
+                          router.push(searchParams.get("next") || `/${locale}`),
+                        );
+                      });
+                    }}
+                  >
+                    <strong className="login-role-title">{customer.name}</strong>
+                    <p className="login-role-copy">
+                      {dynamicLabel(t, customer.tier)} · {customer.notes}
+                    </p>
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
       </div>

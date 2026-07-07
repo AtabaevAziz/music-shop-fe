@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { AuthGuard } from "@/components/layout/auth-guard";
+import { ProtectedShell } from "@/components/layout/protected-shell";
 import { Locale } from "@/i18n";
 
 export default async function ProtectedLayout({
@@ -13,7 +13,7 @@ export default async function ProtectedLayout({
 
   return (
     <AuthGuard locale={locale}>
-      <AppShell locale={locale}>{children}</AppShell>
+      <ProtectedShell locale={locale}>{children}</ProtectedShell>
     </AuthGuard>
   );
 }

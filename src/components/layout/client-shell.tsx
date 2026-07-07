@@ -11,9 +11,9 @@ import {
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,16 @@ import {
 import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
-import { useSessionStore, useStoreDb } from "@/store/music-store";
+import { useClientStore, useSessionStore } from "@/store/music-store";
 import { Role } from "@/types/music";
+
+type NavSegment =
+  | ""
+  | "catalog"
+  | "inventory"
+  | "orders"
+  | "customers"
+  | "repairs";
 
 type NavItem = { href: string; label: string; roles?: Role[] };
 
@@ -47,18 +55,17 @@ const navOrder = [
   "customers",
   "repairs",
 ] as const;
-type NavSegment = (typeof navOrder)[number];
 
 const accessMap: Record<NavSegment, Role[]> = {
-  "": ["admin", "store_manager", "catalog_manager", "sales_operator"],
-  catalog: ["admin", "store_manager", "catalog_manager"],
-  inventory: ["admin", "store_manager", "catalog_manager"],
-  orders: ["admin", "store_manager", "sales_operator"],
-  customers: ["admin", "store_manager", "sales_operator"],
-  repairs: [],
+  "": ["client"],
+  catalog: ["client"],
+  inventory: [],
+  orders: ["client"],
+  customers: [],
+  repairs: ["client"],
 };
 
-export function AppShell({
+export function ClientShell({
   locale,
   children,
 }: {
@@ -68,7 +75,7 @@ export function AppShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const db = useStoreDb();
+  const { customer, orders, repairRequests } = useClientStore();
   const { session, logout, resetDemo } = useSessionStore();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [themeMounted, setThemeMounted] = useState(false);
@@ -112,19 +119,25 @@ export function AppShell({
     ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
     : false;
   const pageMeta: Record<NavSegment, { title: string; subtitle: string }> = {
-    "": { title: t("nav.dashboard"), subtitle: t("meta.appSubtitle") },
+    "": {
+      title: t("nav.dashboard"),
+      subtitle: t("section.clientHomeSubtitle"),
+    },
     catalog: {
       title: t("nav.catalog"),
-      subtitle: t("section.catalogSubtitle"),
+      subtitle: t("section.clientCatalogSubtitle"),
     },
     inventory: {
       title: t("nav.inventory"),
-      subtitle: t("section.inventorySubtitle"),
+      subtitle: t("labels.accessRestrictedText"),
     },
-    orders: { title: t("nav.orders"), subtitle: t("section.ordersSubtitle") },
+    orders: {
+      title: t("nav.orders"),
+      subtitle: t("section.clientOrdersSubtitle"),
+    },
     customers: {
       title: t("nav.customers"),
-      subtitle: t("section.customersSubtitle"),
+      subtitle: t("labels.accessRestrictedText"),
     },
     repairs: {
       title: t("nav.repairs"),
@@ -149,8 +162,8 @@ export function AppShell({
       <div className="brand-mark">
         <div className="sidebar-kicker">{t("common.brand")}</div>
         <strong className="sidebar-title">{t("meta.appName")}</strong>
-        <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
-        <small className="sidebar-role">{dynamicLabel(t, session.role)}</small>
+        <p className="sidebar-copy muted">{t("section.clientPortalBlurb")}</p>
+        <small className="sidebar-role">{localizedRole}</small>
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
@@ -167,14 +180,13 @@ export function AppShell({
         </nav>
       </div>
       <div className="surface sidebar-metric sidebar-footer">
-        <div className="sidebar-metric-label muted">
-          {t("labels.inventoryThresholdTitle")}
-        </div>
+        <div className="sidebar-metric-label muted">{customer?.email}</div>
         <div className="sidebar-metric-value">
-          {db.settings.lowStockThreshold}
+          {dynamicLabel(t, customer?.tier ?? "standard")}
         </div>
         <div className="sidebar-metric-copy muted">
-          {t("labels.inventoryThresholdHelp")}
+          {t("labels.activeOrders")}: {orders.length} · {t("nav.repairs")}:{" "}
+          {repairRequests.length}
         </div>
       </div>
     </>

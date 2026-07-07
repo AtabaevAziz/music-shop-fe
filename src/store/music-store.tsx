@@ -16,6 +16,8 @@ import {
   StoreActionError,
   validateBrandInput,
   validateCategoryInput,
+  validateClientLogin,
+  validateClientOrderInput,
   validateCustomerInput,
   validateDeleteEntity,
   validateEmployeeInput,
@@ -23,6 +25,7 @@ import {
   validatePrimaryImageSelection,
   validateProductImageInput,
   validateProductInput,
+  validateRepairRequestInput,
   validateSettingsInput,
   validateStockAdjustment,
 } from "@/store/music-store-domain";
@@ -34,9 +37,11 @@ import {
   Customer,
   Database,
   Employee,
+  OrderItem,
   OrderStatus,
   Product,
   ProductStatus,
+  RepairRequest,
   Role,
   Session,
 } from "@/types/music";
@@ -53,7 +58,7 @@ type StoreContextValue = {
   session: Session | null;
   ready: boolean;
   flash: Flash;
-  login: (role: Role) => Promise<void>;
+  login: (role: Role, customerId?: string) => Promise<void>;
   logout: () => void;
   resetDemo: () => Promise<void>;
   saveCategory: (
@@ -74,6 +79,18 @@ type StoreContextValue = {
     reason: string,
   ) => Promise<void>;
   changeOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
+  createClientOrder: (
+    input: {
+      items: OrderItem[];
+      notes: string;
+    },
+  ) => Promise<void>;
+  createRepairRequest: (
+    input: Omit<
+      RepairRequest,
+      "id" | "customerId" | "status" | "createdAt" | "updatedAt"
+    >,
+  ) => Promise<void>;
   saveSettings: (input: Database["settings"]) => Promise<void>;
   addProductImage: (productId: string, label: string) => Promise<void>;
   setPrimaryImage: (productId: string, label: string) => Promise<void>;
@@ -82,7 +99,7 @@ type StoreContextValue = {
 const DB_KEY = "music-shop-db";
 const SESSION_KEY = "music-shop-session";
 const DB_VERSION_KEY = "music-shop-db-version";
-const DB_VERSION = "3";
+const DB_VERSION = "4";
 const DEFAULT_ERROR_MESSAGE = "Unable to complete the requested action.";
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -97,7 +114,16 @@ function roleToName(role: Role) {
     store_manager: "Store Manager",
     catalog_manager: "Catalog Manager",
     sales_operator: "Sales Operator",
+    client: "Client",
   }[role];
+}
+
+function nextOrderCode() {
+  return `ORD-${Date.now().toString().slice(-6)}`;
+}
+
+function nextRepairCode() {
+  return `REP-${Date.now().toString().slice(-6)}`;
 }
 
 function simulateDelay() {
@@ -259,8 +285,21 @@ export function MusicStoreProvider({
     session,
     ready,
     flash,
-    login: async (role) => {
+    login: async (role, customerId) => {
       await simulateDelay();
+      if (role === "client") {
+        validateClientLogin(dbRef.current, customerId ?? "");
+        const customer = dbRef.current.customers.find(
+          (entry) => entry.id === customerId,
+        );
+        setSession({
+          role,
+          customerId,
+          name: customer?.name ?? roleToName(role),
+        });
+        return;
+      }
+
       setSession({ role, name: roleToName(role) });
     },
     logout: () => setSession(null),
@@ -545,6 +584,114 @@ export function MusicStoreProvider({
         { kind: "success", key: "flash.orderStatusUpdated" },
       );
     },
+    createClientOrder: async (input) => {
+      await patchDb(
+        (current) => {
+          validateClientOrderInput(
+            current,
+            session?.customerId ?? "",
+            input.items,
+            input.notes,
+          );
+
+          const orderId = nextOrderCode();
+          const now = new Date().toISOString();
+          const items = input.items.map((item) => ({
+            ...item,
+            unitPrice:
+              current.products.find((product) => product.id === item.productId)
+                ?.price ?? item.unitPrice,
+          }));
+
+          return {
+            ...current,
+            orders: [
+              {
+                id: orderId,
+                customerId: session?.customerId ?? "",
+                items,
+                paymentStatus: "pending",
+                status: "new",
+                notes: input.notes.trim(),
+                createdAt: now,
+                updatedAt: now,
+              },
+              ...current.orders,
+            ],
+            products: current.products.map((product) => {
+              const orderedItem = items.find(
+                (item) => item.productId === product.id,
+              );
+
+              return orderedItem
+                ? {
+                    ...product,
+                    stockQty: Math.max(product.stockQty - orderedItem.qty, 0),
+                  }
+                : product;
+            }),
+            inventoryMovements: [
+              ...items.map((item) => {
+                return {
+                  id: nextId("movement", `${orderId}-${item.productId}`),
+                  productId: item.productId,
+                  delta: -item.qty,
+                  reason: `Reserved for client order ${orderId}`,
+                  createdAt: now,
+                };
+              }),
+              ...current.inventoryMovements,
+            ],
+            activity: addActivityEntry(
+              current.activity,
+              "activity.clientOrderPlaced",
+              {
+                orderId,
+                customerName: session?.name ?? "",
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "flash.orderPlaced" },
+      );
+    },
+    createRepairRequest: async (input) => {
+      await patchDb(
+        (current) => {
+          validateRepairRequestInput(current, session?.customerId ?? "", input);
+
+          const repairId = nextRepairCode();
+          const now = new Date().toISOString();
+
+          return {
+            ...current,
+            repairRequests: [
+              {
+                id: repairId,
+                customerId: session?.customerId ?? "",
+                instrumentName: input.instrumentName.trim(),
+                brand: input.brand.trim(),
+                issue: input.issue.trim(),
+                status: "new",
+                notes: input.notes.trim(),
+                createdAt: now,
+                updatedAt: now,
+              },
+              ...current.repairRequests,
+            ],
+            activity: addActivityEntry(
+              current.activity,
+              "activity.repairRequestSubmitted",
+              {
+                repairId,
+                instrumentName: input.instrumentName.trim(),
+              },
+            ),
+          };
+        },
+        { kind: "success", key: "flash.repairRequestSubmitted" },
+      );
+    },
     saveSettings: async (input) => {
       await patchDb(
         (current) => {
@@ -721,6 +868,28 @@ export function useOrdersStore() {
     customers: db.customers,
     settings: db.settings,
     changeOrderStatus,
+  };
+}
+
+export function useClientStore() {
+  const { db, session, createClientOrder, createRepairRequest } =
+    useMusicStore();
+  const customerId = session?.customerId;
+
+  return {
+    customer: customerId
+      ? db.customers.find((entry) => entry.id === customerId) ?? null
+      : null,
+    products: db.products,
+    orders: customerId
+      ? db.orders.filter((order) => order.customerId === customerId)
+      : [],
+    repairRequests: customerId
+      ? db.repairRequests.filter((request) => request.customerId === customerId)
+      : [],
+    settings: db.settings,
+    createClientOrder,
+    createRepairRequest,
   };
 }
 

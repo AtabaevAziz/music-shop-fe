@@ -1,4 +1,6 @@
+import { RoleRoute } from "@/components/layout/role-route";
 import { CatalogModule } from "@/features/catalog/catalog-module";
+import { ClientCatalogModule } from "@/features/client/client-catalog-module";
 import { Locale } from "@/i18n";
 
 export default async function CatalogPage({
@@ -7,5 +9,10 @@ export default async function CatalogPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  return <CatalogModule locale={locale} />;
+  return (
+    <RoleRoute
+      client={<ClientCatalogModule locale={locale} />}
+      staff={<CatalogModule locale={locale} />}
+    />
+  );
 }

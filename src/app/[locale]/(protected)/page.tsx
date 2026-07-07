@@ -1,3 +1,5 @@
+import { RoleRoute } from "@/components/layout/role-route";
+import { ClientHomeModule } from "@/features/client/client-home-module";
 import { DashboardModule } from "@/features/dashboard/dashboard-module";
 import { Locale } from "@/i18n";
 
@@ -7,5 +9,10 @@ export default async function DashboardPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  return <DashboardModule locale={locale} />;
+  return (
+    <RoleRoute
+      client={<ClientHomeModule locale={locale} />}
+      staff={<DashboardModule locale={locale} />}
+    />
+  );
 }

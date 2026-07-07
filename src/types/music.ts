@@ -2,13 +2,21 @@ export type Role =
   | "admin"
   | "store_manager"
   | "catalog_manager"
-  | "sales_operator";
+  | "sales_operator"
+  | "client";
 export type PaymentStatus = "pending" | "partial" | "paid" | "refunded";
 export type OrderStatus =
   | "new"
   | "confirmed"
   | "packed"
   | "ready_for_pickup"
+  | "completed"
+  | "cancelled";
+export type RepairStatus =
+  | "new"
+  | "diagnostics"
+  | "in_progress"
+  | "ready"
   | "completed"
   | "cancelled";
 export type ProductStatus = "draft" | "active" | "archived";
@@ -75,6 +83,18 @@ export type Order = {
   updatedAt: string;
 };
 
+export type RepairRequest = {
+  id: string;
+  customerId: string;
+  instrumentName: string;
+  brand: string;
+  issue: string;
+  status: RepairStatus;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Customer = {
   id: string;
   name: string;
@@ -112,6 +132,7 @@ export type Activity = {
 export type Session = {
   role: Role;
   name: string;
+  customerId?: string;
 };
 
 export type Database = {
@@ -120,6 +141,7 @@ export type Database = {
   products: Product[];
   inventoryMovements: InventoryMovement[];
   orders: Order[];
+  repairRequests: RepairRequest[];
   customers: Customer[];
   employees: Employee[];
   settings: BusinessSettings;
