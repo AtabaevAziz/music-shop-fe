@@ -1,13 +1,30 @@
 "use client";
 
-import { Languages, LogOut, Menu, RotateCcw } from "lucide-react";
+import {
+  ChevronDown,
+  Languages,
+  LogOut,
+  Menu,
+  Moon,
+  RotateCcw,
+  Sun,
+  UserRound,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -46,9 +63,15 @@ export function AppShell({
   const db = useStoreDb();
   const { session, logout, resetDemo } = useSessionStore();
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [themeMounted, setThemeMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
   const sessionRole = session?.role;
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const nextLocale = getNextLocale(locale);
+  const isDark = themeMounted && resolvedTheme === "dark";
+  const themeLabel = isDark
+    ? t("common.switchToLight")
+    : t("common.switchToDark");
 
   const navMap: Record<NavSegment, string> = {
     "": t("nav.dashboard"),
@@ -101,7 +124,12 @@ export function AppShell({
     setIsNavOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    setThemeMounted(true);
+  }, []);
+
   if (!session) return null;
+  const localizedRole = dynamicLabel(t, session.role);
 
   const navContent = (
     <>
@@ -167,35 +195,72 @@ export function AppShell({
             <div className="muted">{currentPage.subtitle}</div>
           </div>
           <div className="topbar-actions">
-            <ThemeToggle />
-            <Button
-              className="topbar-action topbar-language"
-              variant="outline"
-              onClick={() => router.push(`/${nextLocale}${pathname.slice(3)}`)}
-              aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
-            >
-              <Languages size={16} />
-              {t("common.language")}: {currentLocaleLabel}
-            </Button>
-            <Button
-              className="topbar-action topbar-reset"
-              variant="outline"
-              onClick={() => void resetDemo()}
-            >
-              <RotateCcw size={16} />
-              {t("nav.resetDemo")}
-            </Button>
-            <Button
-              className="topbar-action topbar-logout"
-              variant="destructive"
-              onClick={() => {
-                logout();
-                router.replace(`/${locale}/login`);
-              }}
-            >
-              <LogOut size={16} />
-              {t("nav.logout")}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="profile-menu-trigger"
+                  variant="outline"
+                  aria-label={`${session.name}: ${localizedRole}`}
+                >
+                  <span className="profile-menu-icon">
+                    <UserRound size={16} />
+                  </span>
+                  <span className="profile-menu-copy">
+                    <span className="profile-menu-name">{session.name}</span>
+                    <span className="profile-menu-role">{localizedRole}</span>
+                  </span>
+                  <ChevronDown size={16} className="profile-menu-chevron" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="profile-menu-content w-72"
+              >
+                <DropdownMenuLabel className="profile-menu-header">
+                  <span className="profile-menu-header-name">
+                    {session.name}
+                  </span>
+                  <span className="profile-menu-header-role">
+                    {localizedRole}
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="profile-menu-item"
+                  onSelect={() => setTheme(isDark ? "light" : "dark")}
+                >
+                  {isDark ? <Moon size={16} /> : <Sun size={16} />}
+                  {themeLabel}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="profile-menu-item"
+                  onSelect={() =>
+                    router.push(`/${nextLocale}${pathname.slice(3)}`)
+                  }
+                >
+                  <Languages size={16} />
+                  {t("common.language")}: {currentLocaleLabel}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="profile-menu-item"
+                  onSelect={() => void resetDemo()}
+                >
+                  <RotateCcw size={16} />
+                  {t("nav.resetDemo")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="profile-menu-item profile-menu-item-danger"
+                  onSelect={() => {
+                    logout();
+                    router.replace(`/${locale}/login`);
+                  }}
+                >
+                  <LogOut size={16} />
+                  {t("nav.logout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <div className="page-scroll">
