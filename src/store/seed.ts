@@ -593,24 +593,57 @@ const localizedRepairContent = {
   },
 } as const;
 
+type SeedLocalizedText = {
+  ru: string;
+  en: string;
+  uz?: string;
+};
+
+type SeedLocalizedSpecs = {
+  ru: Record<string, string>;
+  en: Record<string, string>;
+  uz?: Record<string, string>;
+};
+
+function resolveLocalizedText(
+  translations: SeedLocalizedText | undefined,
+  locale: Locale,
+  fallback: string,
+) {
+  if (!translations) {
+    return fallback;
+  }
+
+  return translations[locale] ?? translations.en ?? translations.ru ?? fallback;
+}
+
+function resolveLocalizedSpecs(
+  translations: SeedLocalizedSpecs | undefined,
+  locale: Locale,
+  fallback: Record<string, string>,
+) {
+  if (!translations) {
+    return fallback;
+  }
+
+  return translations[locale] ?? translations.en ?? translations.ru ?? fallback;
+}
+
 function localizeText(
   value: string,
-  translations: Record<Locale, string> | undefined,
+  translations: SeedLocalizedText | undefined,
   locale: Locale,
 ) {
   if (!translations) return value;
   const knownVariants = Object.values(translations);
-  return knownVariants.includes(value) ? translations[locale] : value;
+  return knownVariants.includes(value)
+    ? resolveLocalizedText(translations, locale, value)
+    : value;
 }
 
 function localizeSpecs(
   specs: Record<string, string>,
-  translations:
-    | {
-        ru: Record<string, string>;
-        en: Record<string, string>;
-      }
-    | undefined,
+  translations: SeedLocalizedSpecs | undefined,
   locale: Locale,
 ) {
   if (!translations) return specs;
@@ -620,7 +653,7 @@ function localizeSpecs(
   );
 
   return knownVariants.includes(JSON.stringify(specs))
-    ? translations[locale]
+    ? resolveLocalizedSpecs(translations, locale, specs)
     : specs;
 }
 
