@@ -79,7 +79,9 @@ export function LoginScreen({ locale }: { locale: Locale }) {
 
     setError(null);
     startTransition(() => {
-      void login("client", matchingCustomer.id).then(() => router.push(destination));
+      void login("client", matchingCustomer.id).then(() =>
+        router.push(destination),
+      );
     });
   };
 
@@ -139,7 +141,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
         </section>
         <section>
           <h2>{t("auth.enterAs")}</h2>
-          <form className="auth-signin-panel" autoComplete="off" onSubmit={handleSignIn}>
+          <form
+            className="auth-signin-panel"
+            autoComplete="off"
+            onSubmit={handleSignIn}
+          >
             <div className="auth-field-group">
               <Label htmlFor="login">{t("auth.loginLabel")}</Label>
               <Input

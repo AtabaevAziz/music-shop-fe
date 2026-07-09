@@ -79,12 +79,10 @@ type StoreContextValue = {
     reason: string,
   ) => Promise<void>;
   changeOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>;
-  createClientOrder: (
-    input: {
-      items: OrderItem[];
-      notes: string;
-    },
-  ) => Promise<void>;
+  createClientOrder: (input: {
+    items: OrderItem[];
+    notes: string;
+  }) => Promise<void>;
   createRepairRequest: (
     input: Omit<
       RepairRequest,
@@ -892,7 +890,7 @@ export function useClientStore() {
 
   return {
     customer: customerId
-      ? db.customers.find((entry) => entry.id === customerId) ?? null
+      ? (db.customers.find((entry) => entry.id === customerId) ?? null)
       : null,
     products: db.products,
     orders: customerId

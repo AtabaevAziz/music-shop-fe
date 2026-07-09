@@ -189,11 +189,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
               <div className="text-sm font-medium">{purchaseTarget?.name}</div>
               <div className="muted">
                 {purchaseTarget
-                  ? formatMoney(
-                      purchaseTarget.price,
-                      settings.currency,
-                      locale,
-                    )
+                  ? formatMoney(purchaseTarget.price, settings.currency, locale)
                   : null}
               </div>
             </div>

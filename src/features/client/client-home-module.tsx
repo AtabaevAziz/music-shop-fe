@@ -37,7 +37,8 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
   const recentActivity = [...orders, ...repairRequests]
     .sort(
       (left, right) =>
-        new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+        new Date(right.updatedAt).getTime() -
+        new Date(left.updatedAt).getTime(),
     )
     .slice(0, 4);
 
