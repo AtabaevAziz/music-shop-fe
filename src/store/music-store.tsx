@@ -130,6 +130,20 @@ function simulateDelay() {
   return new Promise((resolve) => setTimeout(resolve, 280));
 }
 
+function normalizeStoredDb(db: Database) {
+  if (db.settings.currency === "USD") {
+    return {
+      ...db,
+      settings: {
+        ...db.settings,
+        currency: "UZS",
+      },
+    };
+  }
+
+  return db;
+}
+
 function readStoredDb() {
   const rawDb = window.localStorage.getItem(DB_KEY);
   const rawDbVersion = window.localStorage.getItem(DB_VERSION_KEY);
@@ -138,7 +152,7 @@ function readStoredDb() {
   }
 
   try {
-    return JSON.parse(rawDb) as Database;
+    return normalizeStoredDb(JSON.parse(rawDb) as Database);
   } catch {
     return null;
   }

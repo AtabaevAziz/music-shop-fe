@@ -323,7 +323,7 @@ export const seedDatabase: Database = {
     },
   ],
   settings: {
-    currency: "USD",
+    currency: "UZS",
     lowStockThreshold: 3,
     defaultProductStatus: "draft",
     defaultMarkupPercent: 28,

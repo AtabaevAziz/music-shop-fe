@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatMoney(
   value: number,
-  currency = "USD",
+  currency = "UZS",
   locale: Locale = "en",
 ) {
   return new Intl.NumberFormat(getIntlLocale(locale), {
@@ -20,7 +20,7 @@ export function formatMoney(
 }
 
 export function getIntlLocale(locale: Locale) {
-  return locale === "ru" ? "ru-RU" : "en-US";
+  return locale === "ru" ? "ru-RU" : locale === "uz" ? "uz-UZ" : "en-US";
 }
 
 export function slugify(value: string) {

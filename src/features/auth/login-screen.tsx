@@ -1,23 +1,37 @@
 "use client";
 
-import { Languages } from "lucide-react";
+import { ChevronDown, Eye, EyeOff, Languages } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
-import { dynamicLabel } from "@/lib/translations";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 import { useSessionStore, useStoreDb } from "@/store/music-store";
 import { Role } from "@/types/music";
 
-const staffRoles: Role[] = [
+const staffRoles = [
   "admin",
   "store_manager",
   "catalog_manager",
   "sales_operator",
-];
+] as const satisfies Role[];
+const STAFF_PASSWORD = "Secret!1";
+
+type StaffRole = (typeof staffRoles)[number];
+
+function isStaffRole(value: string): value is StaffRole {
+  return staffRoles.includes(value as StaffRole);
+}
 
 export function LoginScreen({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -27,19 +41,47 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const db = useStoreDb();
   const { login } = useSessionStore();
   const [isPending, startTransition] = useTransition();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [loginValue, setLoginValue] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const next = searchParams.get("next");
-  const targetLocale = getNextLocale(locale);
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
-  const roleBlurbs: Record<Role, string> = {
-    admin: t("auth.adminBlurb"),
-    store_manager: t("auth.storeManagerBlurb"),
-    catalog_manager: t("auth.catalogManagerBlurb"),
-    sales_operator: t("auth.salesOperatorBlurb"),
-    client: t("auth.clientBlurb"),
-  };
-  const demoCustomers = db.customers.filter(
+  const activeCustomers = db.customers.filter(
     (customer) => customer.status === "active",
   );
+  const destination = next || `/${locale}`;
+
+  const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedLogin = loginValue.trim().toLowerCase();
+    const normalizedPassword = passwordValue.trim().toLowerCase();
+
+    if (isStaffRole(normalizedLogin) && passwordValue === STAFF_PASSWORD) {
+      setError(null);
+      startTransition(() => {
+        void login(normalizedLogin).then(() => router.push(destination));
+      });
+      return;
+    }
+
+    const matchingCustomer = activeCustomers.find(
+      (customer) => customer.email.trim().toLowerCase() === normalizedLogin,
+    );
+    if (
+      !matchingCustomer ||
+      normalizedPassword !== matchingCustomer.email.trim().toLowerCase()
+    ) {
+      setError(t("auth.invalidCredentials"));
+      return;
+    }
+
+    setError(null);
+    startTransition(() => {
+      void login("client", matchingCustomer.id).then(() => router.push(destination));
+    });
+  };
 
   return (
     <div className="auth-page">
@@ -48,22 +90,37 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           <div className="hero-panel-top">
             <div className="hero-eyebrow">{t("common.brand")}</div>
             <div className="hero-panel-controls">
-              <Button
-                className="hero-panel-locale"
-                variant="secondary"
-                type="button"
-                onClick={() =>
-                  router.push(
-                    `/${targetLocale}${pathname.slice(3)}${
-                      next ? `?next=${encodeURIComponent(next)}` : ""
-                    }`,
-                  )
-                }
-                aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
-              >
-                <Languages size={16} />
-                <span>{currentLocaleLabel}</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    className="hero-panel-locale"
+                    variant="secondary"
+                    type="button"
+                    aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
+                  >
+                    <Languages size={16} />
+                    <span>{currentLocaleLabel}</span>
+                    <ChevronDown size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {locales.map((itemLocale) => (
+                    <DropdownMenuItem
+                      key={itemLocale}
+                      disabled={itemLocale === locale}
+                      onSelect={() =>
+                        router.push(
+                          `/${itemLocale}${pathname.slice(3)}${
+                            next ? `?next=${encodeURIComponent(next)}` : ""
+                          }`,
+                        )
+                      }
+                    >
+                      {t(localeLabelKeyMap[itemLocale])}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <ThemeToggle variant="hero" />
             </div>
           </div>
@@ -82,58 +139,74 @@ export function LoginScreen({ locale }: { locale: Locale }) {
         </section>
         <section>
           <h2>{t("auth.enterAs")}</h2>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="hero-note-label">{t("auth.staffAccess")}</div>
-              <div className="login-role-grid">
-                {staffRoles.map((role) => (
-                  <Button
-                    key={role}
-                    className="login-role h-auto justify-start whitespace-normal p-5 text-left"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => {
-                      startTransition(() => {
-                        void login(role).then(() =>
-                          router.push(searchParams.get("next") || `/${locale}`),
-                        );
-                      });
-                    }}
-                  >
-                    <strong className="login-role-title">
-                      {dynamicLabel(t, role)}
-                    </strong>
-                    <p className="login-role-copy">{roleBlurbs[role]}</p>
-                  </Button>
-                ))}
+          <form className="auth-signin-panel" autoComplete="off" onSubmit={handleSignIn}>
+            <div className="auth-field-group">
+              <Label htmlFor="login">{t("auth.loginLabel")}</Label>
+              <Input
+                id="login"
+                name="signin_identifier"
+                className="auth-input"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder={t("auth.loginPlaceholder")}
+                value={loginValue}
+                required
+                disabled={isPending}
+                onChange={(event) => {
+                  if (error) {
+                    setError(null);
+                  }
+                  setLoginValue(event.target.value);
+                }}
+              />
+            </div>
+            <div className="auth-field-group">
+              <Label htmlFor="password">{t("auth.passwordLabel")}</Label>
+              <div className="auth-password-field">
+                <Input
+                  id="password"
+                  name="signin_secret"
+                  className="auth-input auth-input-with-toggle"
+                  type={isPasswordVisible ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder={t("auth.passwordPlaceholder")}
+                  value={passwordValue}
+                  required
+                  disabled={isPending}
+                  onChange={(event) => {
+                    if (error) {
+                      setError(null);
+                    }
+                    setPasswordValue(event.target.value);
+                  }}
+                />
+                <button
+                  className="auth-password-toggle"
+                  type="button"
+                  aria-label={
+                    isPasswordVisible
+                      ? t("auth.hidePassword")
+                      : t("auth.showPassword")
+                  }
+                  aria-pressed={isPasswordVisible}
+                  disabled={isPending}
+                  onClick={() => setIsPasswordVisible((current) => !current)}
+                >
+                  {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="hero-note-label">{t("auth.clientAccess")}</div>
-              <div className="login-role-grid">
-                {demoCustomers.map((customer) => (
-                  <Button
-                    key={customer.id}
-                    className="login-role h-auto justify-start whitespace-normal p-5 text-left"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => {
-                      startTransition(() => {
-                        void login("client", customer.id).then(() =>
-                          router.push(searchParams.get("next") || `/${locale}`),
-                        );
-                      });
-                    }}
-                  >
-                    <strong className="login-role-title">{customer.name}</strong>
-                    <p className="login-role-copy">
-                      {dynamicLabel(t, customer.tier)} · {customer.notes}
-                    </p>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
+            {error ? (
+              <p className="auth-form-error" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <Button className="auth-submit" type="submit" disabled={isPending}>
+              {t("auth.signInAction")}
+            </Button>
+          </form>
         </section>
       </div>
     </div>

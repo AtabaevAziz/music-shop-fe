@@ -5,17 +5,15 @@ import {
   Languages,
   LogOut,
   Menu,
-  Moon,
   RotateCcw,
-  Sun,
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,7 +29,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Locale, getNextLocale, localeLabelKeyMap } from "@/i18n";
+import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useSessionStore, useStoreDb } from "@/store/music-store";
@@ -71,15 +69,8 @@ export function AppShell({
   const db = useStoreDb();
   const { session, logout, resetDemo } = useSessionStore();
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [themeMounted, setThemeMounted] = useState(false);
-  const { resolvedTheme, setTheme } = useTheme();
   const sessionRole = session?.role;
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
-  const nextLocale = getNextLocale(locale);
-  const isDark = themeMounted && resolvedTheme === "dark";
-  const themeLabel = isDark
-    ? t("common.switchToLight")
-    : t("common.switchToDark");
 
   const navMap: Record<NavSegment, string> = {
     "": t("nav.dashboard"),
@@ -136,10 +127,6 @@ export function AppShell({
   useEffect(() => {
     setIsNavOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    setThemeMounted(true);
-  }, []);
 
   if (!session) return null;
   const localizedRole = dynamicLabel(t, session.role);
@@ -211,6 +198,35 @@ export function AppShell({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
+                  className="topbar-action"
+                  variant="outline"
+                  type="button"
+                  aria-label={`${t("common.language")}: ${currentLocaleLabel}`}
+                  title={`${t("common.language")}: ${currentLocaleLabel}`}
+                >
+                  <Languages size={16} />
+                  <span>{currentLocaleLabel}</span>
+                  <ChevronDown size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {locales.map((itemLocale) => (
+                  <DropdownMenuItem
+                    key={itemLocale}
+                    disabled={itemLocale === locale}
+                    onSelect={() =>
+                      router.push(`/${itemLocale}${pathname.slice(3)}`)
+                    }
+                  >
+                    {t(localeLabelKeyMap[itemLocale])}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ThemeToggle />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
                   className="profile-menu-trigger"
                   variant="outline"
                   aria-label={`${session.name}: ${localizedRole}`}
@@ -238,22 +254,6 @@ export function AppShell({
                   </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="profile-menu-item"
-                  onSelect={() => setTheme(isDark ? "light" : "dark")}
-                >
-                  {isDark ? <Moon size={16} /> : <Sun size={16} />}
-                  {themeLabel}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="profile-menu-item"
-                  onSelect={() =>
-                    router.push(`/${nextLocale}${pathname.slice(3)}`)
-                  }
-                >
-                  <Languages size={16} />
-                  {t("common.language")}: {currentLocaleLabel}
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="profile-menu-item"
                   onSelect={() => void resetDemo()}

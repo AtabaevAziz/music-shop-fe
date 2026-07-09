@@ -1,12 +1,13 @@
 import { getRequestConfig } from "next-intl/server";
 
-export const locales = ["ru", "en"] as const;
+export const locales = ["ru", "en", "uz"] as const;
 export const defaultLocale = "ru";
 
 export type Locale = (typeof locales)[number];
 export const localeLabelKeyMap: Record<Locale, string> = {
   ru: "common.localeNameRu",
   en: "common.localeNameEn",
+  uz: "common.localeNameUz",
 };
 
 export function isLocale(value: string): value is Locale {
@@ -14,7 +15,8 @@ export function isLocale(value: string): value is Locale {
 }
 
 export function getNextLocale(locale: Locale): Locale {
-  return locale === "ru" ? "en" : "ru";
+  const currentIndex = locales.indexOf(locale);
+  return locales[(currentIndex + 1) % locales.length] ?? defaultLocale;
 }
 
 export default getRequestConfig(async ({ locale }) => {
@@ -24,6 +26,6 @@ export default getRequestConfig(async ({ locale }) => {
   return {
     locale: currentLocale,
     messages,
-    timeZone: currentLocale === "ru" ? "Asia/Tashkent" : "UTC",
+    timeZone: currentLocale === "en" ? "UTC" : "Asia/Tashkent",
   };
 });
