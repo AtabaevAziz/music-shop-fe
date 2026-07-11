@@ -1,7 +1,8 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppField } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
@@ -13,9 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSettingsQuery } from "@/hooks/use-settings-query";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
+import { updateSettings } from "@/services/settings";
 import { ModuleSection } from "@/shared/components/module-shell";
-import { useSettingsStore } from "@/store/music-store";
 import { ProductStatus } from "@/types/music";
 
 type SettingsDraft = {
@@ -27,15 +30,47 @@ type SettingsDraft = {
 
 export function SettingsModule() {
   const t = useTranslations();
-  const { settings, saveSettings } = useSettingsStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useSettingsQuery();
   const [formError, setFormError] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [draft, setDraft] = useState<SettingsDraft>({
-    currency: settings.currency,
-    lowStockThreshold: String(settings.lowStockThreshold),
-    defaultProductStatus: settings.defaultProductStatus,
-    defaultMarkupPercent: String(settings.defaultMarkupPercent),
+    currency: "",
+    lowStockThreshold: "",
+    defaultProductStatus: "draft",
+    defaultMarkupPercent: "",
   });
+  const saveMutation = useMutation({
+    mutationFn: updateSettings,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+
+  useEffect(() => {
+    if (!data?.settings) {
+      return;
+    }
+
+    setDraft({
+      currency: data.settings.currency,
+      lowStockThreshold: String(data.settings.lowStockThreshold),
+      defaultProductStatus: data.settings.defaultProductStatus,
+      defaultMarkupPercent: String(data.settings.defaultMarkupPercent),
+    });
+  }, [data?.settings]);
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
+
+  const isSaving = saveMutation.isPending;
+  const productStatuses =
+    data.dictionaries.productStatuses?.map((status) => status.value) ??
+    (["draft", "active", "archived"] as ProductStatus[]);
 
   return (
     <ModuleSection
@@ -48,9 +83,8 @@ export function SettingsModule() {
         onSubmit={async (event) => {
           event.preventDefault();
           setFormError("");
-          setIsSaving(true);
           try {
-            await saveSettings({
+            await saveMutation.mutateAsync({
               currency: draft.currency,
               lowStockThreshold: Number(draft.lowStockThreshold),
               defaultProductStatus: draft.defaultProductStatus as
@@ -65,8 +99,6 @@ export function SettingsModule() {
                 ? error.message
                 : t("common.unexpectedError"),
             );
-          } finally {
-            setIsSaving(false);
           }
         }}
       >
@@ -110,13 +142,11 @@ export function SettingsModule() {
               <SelectValue placeholder={t("labels.defaultProductStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="draft">{dynamicLabel(t, "draft")}</SelectItem>
-              <SelectItem value="active">
-                {dynamicLabel(t, "active")}
-              </SelectItem>
-              <SelectItem value="archived">
-                {dynamicLabel(t, "archived")}
-              </SelectItem>
+              {productStatuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {dynamicLabel(t, status)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </AppField>

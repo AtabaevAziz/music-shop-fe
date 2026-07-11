@@ -57,6 +57,9 @@ const routeTitleKeyMap: Record<string, string> = {
   orders: "nav.orders",
   customers: "nav.customers",
   repairs: "nav.repairs",
+  employees: "nav.employees",
+  finance: "nav.finance",
+  settings: "nav.settings",
 };
 
 const routeSubtitleKeyMap: Record<string, string> = {
@@ -66,6 +69,9 @@ const routeSubtitleKeyMap: Record<string, string> = {
   orders: "section.ordersSubtitle",
   customers: "section.customersSubtitle",
   repairs: "section.repairsSubtitle",
+  employees: "section.employeesSubtitle",
+  finance: "section.financeSubtitle",
+  settings: "section.settingsSubtitle",
 };
 
 function getDefaultNavItems(
@@ -83,6 +89,9 @@ function getDefaultNavItems(
     { id: "orders", href: `/${locale}/orders` },
     { id: "customers", href: `/${locale}/customers` },
     { id: "repairs", href: `/${locale}/repairs` },
+    { id: "employees", href: `/${locale}/employees` },
+    { id: "finance", href: `/${locale}/finance` },
+    { id: "settings", href: `/${locale}/settings` },
   ];
 
   const accessMatrix: Record<Role, string[]> = {

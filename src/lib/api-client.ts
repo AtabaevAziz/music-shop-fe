@@ -13,8 +13,6 @@ type RequestOptions = {
   credentials?: RequestCredentials;
 };
 
-const DEFAULT_API_URL = "http://localhost:8080/api/v1";
-
 function normalizeBaseUrl(url: string) {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
@@ -48,11 +46,17 @@ function buildUrlWithParams(
 }
 
 function getApiUrl() {
-  return normalizeBaseUrl(
-    process.env.NEXT_PUBLIC_MUSIC_SHOP_BE_URL ??
-      process.env.NEXT_PUBLIC_API_BASE_URL ??
-      DEFAULT_API_URL,
-  );
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    process.env.NEXT_PUBLIC_MUSIC_SHOP_BE_URL;
+
+  if (!apiUrl) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_API_BASE_URL. Set it to your backend base URL, for example http://localhost:8080/api/v1.",
+    );
+  }
+
+  return normalizeBaseUrl(apiUrl);
 }
 
 function getLocaleHeader() {

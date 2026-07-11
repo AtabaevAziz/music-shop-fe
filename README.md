@@ -1,6 +1,6 @@
 # Music Shop Online
 
-Music Shop Online is a Next.js storefront and backoffice frontend for a musical instrument shop. It currently runs against a browser-side demo store, but the domain model and UI flows are structured to be replaced by a real backend API without changing product behavior.
+Music Shop Online is a Next.js storefront and backoffice frontend for a musical instrument shop. The app is wired to a backend API and active workflows no longer use browser-side demo persistence.
 
 The app includes:
 
@@ -28,11 +28,18 @@ The backend handoff document lives in [BACKEND_CONTRACT.md](BACKEND_CONTRACT.md)
 ```bash
 git clone <repository-url>
 cd music-shop-fe
+cp .env.example .env.local
 pnpm install
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+Required env:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
+```
 
 ## Scripts
 
@@ -56,18 +63,18 @@ pnpm prepare
 - Theme switching is available in the login screen and protected shells
 - Currency defaults to `UZS`
 - UI translations live in `src/messages/*.json`
-- Current persistence is browser-side via `localStorage`
+- Runtime data is loaded from the backend API through typed service clients
 
 ## Demo Sign-In
 
-The current login flow is intentionally demo-oriented.
+The login flow uses the seeded backend accounts.
 
 - Staff login: use one of `admin`, `store_manager`, `catalog_manager`, `sales_operator`
 - Staff password: `Secret!1`
 - Client login: use an active customer email from the seeded data
 - Client password: use the same email value
 
-These credentials are frontend-only placeholders and should be replaced by real backend authentication.
+These credentials come from the backend seed data.
 
 ## Routes and Experiences
 
@@ -80,21 +87,16 @@ Current locale-scoped routes:
 - `/{locale}/orders`
 - `/{locale}/customers`
 - `/{locale}/repairs`
+- `/{locale}/employees`
+- `/{locale}/finance`
+- `/{locale}/settings`
 
 Route behavior depends on session role:
 
-- Staff users currently see dashboard, catalog, inventory, orders, and customers
+- Staff users currently see dashboard, catalog, inventory, orders, customers, employees, finance, and settings
 - Client users see a client portal on the same protected route shell, including client orders and repairs
 - `catalog` already groups products, categories, brands, and media inside tabbed UI
 - `repairs` is currently mounted as a client-facing route
-
-Modeled but not yet mounted as standalone App Router pages:
-
-- employees
-- finance
-- settings
-
-Those domains already exist in the frontend code and are part of the planned backend contract.
 
 ## Main Modules
 
@@ -107,7 +109,7 @@ Those domains already exist in the frontend code and are part of the planned bac
 - Repairs: repair intake and repair status visibility
 - Client portal: client home, product browsing, order creation, repair request submission, personal order and repair history
 - Shared business settings: currency, threshold, default product status, markup
-- Employees and finance: already modeled in feature code for future exposure
+- Employees, finance, and settings: mounted as API-backed backoffice modules
 
 ## Project Structure
 
@@ -183,7 +185,7 @@ The recommended API contract, enums, payload keys, validation rules, and Scala D
 - Navigation supports locale switching and theme switching in protected shells
 - Shared controls come from `shadcn/ui`-style components in `src/components/ui`
 - Notifications are shown through `sonner`
-- The client and staff experiences reuse the same domain store with role-aware shells
+- The client and staff experiences share typed API services and role-aware shells
 
 ## Demo Assets
 
@@ -199,5 +201,5 @@ docker run -p 3000:3000 music-shop-fe
 
 ## Notes
 
-- The app currently works without a backend because all state is demo-persisted in the browser
-- The intended next step is to replace the local store actions with real API calls while preserving the current domain model and UI behavior
+- The frontend requires a running backend with cookie-based auth and seeded PostgreSQL data
+- Legacy demo-store code may still exist in the repo, but active routes use API-backed queries and mutations

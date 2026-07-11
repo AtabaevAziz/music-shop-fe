@@ -12,34 +12,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useFinanceQuery } from "@/hooks/use-finance-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
-import { useStoreDb } from "@/store/music-store";
 
 export function FinanceModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const db = useStoreDb();
-  const rows = db.orders.map((order) => {
+  const { data, isPending } = useFinanceQuery();
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
+
+  const rows = data.orders.map((order) => {
     const total = order.items.reduce(
       (sum, item) => sum + item.qty * item.unitPrice,
       0,
     );
     const cost = order.items.reduce((sum, item) => {
-      const product = db.products.find((entry) => entry.id === item.productId);
+      const product = data.products.find((entry) => entry.id === item.productId);
       return sum + (product?.costPrice ?? 0) * item.qty;
     }, 0);
     return { order, total, margin: total - cost };
   });
-  const tableRows = rows.length
-    ? Array.from({ length: rows.length + 7 }, (_, index) => ({
-        ...rows[index % rows.length],
-        rowKey: `${rows[index % rows.length].order.id}-${index}`,
-      }))
-    : [];
-
-  const totalRevenue = rows.reduce((sum, row) => sum + row.total, 0);
-  const totalMargin = rows.reduce((sum, row) => sum + row.margin, 0);
 
   return (
     <div className="finance-shell">
@@ -49,7 +49,11 @@ export function FinanceModule({ locale }: { locale: Locale }) {
             <CardContent className="p-6">
               <div className="muted">{t("labels.revenue")}</div>
               <div className="kpi-value">
-                {formatMoney(totalRevenue, db.settings.currency, locale)}
+                {formatMoney(
+                  data.summary.revenue,
+                  data.summary.currency,
+                  locale,
+                )}
               </div>
             </CardContent>
           </Card>
@@ -57,19 +61,18 @@ export function FinanceModule({ locale }: { locale: Locale }) {
             <CardContent className="p-6">
               <div className="muted">{t("labels.grossMargin")}</div>
               <div className="kpi-value">
-                {formatMoney(totalMargin, db.settings.currency, locale)}
+                {formatMoney(
+                  data.summary.grossMargin,
+                  data.summary.currency,
+                  locale,
+                )}
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6">
               <div className="muted">{t("labels.paidOrders")}</div>
-              <div className="kpi-value">
-                {
-                  db.orders.filter((order) => order.paymentStatus === "paid")
-                    .length
-                }
-              </div>
+              <div className="kpi-value">{data.summary.paidOrders}</div>
             </CardContent>
           </Card>
         </div>
@@ -86,14 +89,14 @@ export function FinanceModule({ locale }: { locale: Locale }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tableRows.map(({ order, total, margin, rowKey }) => (
-                <TableRow key={rowKey}>
+              {rows.map(({ order, total, margin }) => (
+                <TableRow key={order.id}>
                   <TableCell>{order.id}</TableCell>
                   <TableCell>
-                    {formatMoney(total, db.settings.currency, locale)}
+                    {formatMoney(total, data.settings.currency, locale)}
                   </TableCell>
                   <TableCell>
-                    {formatMoney(margin, db.settings.currency, locale)}
+                    {formatMoney(margin, data.settings.currency, locale)}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -108,6 +111,9 @@ export function FinanceModule({ locale }: { locale: Locale }) {
               ))}
             </TableBody>
           </Table>
+          {rows.length === 0 ? (
+            <div className="empty-state">{t("common.noData")}</div>
+          ) : null}
         </div>
       </section>
     </div>

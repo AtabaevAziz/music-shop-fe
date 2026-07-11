@@ -1,10 +1,17 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { useEmployeesQuery } from "@/hooks/use-employees-query";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
-import { useEmployeeStore } from "@/store/music-store";
+import {
+  createEmployee,
+  deleteEmployee,
+  updateEmployee,
+} from "@/services/employees";
 import { Employee, Role } from "@/types/music";
 
 type EmployeeDraft = {
@@ -18,7 +25,54 @@ type EmployeeDraft = {
 
 export function EmployeesModule() {
   const t = useTranslations();
-  const { employees, saveEmployee, deleteEntity } = useEmployeeStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useEmployeesQuery();
+  const employees = data?.employees ?? [];
+  const availableRoles =
+    data?.dictionaries.roles
+      ?.map((role) => role.value)
+      .filter((role): role is Exclude<Role, "client"> => role !== "client") ??
+    ([
+      "admin",
+      "store_manager",
+      "catalog_manager",
+      "sales_operator",
+    ] as Exclude<Role, "client">[]);
+  const saveMutation = useMutation({
+    mutationFn: async (draft: EmployeeDraft) => {
+      const payload = {
+        name: draft.name,
+        email: draft.email,
+        phone: draft.phone,
+        role: draft.role,
+        status: draft.status,
+      };
+
+      if (draft.id) {
+        await updateEmployee(draft.id, payload);
+        return;
+      }
+
+      await createEmployee(payload);
+    },
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteEmployee,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+
+  if (isPending && !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   return (
     <GenericCrudModule<Employee, EmployeeDraft>
@@ -58,14 +112,7 @@ export function EmployeesModule() {
           name: "role",
           label: t("labels.role"),
           type: "select",
-          options: (
-            [
-              "admin",
-              "store_manager",
-              "catalog_manager",
-              "sales_operator",
-            ] as Role[]
-          ).map((role) => ({
+          options: availableRoles.map((role) => ({
             label: dynamicLabel(t, role),
             value: role,
           })),
@@ -81,7 +128,7 @@ export function EmployeesModule() {
         },
       ]}
       onSave={(draft) =>
-        saveEmployee({
+        saveMutation.mutateAsync({
           id: draft.id,
           name: draft.name,
           email: draft.email,
@@ -90,7 +137,7 @@ export function EmployeesModule() {
           status: draft.status,
         })
       }
-      onDelete={(id) => deleteEntity("employees", id)}
+      onDelete={(id) => deleteMutation.mutateAsync(id)}
     />
   );
 }
