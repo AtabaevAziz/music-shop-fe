@@ -6,73 +6,54 @@ import Image from "next/image";
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useClientHomeQuery } from "@/hooks/use-client-home-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
-import { useClientStore } from "@/store/music-store";
 
 export function ClientHomeModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { customer, orders, repairRequests, products, settings } =
-    useClientStore();
-  const activeOrders = orders.filter(
-    (order) => !["completed", "cancelled"].includes(order.status),
-  );
-  const activeProducts = products.filter(
-    (product) => product.status === "active",
-  );
-  const openRepairs = repairRequests.filter(
-    (request) => !["completed", "cancelled"].includes(request.status),
-  );
-  const readyCount =
-    orders.filter((order) => order.status === "ready_for_pickup").length +
-    repairRequests.filter((request) => request.status === "ready").length;
-  const spent = orders.reduce(
-    (sum, order) =>
-      sum +
-      order.items.reduce((acc, item) => acc + item.qty * item.unitPrice, 0),
-    0,
-  );
-  const featuredProducts = activeProducts.slice(0, 3);
-  const recentActivity = [...orders, ...repairRequests]
-    .sort(
-      (left, right) =>
-        new Date(right.updatedAt).getTime() -
-        new Date(left.updatedAt).getTime(),
-    )
-    .slice(0, 4);
+  const { data, isPending } = useClientHomeQuery();
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   return (
     <div className="dashboard-shell">
       <section className="table-card dashboard-hero">
         <PageHeader
-          title={customer?.name ?? t("dynamic.client")}
+          title={data.customer?.name ?? t("dynamic.client")}
           subtitle={t("section.clientHomeSubtitle")}
         />
         <div className="dashboard-overview">
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.activeOrders")}</div>
-              <div className="kpi-value">{activeOrders.length}</div>
+              <div className="kpi-value">{data.activeOrdersCount}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("nav.repairs")}</div>
-              <div className="kpi-value">{openRepairs.length}</div>
+              <div className="kpi-value">{data.openRepairsCount}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.readyForPickup")}</div>
-              <div className="kpi-value">{readyCount}</div>
+              <div className="kpi-value">{data.readyCount}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.totalSpent")}</div>
               <div className="kpi-value">
-                {formatMoney(spent, settings.currency, locale)}
+                {formatMoney(data.spent, data.settings.currency, locale)}
               </div>
             </CardContent>
           </Card>
@@ -86,7 +67,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
             subtitle={t("section.clientOrdersSubtitle")}
           />
           <div className="list-clean">
-            {orders.slice(0, 3).map((order) => (
+            {data.orders.slice(0, 3).map((order) => (
               <Card key={order.id}>
                 <CardContent className="space-y-3 p-5">
                   <div className="heading-row">
@@ -112,7 +93,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                 </CardContent>
               </Card>
             ))}
-            {orders.length === 0 ? (
+            {data.orders.length === 0 ? (
               <div className="empty-state">{t("common.noData")}</div>
             ) : null}
           </div>
@@ -124,7 +105,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
             subtitle={t("section.repairsSubtitle")}
           />
           <div className="list-clean">
-            {repairRequests.slice(0, 3).map((request) => (
+            {data.repairRequests.slice(0, 3).map((request) => (
               <Card key={request.id}>
                 <CardContent className="space-y-3 p-5">
                   <div className="heading-row">
@@ -148,7 +129,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                 </CardContent>
               </Card>
             ))}
-            {repairRequests.length === 0 ? (
+            {data.repairRequests.length === 0 ? (
               <div className="empty-state">{t("common.noData")}</div>
             ) : null}
           </div>
@@ -160,7 +141,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
             subtitle={t("section.clientCatalogSubtitle")}
           />
           <div className="list-clean">
-            {featuredProducts.map((product) => {
+            {data.featuredProducts.map((product) => {
               const previewImage = product.primaryImage ?? product.images[0];
 
               return (
@@ -181,7 +162,11 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                        {formatMoney(product.price, settings.currency, locale)}
+                        {formatMoney(
+                          product.price,
+                          data.settings.currency,
+                          locale,
+                        )}
                       </span>
                     </div>
                   </CardContent>
@@ -197,7 +182,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
             subtitle={t("dashboard.activitySubtitle")}
           />
           <ul className="list-clean activity-feed">
-            {recentActivity.map((item) => (
+            {data.recentActivity.map((item) => (
               <Card key={item.id}>
                 <CardContent className="space-y-2 p-5">
                   <strong>
@@ -214,7 +199,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                 </CardContent>
               </Card>
             ))}
-            {recentActivity.length === 0 ? (
+            {data.recentActivity.length === 0 ? (
               <div className="empty-state">{t("common.noData")}</div>
             ) : null}
           </ul>

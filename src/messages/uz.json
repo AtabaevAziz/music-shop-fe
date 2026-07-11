@@ -49,7 +49,7 @@
   },
   "auth": {
     "title": "Musiqa asboblari onlayn do'koni va boshqaruv paneli",
-    "text": "Musiqa asboblari internet-do'koni demosi: mahsulotlar, buyurtmalar, mijozlar va ombor to'liq klient tomonida backend-siz ishlaydi.",
+    "text": "Mahsulotlar, ombor, buyurtmalar, mijozlar va ta'mirlash uchun real backendga ulangan musiqa asboblari onlayn do'koni va ish maydoni.",
     "modulesLabel": "Bo'limlar",
     "modulesValue": "Bosh sahifa, katalog, ombor, buyurtmalar, mijozlar va ta'mirlash",
     "demoLabel": "Demo rejimi",
@@ -74,7 +74,7 @@
     "pipelineSubtitle": "Buyurtma bajarilishining operatsion ko'rinishi",
     "featuredTitle": "Dolzarb assortiment",
     "featuredSubtitle": "Joriy vitrindagi mahsulotlarning tezkor ko'rinishi",
-    "activitySubtitle": "Brauzer ichidagi demo bo'yicha so'nggi voqealar"
+    "activitySubtitle": "Backenddan kelgan so'nggi operatsion voqealar"
   },
   "section": {
     "catalogSubtitle": "Mahsulotlar, kategoriyalar, brendlar va rasmlar bitta katalog ish maydonida.",
@@ -119,7 +119,7 @@
     "condition": "Holati",
     "stockHealth": "Qoldiq holati",
     "stockAdjustment": "Qoldiqni tuzatish",
-    "stockAdjustmentSubtitle": "localStorage bilan saqlanadigan tezkor ombor amali",
+    "stockAdjustmentSubtitle": "Backend orqali saqlanadigan tezkor ombor amali",
     "recentMovements": "So'nggi harakatlar",
     "recentMovementsSubtitle": "Qoldiq bo'yicha so'nggi operatsiyalar jurnali",
     "replenishmentRisk": "To'ldirish riski",
@@ -173,13 +173,13 @@
     "totalSpent": "Jami sarflangan",
     "orderRequestPrefix": "Qiziqish bildiraman",
     "workflowControlsTitle": "Jarayon boshqaruvi",
-    "workflowControlsSubtitle": "Buyurtma jarayonining bosqichlarini modellashtiring.",
+    "workflowControlsSubtitle": "Buyurtma bosqichlarini backend workflow qoidalari asosida yangilang.",
     "imagePath": "Rasm yo'li",
     "productGalleryPreviewSubtitle": "Mahsulot galereyasi ko'rinishi",
     "primary": "asosiy",
     "setPrimary": "Asosiy qilish",
     "accessRestrictedTitle": "Kirish cheklangan",
-    "accessRestrictedText": "Bu rol tizimga kira oladi, ammo ushbu modul demo kirish matritsasi sozlamalari bilan yashirilgan."
+    "accessRestrictedText": "Bu rol tizimga kira oladi, ammo ushbu modul joriy backend ruxsat matritsasi bilan cheklangan."
   },
   "flash": {
     "demoResetDone": "Demo ma'lumotlari tiklandi.",

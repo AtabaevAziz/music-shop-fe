@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -15,10 +16,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useStaffOrdersQuery } from "@/hooks/use-orders-query";
 import { Locale } from "@/i18n";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
-import { useOrdersStore } from "@/store/music-store";
+import { changeOrderStatus } from "@/services/orders";
 import type { OrderStatus } from "@/types/music";
 
 const transitions = [
@@ -30,20 +33,32 @@ const transitions = [
   "cancelled",
 ] as const;
 
-const nextTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
-  new: ["confirmed", "cancelled"],
-  confirmed: ["packed", "cancelled"],
-  packed: ["ready_for_pickup", "cancelled"],
-  ready_for_pickup: ["completed", "cancelled"],
-  completed: [],
-  cancelled: [],
-} as const;
-
 export function OrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { orders, customers, settings, changeOrderStatus } = useOrdersStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useStaffOrdersQuery();
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
+  const statusMutation = useMutation({
+    mutationFn: ({
+      orderId,
+      status,
+    }: {
+      orderId: string;
+      status: OrderStatus;
+    }) => changeOrderStatus(orderId, { status }),
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   return (
     <div className="two-columns">
@@ -60,8 +75,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => {
-                const customer = customers.find(
+              {data.orders.map((order) => {
+                const customer = data.customers.find(
                   (item) => item.id === order.customerId,
                 );
                 const total = order.items.reduce(
@@ -73,7 +88,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <TableCell>{order.id}</TableCell>
                     <TableCell>{customer?.name ?? order.customerId}</TableCell>
                     <TableCell>
-                      {formatMoney(total, settings.currency, locale)}
+                      {formatMoney(total, data.settings.currency, locale)}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -115,58 +130,66 @@ export function OrdersModule({ locale }: { locale: Locale }) {
         />
         {actionError ? <div className="error">{actionError}</div> : null}
         <ul className="list-clean">
-          {orders.map((order) => (
-            <Card key={order.id}>
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <strong>{order.id}</strong>
-                  <Badge
-                    variant={
-                      order.status === "completed"
-                        ? "success"
-                        : order.status === "cancelled"
-                          ? "destructive"
-                          : "secondary"
-                    }
-                  >
-                    {dynamicLabel(t, order.status)}
-                  </Badge>
-                </div>
-                <p>{order.notes}</p>
-                <div className="flex flex-wrap gap-2">
-                  {transitions.map((status) => (
-                    <Button
-                      key={status}
-                      variant="outline"
-                      size="sm"
-                      disabled={
-                        pendingOrderId === order.id ||
-                        order.status === status ||
-                        !nextTransitions[order.status].includes(status)
+          {data.orders.map((order) => {
+            const allowedTransitions =
+              data.orderWorkflow?.transitions[order.status] ?? [];
+
+            return (
+              <Card key={order.id}>
+                <CardContent className="space-y-4 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <strong>{order.id}</strong>
+                    <Badge
+                      variant={
+                        order.status === "completed"
+                          ? "success"
+                          : order.status === "cancelled"
+                            ? "destructive"
+                            : "secondary"
                       }
-                      onClick={async () => {
-                        setActionError("");
-                        setPendingOrderId(order.id);
-                        try {
-                          await changeOrderStatus(order.id, status);
-                        } catch (error) {
-                          setActionError(
-                            error instanceof Error
-                              ? error.message
-                              : t("common.unexpectedError"),
-                          );
-                        } finally {
-                          setPendingOrderId(null);
-                        }
-                      }}
                     >
-                      {dynamicLabel(t, status)}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      {dynamicLabel(t, order.status)}
+                    </Badge>
+                  </div>
+                  <p>{order.notes}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {transitions.map((status) => (
+                      <Button
+                        key={status}
+                        variant="outline"
+                        size="sm"
+                        disabled={
+                          pendingOrderId === order.id ||
+                          order.status === status ||
+                          !allowedTransitions.includes(status)
+                        }
+                        onClick={async () => {
+                          setActionError("");
+                          setPendingOrderId(order.id);
+                          try {
+                            await statusMutation.mutateAsync({
+                              orderId: order.id,
+                              status,
+                            });
+                          } catch (error) {
+                            setActionError(
+                              error instanceof Error
+                                ? error.message
+                                : t("common.unexpectedError"),
+                            );
+                          } finally {
+                            setPendingOrderId(null);
+                          }
+                        }}
+                      >
+                        {dynamicLabel(t, status)}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </ul>
       </section>
     </div>

@@ -1,5 +1,7 @@
+import { RoleRoute } from "@/components/layout/role-route";
 import { ClientRepairsModule } from "@/features/client/client-repairs-module";
 import { Locale } from "@/i18n";
+import { StaffRepairsModule } from "@/features/repairs/staff-repairs-module";
 
 export default async function RepairsPage({
   params,
@@ -7,5 +9,10 @@ export default async function RepairsPage({
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
-  return <ClientRepairsModule locale={locale} />;
+  return (
+    <RoleRoute
+      client={<ClientRepairsModule locale={locale} />}
+      staff={<StaffRepairsModule locale={locale} />}
+    />
+  );
 }

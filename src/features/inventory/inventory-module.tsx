@@ -1,7 +1,8 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppField } from "@/components/shared/form-field";
 import { PageHeader } from "@/components/shared/page-header";
@@ -25,20 +26,43 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useInventoryQuery } from "@/hooks/use-inventory-query";
 import { Locale } from "@/i18n";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";
-import { useInventoryStore } from "@/store/music-store";
+import { adjustInventoryStock } from "@/services/inventory";
 
 export function InventoryModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { products, inventoryMovements, settings, adjustStock } =
-    useInventoryStore();
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const queryClient = useQueryClient();
+  const { data, isPending } = useInventoryQuery();
+  const [productId, setProductId] = useState("");
   const [delta, setDelta] = useState("1");
   const [reason, setReason] = useState(t("labels.manualCorrection"));
   const [formError, setFormError] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
+  const adjustMutation = useMutation({
+    mutationFn: adjustInventoryStock,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+
+  useEffect(() => {
+    if (!productId && data?.products[0]?.id) {
+      setProductId(data.products[0].id);
+    }
+  }, [data?.products, productId]);
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
+
+  const { products, inventoryMovements, settings } = data;
   const selectedProduct =
     products.find((product) => product.id === productId) ?? products[0];
   const lowStockProducts = products.filter(
@@ -156,7 +180,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <div className="flex flex-wrap gap-2 pt-2">
                       <Badge
                         variant={
-                          selectedProduct.stockQty <= settings.lowStockThreshold
+                          selectedProduct.stockQty <=
+                          settings.lowStockThreshold
                             ? "warning"
                             : "success"
                         }
@@ -176,17 +201,18 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               onSubmit={async (event) => {
                 event.preventDefault();
                 setFormError("");
-                setIsSaving(true);
                 try {
-                  await adjustStock(productId, Number(delta), reason);
+                  await adjustMutation.mutateAsync({
+                    productId,
+                    delta: Number(delta),
+                    reason,
+                  });
                 } catch (error) {
                   setFormError(
                     error instanceof Error
                       ? error.message
                       : t("common.unexpectedError"),
                   );
-                } finally {
-                  setIsSaving(false);
                 }
               }}
             >
@@ -194,7 +220,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               <AppField label={t("labels.product")}>
                 <Select
                   value={productId}
-                  disabled={isSaving}
+                  disabled={adjustMutation.isPending}
                   onValueChange={setProductId}
                 >
                   <SelectTrigger>
@@ -213,20 +239,22 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 <Input
                   type="number"
                   value={delta}
-                  disabled={isSaving}
+                  disabled={adjustMutation.isPending}
                   onChange={(event) => setDelta(event.target.value)}
                 />
               </AppField>
               <AppField label={t("labels.reason")}>
                 <Textarea
                   value={reason}
-                  disabled={isSaving}
+                  disabled={adjustMutation.isPending}
                   onChange={(event) => setReason(event.target.value)}
                 />
               </AppField>
               <div className="flex gap-2">
-                <Button type="submit" disabled={isSaving}>
-                  {isSaving ? t("common.saving") : t("common.save")}
+                <Button type="submit" disabled={adjustMutation.isPending}>
+                  {adjustMutation.isPending
+                    ? t("common.saving")
+                    : t("common.save")}
                 </Button>
               </div>
             </form>

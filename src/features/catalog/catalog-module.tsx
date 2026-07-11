@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -54,11 +55,17 @@ import {
 import { BrandsModule } from "@/features/brands/brands-module";
 import { CategoriesModule } from "@/features/categories/categories-module";
 import { MediaModule } from "@/features/media/media-module";
+import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, parseList } from "@/lib/utils";
+import {
+  createProduct,
+  deleteProduct,
+  updateProduct,
+} from "@/services/catalog";
 import { ModuleSection } from "@/shared/components/module-shell";
-import { useCatalogStore } from "@/store/music-store";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -78,16 +85,43 @@ type ProductDraft = Record<string, string>;
 
 export function CatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { products, categories, brands, settings, saveProduct, deleteEntity } =
-    useCatalogStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useCatalogQuery();
+  const products = data?.products ?? [];
+  const categories = data?.categories ?? [];
+  const brands = data?.brands ?? [];
+  const settings = data?.settings ?? {
+    currency: "UZS",
+    lowStockThreshold: 0,
+    defaultProductStatus: "draft" as const,
+    defaultMarkupPercent: 0,
+  };
+  const saveMutation = useMutation({
+    mutationFn: async (input: Parameters<typeof createProduct>[0] & { id?: string }) => {
+      if (input.id) {
+        const { id, ...payload } = input;
+        await updateProduct(id, payload);
+        return;
+      }
+
+      await createProduct(input);
+    },
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
   const [query, setQuery] = useState("");
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [draft, setDraft] = useState<ProductDraft>({
-    status: settings.defaultProductStatus,
+    status: "draft",
     condition: "new",
   });
 
@@ -121,7 +155,6 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       setFormError(t("labels.validationFailed"));
       return;
     }
-    setIsSaving(true);
     const specs = Object.fromEntries(
       parseList(draft.specs ?? "").map((row) => {
         const [key, ...rest] = row.split(":");
@@ -129,7 +162,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       }),
     );
     try {
-      await saveProduct({
+      await saveMutation.mutateAsync({
         id: draft.id,
         ...parsed.data,
         barcode: draft.barcode,
@@ -147,9 +180,18 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       setFormError(
         error instanceof Error ? error.message : t("common.unexpectedError"),
       );
-    } finally {
-      setIsSaving(false);
     }
+  }
+
+  const isSaving = saveMutation.isPending;
+  const isDeleting = deleteMutation.isPending;
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
   }
 
   return (
@@ -649,9 +691,8 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   return;
                 }
                 setFormError("");
-                setIsDeleting(true);
                 try {
-                  await deleteEntity("products", deleteTargetId);
+                  await deleteMutation.mutateAsync(deleteTargetId);
                   setDeleteTargetId(null);
                 } catch (error) {
                   setFormError(
@@ -659,8 +700,6 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                       ? error.message
                       : t("common.unexpectedError"),
                   );
-                } finally {
-                  setIsDeleting(false);
                 }
               }}
             >

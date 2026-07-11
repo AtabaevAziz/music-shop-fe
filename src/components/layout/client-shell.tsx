@@ -5,7 +5,6 @@ import {
   Languages,
   LogOut,
   Menu,
-  RotateCcw,
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -29,39 +28,55 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useClientHomeQuery } from "@/hooks/use-client-home-query";
+import { useNavigationQuery, usePermissionsQuery } from "@/hooks/use-config-query";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import {
+  canAccessRoute,
+  getRouteIdFromPathname,
+  getVisibleNavigationItems,
+} from "@/lib/navigation";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
-import { useClientStore, useSessionStore } from "@/store/music-store";
-import { Role } from "@/types/music";
+import { useAuthSession } from "@/providers/session-provider";
+import type { Role } from "@/types/music";
 
-type NavSegment =
-  | ""
-  | "catalog"
-  | "inventory"
-  | "orders"
-  | "customers"
-  | "repairs";
-
-type NavItem = { href: string; label: string; roles?: Role[] };
-
-const navOrder = [
-  "",
-  "catalog",
-  "inventory",
-  "orders",
-  "customers",
-  "repairs",
-] as const;
-
-const accessMap: Record<NavSegment, Role[]> = {
-  "": ["client"],
-  catalog: ["client"],
-  inventory: [],
-  orders: ["client"],
-  customers: [],
-  repairs: ["client"],
+type NavItem = {
+  id: string;
+  href: string;
+  label: string;
+  subtitle?: string;
 };
+
+const routeTitleKeyMap: Record<string, string> = {
+  dashboard: "nav.dashboard",
+  catalog: "nav.catalog",
+  orders: "nav.orders",
+  repairs: "nav.repairs",
+};
+
+const routeSubtitleKeyMap: Record<string, string> = {
+  dashboard: "section.clientHomeSubtitle",
+  catalog: "section.clientCatalogSubtitle",
+  orders: "section.clientOrdersSubtitle",
+  repairs: "section.repairsSubtitle",
+};
+
+function getDefaultClientNav(
+  locale: Locale,
+  sessionRole: Role | undefined,
+): Array<Pick<NavItem, "id" | "href">> {
+  if (sessionRole !== "client") {
+    return [];
+  }
+
+  return [
+    { id: "dashboard", href: `/${locale}` },
+    { id: "catalog", href: `/${locale}/catalog` },
+    { id: "orders", href: `/${locale}/orders` },
+    { id: "repairs", href: `/${locale}/repairs` },
+  ];
+}
 
 export function ClientShell({
   locale,
@@ -73,75 +88,69 @@ export function ClientShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const { customer, orders, repairRequests } = useClientStore();
-  const { session, logout, resetDemo } = useSessionStore();
+  const { session, logout } = useAuthSession();
+  const { data: navigation } = useNavigationQuery();
+  const { data: permissions } = usePermissionsQuery();
+  const { data: homeData } = useClientHomeQuery();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sessionRole = session?.role;
+  const routeId = getRouteIdFromPathname(pathname);
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
 
-  const navMap: Record<NavSegment, string> = {
-    "": t("nav.dashboard"),
-    catalog: t("nav.catalog"),
-    inventory: t("nav.inventory"),
-    orders: t("nav.orders"),
-    customers: t("nav.customers"),
-    repairs: t("nav.repairs"),
-  };
-
-  const navItems: NavItem[] = navOrder.map((segment) => ({
-    href: `/${locale}${segment ? `/${segment}` : ""}`,
-    label: navMap[segment],
-    roles: accessMap[segment],
-  }));
-  const visibleNavItems = useMemo(
-    () =>
-      sessionRole
-        ? navItems.filter(
-            (item) => !item.roles || item.roles.includes(sessionRole),
-          )
-        : [],
-    [navItems, sessionRole],
+  const fallbackNavItems = useMemo(
+    () => getDefaultClientNav(locale, sessionRole),
+    [locale, sessionRole],
   );
+  const visibleNavItems = useMemo(() => {
+    const configItems = getVisibleNavigationItems(
+      navigation,
+      locale,
+      sessionRole,
+      permissions,
+    );
 
-  const rawSegment = pathname.split("/")[2] ?? "";
-  const currentSegment =
-    navOrder.find((segment) => segment === rawSegment) ?? "";
-  const isAllowed = sessionRole
-    ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
-    : false;
-  const pageMeta: Record<NavSegment, { title: string; subtitle: string }> = {
-    "": {
-      title: t("nav.dashboard"),
-      subtitle: t("section.clientHomeSubtitle"),
-    },
-    catalog: {
-      title: t("nav.catalog"),
-      subtitle: t("section.clientCatalogSubtitle"),
-    },
-    inventory: {
-      title: t("nav.inventory"),
-      subtitle: t("labels.accessRestrictedText"),
-    },
-    orders: {
-      title: t("nav.orders"),
-      subtitle: t("section.clientOrdersSubtitle"),
-    },
-    customers: {
-      title: t("nav.customers"),
-      subtitle: t("labels.accessRestrictedText"),
-    },
-    repairs: {
-      title: t("nav.repairs"),
-      subtitle: t("section.repairsSubtitle"),
-    },
-  };
-  const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
+    if (!configItems.length) {
+      return fallbackNavItems.map((item) => ({
+        ...item,
+        label: t(routeTitleKeyMap[item.id] ?? "nav.dashboard"),
+        subtitle: t(
+          routeSubtitleKeyMap[item.id] ?? "section.clientHomeSubtitle",
+        ),
+      }));
+    }
+
+    return configItems.map((item) => ({
+      id: item.id,
+      href: item.href,
+      label: t(item.titleKey),
+      subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
+    }));
+  }, [fallbackNavItems, locale, navigation, permissions, sessionRole, t]);
+
+  const currentPage = useMemo(() => {
+    const navItem = visibleNavItems.find((item) => item.id === routeId);
+    const forceClientSubtitle = routeId === "dashboard";
+    return {
+      title: navItem?.label ?? t(routeTitleKeyMap[routeId] ?? "nav.dashboard"),
+      subtitle:
+        (!forceClientSubtitle ? navItem?.subtitle : undefined) ??
+        t(routeSubtitleKeyMap[routeId] ?? "section.clientHomeSubtitle"),
+    };
+  }, [routeId, t, visibleNavItems]);
+
+  const isAllowed =
+    !sessionRole || !permissions
+      ? true
+      : canAccessRoute(sessionRole, routeId, permissions);
 
   useEffect(() => {
     setIsNavOpen(false);
   }, [pathname]);
 
-  if (!session) return null;
+  if (!session) {
+    return null;
+  }
+
   const localizedRole = dynamicLabel(t, session.role);
 
   const navContent = (
@@ -167,13 +176,15 @@ export function ClientShell({
         </nav>
       </div>
       <div className="surface sidebar-metric sidebar-footer">
-        <div className="sidebar-metric-label muted">{customer?.email}</div>
+        <div className="sidebar-metric-label muted">
+          {homeData?.customer?.email ?? "—"}
+        </div>
         <div className="sidebar-metric-value">
-          {dynamicLabel(t, customer?.tier ?? "standard")}
+          {dynamicLabel(t, homeData?.customer?.tier ?? "standard")}
         </div>
         <div className="sidebar-metric-copy muted">
-          {t("labels.activeOrders")}: {orders.length} · {t("nav.repairs")}:{" "}
-          {repairRequests.length}
+          {t("labels.activeOrders")}: {homeData?.orders.length ?? 0} ·{" "}
+          {t("nav.repairs")}: {homeData?.repairRequests.length ?? 0}
         </div>
       </div>
     </>
@@ -267,18 +278,11 @@ export function ClientShell({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="profile-menu-item"
-                  onSelect={() => void resetDemo()}
-                >
-                  <RotateCcw size={16} />
-                  {t("nav.resetDemo")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
                   className="profile-menu-item profile-menu-item-danger"
                   onSelect={() => {
-                    logout();
-                    router.replace(`/${locale}/login`);
+                    void logout().then(() => {
+                      router.replace(`/${locale}/login`);
+                    });
                   }}
                 >
                   <LogOut size={16} />

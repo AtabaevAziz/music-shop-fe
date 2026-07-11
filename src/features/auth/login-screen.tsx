@@ -3,7 +3,7 @@
 import { ChevronDown, Eye, EyeOff, Languages } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, useState, useTransition } from "react";
+import { type FormEvent, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -16,73 +16,35 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
-import { useSessionStore, useStoreDb } from "@/store/music-store";
-import { Role } from "@/types/music";
-
-const staffRoles = [
-  "admin",
-  "store_manager",
-  "catalog_manager",
-  "sales_operator",
-] as const satisfies Role[];
-const STAFF_PASSWORD = "Secret!1";
-
-type StaffRole = (typeof staffRoles)[number];
-
-function isStaffRole(value: string): value is StaffRole {
-  return staffRoles.includes(value as StaffRole);
-}
+import { useAuthSession } from "@/providers/session-provider";
 
 export function LoginScreen({ locale }: { locale: Locale }) {
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const db = useStoreDb();
-  const { login } = useSessionStore();
-  const [isPending, startTransition] = useTransition();
+  const { isAuthenticating, login } = useAuthSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [loginValue, setLoginValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const next = searchParams.get("next");
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
-  const activeCustomers = db.customers.filter(
-    (customer) => customer.status === "active",
-  );
   const destination = next || `/${locale}`;
 
   const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const normalizedLogin = loginValue.trim().toLowerCase();
-    const normalizedPassword = passwordValue.trim().toLowerCase();
-
-    if (isStaffRole(normalizedLogin) && passwordValue === STAFF_PASSWORD) {
-      setError(null);
-      startTransition(() => {
-        void login(normalizedLogin).then(() => router.push(destination));
-      });
-      return;
-    }
-
-    const matchingCustomer = activeCustomers.find(
-      (customer) => customer.email.trim().toLowerCase() === normalizedLogin,
-    );
-    if (
-      !matchingCustomer ||
-      normalizedPassword !== matchingCustomer.email.trim().toLowerCase()
-    ) {
-      setError(t("auth.invalidCredentials"));
-      return;
-    }
 
     setError(null);
-    startTransition(() => {
-      void login("client", matchingCustomer.id).then(() =>
-        router.push(destination),
-      );
-    });
+    void login(normalizedLogin, passwordValue)
+      .then(() => router.push(destination))
+      .catch((error) => {
+        setError(
+          error instanceof Error ? error.message : t("auth.invalidCredentials"),
+        );
+      });
   };
 
   return (
@@ -133,10 +95,6 @@ export function LoginScreen({ locale }: { locale: Locale }) {
               <div className="hero-note-label">{t("auth.modulesLabel")}</div>
               <div>{t("auth.modulesValue")}</div>
             </div>
-            <div className="hero-note">
-              <div className="hero-note-label">{t("auth.demoLabel")}</div>
-              <div>{t("auth.demoValue")}</div>
-            </div>
           </div>
         </section>
         <section>
@@ -159,7 +117,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 placeholder={t("auth.loginPlaceholder")}
                 value={loginValue}
                 required
-                disabled={isPending}
+                disabled={isAuthenticating}
                 onChange={(event) => {
                   if (error) {
                     setError(null);
@@ -180,7 +138,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   placeholder={t("auth.passwordPlaceholder")}
                   value={passwordValue}
                   required
-                  disabled={isPending}
+                  disabled={isAuthenticating}
                   onChange={(event) => {
                     if (error) {
                       setError(null);
@@ -197,7 +155,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                       : t("auth.showPassword")
                   }
                   aria-pressed={isPasswordVisible}
-                  disabled={isPending}
+                  disabled={isAuthenticating}
                   onClick={() => setIsPasswordVisible((current) => !current)}
                 >
                   {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -209,7 +167,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 {error}
               </p>
             ) : null}
-            <Button className="auth-submit" type="submit" disabled={isPending}>
+            <Button
+              className="auth-submit"
+              type="submit"
+              disabled={isAuthenticating}
+            >
               {t("auth.signInAction")}
             </Button>
           </form>

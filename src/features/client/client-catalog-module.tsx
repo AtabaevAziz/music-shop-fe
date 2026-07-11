@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -18,10 +19,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useClientCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
-import { useClientStore } from "@/store/music-store";
+import { createClientOrder } from "@/services/client";
 import { Product } from "@/types/music";
 
 const checkoutSchema = z.object({
@@ -31,18 +34,24 @@ const checkoutSchema = z.object({
 
 export function ClientCatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { products, settings, createClientOrder } = useClientStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useClientCatalogQuery();
   const [query, setQuery] = useState("");
   const [purchaseTarget, setPurchaseTarget] = useState<Product | null>(null);
   const [qty, setQty] = useState("1");
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const activeProducts = useMemo(
-    () => products.filter((product) => product.status === "active"),
-    [products],
-  );
+  const orderMutation = useMutation({
+    mutationFn: createClientOrder,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
 
+  const activeProducts = useMemo(
+    () => data?.products.filter((product) => product.status === "active") ?? [],
+    [data?.products],
+  );
   const filteredProducts = useMemo(() => {
     const value = query.trim().toLowerCase();
     if (!value) return activeProducts;
@@ -53,6 +62,14 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
         .includes(value),
     );
   }, [activeProducts, query]);
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   async function submitOrder() {
     const parsed = checkoutSchema.safeParse({
@@ -65,9 +82,8 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await createClientOrder({
+      await orderMutation.mutateAsync({
         items: [
           {
             productId: purchaseTarget.id,
@@ -85,8 +101,6 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
       setFormError(
         error instanceof Error ? error.message : t("common.unexpectedError"),
       );
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -126,7 +140,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                       <strong>{product.name}</strong>
                       <Badge
                         variant={
-                          product.stockQty <= settings.lowStockThreshold
+                          product.stockQty <= data.settings.lowStockThreshold
                             ? "warning"
                             : "success"
                         }
@@ -140,7 +154,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                        {formatMoney(product.price, settings.currency, locale)}
+                        {formatMoney(product.price, data.settings.currency, locale)}
                       </span>
                     </div>
                   </div>
@@ -189,7 +203,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
               <div className="text-sm font-medium">{purchaseTarget?.name}</div>
               <div className="muted">
                 {purchaseTarget
-                  ? formatMoney(purchaseTarget.price, settings.currency, locale)
+                  ? formatMoney(
+                      purchaseTarget.price,
+                      data.settings.currency,
+                      locale,
+                    )
                   : null}
               </div>
             </div>
@@ -223,14 +241,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
           </div>
           <DialogFooter>
             <Button
-              variant="outline"
               type="button"
-              onClick={() => setPurchaseTarget(null)}
+              disabled={orderMutation.isPending}
+              onClick={() => void submitOrder()}
             >
-              {t("common.cancel")}
-            </Button>
-            <Button type="button" disabled={isSubmitting} onClick={submitOrder}>
-              {isSubmitting ? t("common.saving") : t("labels.placeOrder")}
+              {orderMutation.isPending ? t("common.saving") : t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

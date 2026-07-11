@@ -5,14 +5,27 @@ import {
   Languages,
   LogOut,
   Menu,
-  RotateCcw,
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
+import { useNavigationQuery, usePermissionsQuery } from "@/hooks/use-config-query";
+import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import {
+  canAccessRoute,
+  getRouteIdFromPathname,
+  getVisibleNavigationItems,
+} from "@/lib/navigation";
+import { queryKeys } from "@/lib/query-keys";
+import { dynamicLabel } from "@/lib/translations";
+import { cn } from "@/lib/utils";
+import { useAuthSession } from "@/providers/session-provider";
+import { getSettings } from "@/services/settings";
+import type { Role } from "@/types/music";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,32 +42,61 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Locale, localeLabelKeyMap, locales } from "@/i18n";
-import { dynamicLabel } from "@/lib/translations";
-import { cn } from "@/lib/utils";
-import { useSessionStore, useStoreDb } from "@/store/music-store";
-import { Role } from "@/types/music";
 
-type NavItem = { href: string; label: string; roles?: Role[] };
-
-const navOrder = [
-  "",
-  "catalog",
-  "inventory",
-  "orders",
-  "customers",
-  "repairs",
-] as const;
-type NavSegment = (typeof navOrder)[number];
-
-const accessMap: Record<NavSegment, Role[]> = {
-  "": ["admin", "store_manager", "catalog_manager", "sales_operator"],
-  catalog: ["admin", "store_manager", "catalog_manager"],
-  inventory: ["admin", "store_manager", "catalog_manager"],
-  orders: ["admin", "store_manager", "sales_operator"],
-  customers: ["admin", "store_manager", "sales_operator"],
-  repairs: [],
+type NavItem = {
+  id: string;
+  href: string;
+  label: string;
+  subtitle?: string;
 };
+
+const routeTitleKeyMap: Record<string, string> = {
+  dashboard: "nav.dashboard",
+  catalog: "nav.catalog",
+  inventory: "nav.inventory",
+  orders: "nav.orders",
+  customers: "nav.customers",
+  repairs: "nav.repairs",
+};
+
+const routeSubtitleKeyMap: Record<string, string> = {
+  dashboard: "meta.appSubtitle",
+  catalog: "section.catalogSubtitle",
+  inventory: "section.inventorySubtitle",
+  orders: "section.ordersSubtitle",
+  customers: "section.customersSubtitle",
+  repairs: "section.repairsSubtitle",
+};
+
+function getDefaultNavItems(
+  locale: Locale,
+  sessionRole: Role | undefined,
+): Array<Pick<NavItem, "id" | "href">> {
+  if (!sessionRole) {
+    return [];
+  }
+
+  const defaults = [
+    { id: "dashboard", href: `/${locale}` },
+    { id: "catalog", href: `/${locale}/catalog` },
+    { id: "inventory", href: `/${locale}/inventory` },
+    { id: "orders", href: `/${locale}/orders` },
+    { id: "customers", href: `/${locale}/customers` },
+    { id: "repairs", href: `/${locale}/repairs` },
+  ];
+
+  const accessMatrix: Record<Role, string[]> = {
+    admin: defaults.map((item) => item.id),
+    store_manager: defaults.map((item) => item.id),
+    catalog_manager: ["dashboard", "catalog", "inventory"],
+    sales_operator: ["dashboard", "orders", "customers", "repairs"],
+    client: [],
+  };
+
+  return defaults
+    .filter((item) => accessMatrix[sessionRole]?.includes(item.id))
+    .map((item) => item);
+}
 
 export function AppShell({
   locale,
@@ -66,69 +108,70 @@ export function AppShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const db = useStoreDb();
-  const { session, logout, resetDemo } = useSessionStore();
+  const { session, logout } = useAuthSession();
+  const { data: navigation } = useNavigationQuery();
+  const { data: permissions } = usePermissionsQuery();
+  const { data: settings } = useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: getSettings,
+    enabled: session?.role !== "client",
+  });
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const sessionRole = session?.role;
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
+  const sessionRole = session?.role;
+  const routeId = getRouteIdFromPathname(pathname);
 
-  const navMap: Record<NavSegment, string> = {
-    "": t("nav.dashboard"),
-    catalog: t("nav.catalog"),
-    inventory: t("nav.inventory"),
-    orders: t("nav.orders"),
-    customers: t("nav.customers"),
-    repairs: t("nav.repairs"),
-  };
-
-  const navItems: NavItem[] = navOrder.map((segment) => ({
-    href: `/${locale}${segment ? `/${segment}` : ""}`,
-    label: navMap[segment],
-    roles: accessMap[segment],
-  }));
-  const visibleNavItems = useMemo(
-    () =>
-      sessionRole
-        ? navItems.filter(
-            (item) => !item.roles || item.roles.includes(sessionRole),
-          )
-        : [],
-    [navItems, sessionRole],
+  const fallbackNavItems = useMemo(
+    () => getDefaultNavItems(locale, sessionRole),
+    [locale, sessionRole],
   );
+  const visibleNavItems = useMemo(() => {
+    const configItems = getVisibleNavigationItems(
+      navigation,
+      locale,
+      sessionRole,
+      permissions,
+    );
 
-  const rawSegment = pathname.split("/")[2] ?? "";
-  const currentSegment =
-    navOrder.find((segment) => segment === rawSegment) ?? "";
-  const isAllowed = sessionRole
-    ? (accessMap[currentSegment]?.includes(sessionRole) ?? true)
-    : false;
-  const pageMeta: Record<NavSegment, { title: string; subtitle: string }> = {
-    "": { title: t("nav.dashboard"), subtitle: t("meta.appSubtitle") },
-    catalog: {
-      title: t("nav.catalog"),
-      subtitle: t("section.catalogSubtitle"),
-    },
-    inventory: {
-      title: t("nav.inventory"),
-      subtitle: t("section.inventorySubtitle"),
-    },
-    orders: { title: t("nav.orders"), subtitle: t("section.ordersSubtitle") },
-    customers: {
-      title: t("nav.customers"),
-      subtitle: t("section.customersSubtitle"),
-    },
-    repairs: {
-      title: t("nav.repairs"),
-      subtitle: t("section.repairsSubtitle"),
-    },
-  };
-  const currentPage = pageMeta[currentSegment] ?? pageMeta[""];
+    if (!configItems.length) {
+      return fallbackNavItems.map((item) => ({
+        ...item,
+        label: t(routeTitleKeyMap[item.id] ?? "nav.dashboard"),
+        subtitle: t(routeSubtitleKeyMap[item.id] ?? "meta.appSubtitle"),
+      }));
+    }
+
+    return configItems.map((item) => ({
+      id: item.id,
+      href: item.href,
+      label: t(item.titleKey),
+      subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
+    }));
+  }, [fallbackNavItems, locale, navigation, permissions, sessionRole, t]);
+
+  const currentPage = useMemo(() => {
+    const navItem = visibleNavItems.find((item) => item.id === routeId);
+    return {
+      title: navItem?.label ?? t(routeTitleKeyMap[routeId] ?? "nav.dashboard"),
+      subtitle:
+        navItem?.subtitle ??
+        t(routeSubtitleKeyMap[routeId] ?? "meta.appSubtitle"),
+    };
+  }, [routeId, t, visibleNavItems]);
+
+  const isAllowed =
+    !sessionRole || !permissions
+      ? true
+      : canAccessRoute(sessionRole, routeId, permissions);
 
   useEffect(() => {
     setIsNavOpen(false);
   }, [pathname]);
 
-  if (!session) return null;
+  if (!session) {
+    return null;
+  }
+
   const localizedRole = dynamicLabel(t, session.role);
 
   const navContent = (
@@ -137,7 +180,7 @@ export function AppShell({
         <div className="sidebar-kicker">{t("common.brand")}</div>
         <strong className="sidebar-title">{t("meta.appName")}</strong>
         <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
-        <small className="sidebar-role">{dynamicLabel(t, session.role)}</small>
+        <small className="sidebar-role">{localizedRole}</small>
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
@@ -158,7 +201,7 @@ export function AppShell({
           {t("labels.inventoryThresholdTitle")}
         </div>
         <div className="sidebar-metric-value">
-          {db.settings.lowStockThreshold}
+          {settings?.lowStockThreshold ?? "—"}
         </div>
         <div className="sidebar-metric-copy muted">
           {t("labels.inventoryThresholdHelp")}
@@ -255,18 +298,11 @@ export function AppShell({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="profile-menu-item"
-                  onSelect={() => void resetDemo()}
-                >
-                  <RotateCcw size={16} />
-                  {t("nav.resetDemo")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
                   className="profile-menu-item profile-menu-item-danger"
                   onSelect={() => {
-                    logout();
-                    router.replace(`/${locale}/login`);
+                    void logout().then(() => {
+                      router.replace(`/${locale}/login`);
+                    });
                   }}
                 >
                   <LogOut size={16} />

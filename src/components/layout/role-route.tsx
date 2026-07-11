@@ -1,6 +1,6 @@
 "use client";
 
-import { useSessionStore } from "@/store/music-store";
+import { useAuthSession } from "@/providers/session-provider";
 
 export function RoleRoute({
   client,
@@ -9,7 +9,7 @@ export function RoleRoute({
   client: React.ReactNode;
   staff: React.ReactNode;
 }) {
-  const { session } = useSessionStore();
+  const { session } = useAuthSession();
 
   return session?.role === "client" ? <>{client}</> : <>{staff}</>;
 }

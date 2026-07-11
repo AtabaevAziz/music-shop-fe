@@ -1,10 +1,17 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import { useCustomersQuery } from "@/hooks/use-customers-query";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
-import { useCustomerStore } from "@/store/music-store";
+import {
+  createCustomer,
+  deleteCustomer,
+  updateCustomer,
+} from "@/services/customers";
 import { Customer } from "@/types/music";
 
 type CustomerDraft = {
@@ -19,7 +26,45 @@ type CustomerDraft = {
 
 export function CustomersModule() {
   const t = useTranslations();
-  const { customers, saveCustomer, deleteEntity } = useCustomerStore();
+  const queryClient = useQueryClient();
+  const { data, isPending } = useCustomersQuery();
+  const customers = data?.customers ?? [];
+  const saveMutation = useMutation({
+    mutationFn: async (draft: CustomerDraft) => {
+      const payload = {
+        name: draft.name,
+        phone: draft.phone,
+        email: draft.email,
+        tier: draft.tier,
+        status: draft.status,
+        notes: draft.notes,
+      };
+
+      if (draft.id) {
+        await updateCustomer(draft.id, payload);
+        return;
+      }
+
+      await createCustomer(payload);
+    },
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteCustomer,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+
+  if (isPending && !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   return (
     <GenericCrudModule<Customer, CustomerDraft>
@@ -78,18 +123,8 @@ export function CustomersModule() {
         },
         { name: "notes", label: t("labels.notes"), type: "textarea" },
       ]}
-      onSave={(draft) =>
-        saveCustomer({
-          id: draft.id,
-          name: draft.name,
-          phone: draft.phone,
-          email: draft.email,
-          tier: draft.tier,
-          status: draft.status,
-          notes: draft.notes,
-        })
-      }
-      onDelete={(id) => deleteEntity("customers", id)}
+      onSave={(draft) => saveMutation.mutateAsync(draft)}
+      onDelete={(id) => deleteMutation.mutateAsync(id)}
     />
   );
 }

@@ -1,10 +1,17 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
-import { useBrandStore } from "@/store/music-store";
+import {
+  createBrand,
+  deleteBrand,
+  updateBrand,
+} from "@/services/catalog";
 import { Brand } from "@/types/music";
 
 type BrandDraft = {
@@ -17,7 +24,35 @@ type BrandDraft = {
 
 export function BrandsModule() {
   const t = useTranslations();
-  const { brands, saveBrand, deleteEntity } = useBrandStore();
+  const queryClient = useQueryClient();
+  const { data } = useCatalogQuery();
+  const brands = data?.brands ?? [];
+  const saveMutation = useMutation({
+    mutationFn: async (draft: BrandDraft) => {
+      const payload = {
+        name: draft.name,
+        country: draft.country,
+        website: draft.website,
+        status: draft.status,
+      };
+
+      if (draft.id) {
+        await updateBrand(draft.id, payload);
+        return;
+      }
+
+      await createBrand(payload);
+    },
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteBrand,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
 
   return (
     <GenericCrudModule<Brand, BrandDraft>
@@ -61,16 +96,8 @@ export function BrandsModule() {
           ],
         },
       ]}
-      onSave={(draft) =>
-        saveBrand({
-          id: draft.id,
-          name: draft.name,
-          country: draft.country,
-          website: draft.website,
-          status: draft.status,
-        })
-      }
-      onDelete={(id) => deleteEntity("brands", id)}
+      onSave={(draft) => saveMutation.mutateAsync(draft)}
+      onDelete={(id) => deleteMutation.mutateAsync(id)}
     />
   );
 }

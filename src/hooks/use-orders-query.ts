@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import { getClientOrders } from "@/services/client";
+import { getClientProducts } from "@/services/client";
 import { getCustomers } from "@/services/customers";
 import { getOrders } from "@/services/orders";
-import { getProducts } from "@/services/catalog";
 import { getSettings } from "@/services/settings";
 import { getWorkflows } from "@/services/config";
 
@@ -37,7 +37,7 @@ export function useClientOrdersQuery() {
     queryFn: async () => {
       const [orders, products, settings] = await Promise.all([
         getClientOrders(),
-        getProducts(),
+        getClientProducts(),
         getSettings(),
       ]);
 

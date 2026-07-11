@@ -3,9 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { FlashToaster } from "@/components/shared/flash-toaster";
-import { type Locale, isLocale, locales } from "@/i18n";
-import { MusicStoreProvider } from "@/store/music-store";
+import { isLocale, locales } from "@/i18n";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -46,10 +44,7 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <MusicStoreProvider locale={locale as Locale}>
-        <FlashToaster />
-        {children}
-      </MusicStoreProvider>
+      {children}
     </NextIntlClientProvider>
   );
 }

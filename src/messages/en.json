@@ -49,7 +49,7 @@
   },
   "auth": {
     "title": "Online musical instrument store and operations backoffice",
-    "text": "Browser-only demo of a musical instrument ecommerce operation with products, orders, customers, and inventory running fully on the client.",
+    "text": "Online musical instrument storefront and operations workspace connected to a live backend for products, inventory, orders, customers, and repairs.",
     "modulesLabel": "Modules",
     "modulesValue": "Home, Catalog, Inventory, Orders, Customers, and Repairs",
     "demoLabel": "Demo mode",
@@ -74,7 +74,7 @@
     "pipelineSubtitle": "Operational fulfillment visibility",
     "featuredTitle": "Featured assortment",
     "featuredSubtitle": "Fast view of the current storefront mix",
-    "activitySubtitle": "Latest browser-side demo events"
+    "activitySubtitle": "Latest operational events from the backend"
   },
   "section": {
     "catalogSubtitle": "Products, categories, brands, and imagery in one catalog workspace.",
@@ -119,7 +119,7 @@
     "condition": "Condition",
     "stockHealth": "Stock health",
     "stockAdjustment": "Stock adjustment",
-    "stockAdjustmentSubtitle": "Fast inventory action persisted in localStorage",
+    "stockAdjustmentSubtitle": "Fast inventory action persisted through the backend",
     "recentMovements": "Recent movements",
     "recentMovementsSubtitle": "Latest stock operations log",
     "replenishmentRisk": "Replenishment risk",
@@ -173,13 +173,13 @@
     "totalSpent": "Total spent",
     "orderRequestPrefix": "Interested in",
     "workflowControlsTitle": "Workflow controls",
-    "workflowControlsSubtitle": "Simulate retail order progression.",
+    "workflowControlsSubtitle": "Update order progression using backend workflow rules.",
     "imagePath": "Image path",
     "productGalleryPreviewSubtitle": "Product gallery preview",
     "primary": "primary",
     "setPrimary": "Set primary",
     "accessRestrictedTitle": "Access restricted",
-    "accessRestrictedText": "This role can sign in, but this module is intentionally hidden in the demo access matrix."
+    "accessRestrictedText": "This role can sign in, but this module is restricted by the current backend permission matrix."
   },
   "flash": {
     "demoResetDone": "Demo data restored.",

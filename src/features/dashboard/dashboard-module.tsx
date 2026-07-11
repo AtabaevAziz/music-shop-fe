@@ -14,44 +14,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useDashboardQuery } from "@/hooks/use-dashboard-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
-import { useStoreDb } from "@/store/music-store";
 
 export function DashboardModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const db = useStoreDb();
+  const { data, isPending } = useDashboardQuery();
 
-  const revenue = db.orders
-    .filter((order) => order.paymentStatus !== "refunded")
-    .reduce(
-      (sum, order) =>
-        sum +
-        order.items.reduce((acc, item) => acc + item.qty * item.unitPrice, 0),
-      0,
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
     );
-  const lowStock = db.products.filter(
-    (product) => product.stockQty <= db.settings.lowStockThreshold,
-  );
-  const activeOrders = db.orders.filter(
-    (order) => !["completed", "cancelled"].includes(order.status),
-  );
-  const completedSales = db.orders.filter(
-    (order) => order.status === "completed",
-  ).length;
-  const featuredProducts = db.products.slice(0, 3);
-  const groupedStatuses = [
-    "new",
-    "confirmed",
-    "packed",
-    "ready_for_pickup",
-    "completed",
-    "cancelled",
-  ].map((status) => ({
-    status,
-    count: db.orders.filter((order) => order.status === status).length,
-  }));
+  }
 
   return (
     <div className="dashboard-shell">
@@ -61,26 +39,26 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             <CardContent className="p-6">
               <div className="muted">{t("labels.revenue")}</div>
               <div className="kpi-value">
-                {formatMoney(revenue, db.settings.currency, locale)}
+                {formatMoney(data.revenue, data.settings.currency, locale)}
               </div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.lowStock")}</div>
-              <div className="kpi-value">{lowStock.length}</div>
+              <div className="kpi-value">{data.lowStock.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.activeOrders")}</div>
-              <div className="kpi-value">{activeOrders.length}</div>
+              <div className="kpi-value">{data.activeOrdersCount}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
               <div className="muted">{t("labels.completedSales")}</div>
-              <div className="kpi-value">{completedSales}</div>
+              <div className="kpi-value">{data.completedSalesCount}</div>
             </CardContent>
           </Card>
         </div>
@@ -92,7 +70,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             title={t("labels.lowStock")}
             subtitle={t("dashboard.lowStockSubtitle")}
           />
-          {lowStock.length ? (
+          {data.lowStock.length ? (
             <div className="responsive-table">
               <Table>
                 <TableHeader>
@@ -103,7 +81,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lowStock.map((product) => (
+                  {data.lowStock.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.sku}</TableCell>
@@ -132,7 +110,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             subtitle={t("dashboard.pipelineSubtitle")}
           />
           <div className="stats-grid dashboard-status-grid">
-            {groupedStatuses.map((item) => (
+            {data.orderPipeline.map((item) => (
               <Card key={item.status}>
                 <CardContent className="space-y-2 p-5">
                   <div className="muted">{dynamicLabel(t, item.status)}</div>
@@ -149,7 +127,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             subtitle={t("dashboard.featuredSubtitle")}
           />
           <div className="list-clean">
-            {featuredProducts.map((product) => {
+            {data.featuredProducts.map((product) => {
               const previewImage = product.primaryImage ?? product.images[0];
 
               return (
@@ -173,7 +151,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                       <span>
                         {formatMoney(
                           product.price,
-                          db.settings.currency,
+                          data.settings.currency,
                           locale,
                         )}
                       </span>
@@ -191,7 +169,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
             subtitle={t("dashboard.activitySubtitle")}
           />
           <ul className="list-clean activity-feed">
-            {db.activity.map((item) => (
+            {data.activity.map((item) => (
               <Card key={item.id}>
                 <CardContent className="space-y-2 p-5">
                   <strong>

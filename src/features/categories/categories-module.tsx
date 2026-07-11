@@ -1,10 +1,17 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
+import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
-import { useCategoryStore } from "@/store/music-store";
+import {
+  createCategory,
+  deleteCategory,
+  updateCategory,
+} from "@/services/catalog";
 import { Category } from "@/types/music";
 
 type CategoryDraft = {
@@ -18,10 +25,38 @@ type CategoryDraft = {
 
 export function CategoriesModule() {
   const t = useTranslations();
-  const { categories, saveCategory, deleteEntity } = useCategoryStore();
+  const queryClient = useQueryClient();
+  const { data } = useCatalogQuery();
+  const categories = data?.categories ?? [];
   const categoryNameMap = Object.fromEntries(
     categories.map((category) => [category.id, category.name]),
   );
+  const saveMutation = useMutation({
+    mutationFn: async (draft: CategoryDraft) => {
+      const payload = {
+        name: draft.name,
+        parentId: draft.parentId,
+        status: draft.status,
+        description: draft.description,
+      };
+
+      if (draft.id) {
+        await updateCategory(draft.id, payload);
+        return;
+      }
+
+      await createCategory(payload);
+    },
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategory,
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
 
   return (
     <GenericCrudModule<Category, CategoryDraft>
@@ -85,16 +120,8 @@ export function CategoriesModule() {
           type: "textarea",
         },
       ]}
-      onSave={(draft) =>
-        saveCategory({
-          id: draft.id,
-          name: draft.name,
-          parentId: draft.parentId,
-          status: draft.status,
-          description: draft.description,
-        })
-      }
-      onDelete={(id) => deleteEntity("categories", id)}
+      onSave={(draft) => saveMutation.mutateAsync(draft)}
+      onDelete={(id) => deleteMutation.mutateAsync(id)}
     />
   );
 }

@@ -5,14 +5,22 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useClientOrdersQuery } from "@/hooks/use-orders-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
-import { useClientStore } from "@/store/music-store";
 
 export function ClientOrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
-  const { orders, products, settings } = useClientStore();
+  const { data, isPending } = useClientOrdersQuery();
+
+  if (isPending || !data) {
+    return (
+      <section className="table-card">
+        <div className="empty-state">{t("common.loadingWorkspace")}</div>
+      </section>
+    );
+  }
 
   return (
     <section className="table-card space-y-4">
@@ -21,7 +29,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
         subtitle={t("section.clientOrdersSubtitle")}
       />
       <div className="list-clean">
-        {orders.map((order) => {
+        {data.orders.map((order) => {
           const total = order.items.reduce(
             (sum, item) => sum + item.qty * item.unitPrice,
             0,
@@ -68,7 +76,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                 </div>
                 <div className="space-y-2">
                   {order.items.map((item) => {
-                    const product = products.find(
+                    const product = data.products.find(
                       (entry) => entry.id === item.productId,
                     );
 
@@ -83,7 +91,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                         <span>
                           {formatMoney(
                             item.qty * item.unitPrice,
-                            settings.currency,
+                            data.settings.currency,
                             locale,
                           )}
                         </span>
@@ -94,14 +102,14 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                 <div className="heading-row">
                   <div className="muted">{order.notes}</div>
                   <strong>
-                    {formatMoney(total, settings.currency, locale)}
+                    {formatMoney(total, data.settings.currency, locale)}
                   </strong>
                 </div>
               </CardContent>
             </Card>
           );
         })}
-        {orders.length === 0 ? (
+        {data.orders.length === 0 ? (
           <div className="empty-state">{t("common.noData")}</div>
         ) : null}
       </div>

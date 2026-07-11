@@ -1,8 +1,9 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AppField } from "@/components/shared/form-field";
 import { PageHeader } from "@/components/shared/page-header";
@@ -16,18 +17,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { invalidateAppQueries } from "@/lib/query-utils";
+import { attachProductImage, setProductPrimaryImage } from "@/services/catalog";
 import { ModuleSection } from "@/shared/components/module-shell";
-import { useMediaStore } from "@/store/music-store";
 
 export function MediaModule() {
   const t = useTranslations();
-  const { products, addProductImage, setPrimaryImage } = useMediaStore();
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const queryClient = useQueryClient();
+  const { data } = useMediaQuery();
+  const products = data?.products ?? [];
+  const [productId, setProductId] = useState("");
   const [label, setLabel] = useState("");
   const [formError, setFormError] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isPromoting, setIsPromoting] = useState(false);
+  const addImageMutation = useMutation({
+    mutationFn: async ({ productId, label }: { productId: string; label: string }) =>
+      attachProductImage(productId, { image: label }),
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
+  const promoteImageMutation = useMutation({
+    mutationFn: async ({
+      productId,
+      label,
+    }: {
+      productId: string;
+      label: string;
+    }) => setProductPrimaryImage(productId, { image: label }),
+    onSuccess: async () => {
+      await invalidateAppQueries(queryClient);
+    },
+  });
   const product = products.find((item) => item.id === productId);
+
+  useEffect(() => {
+    if (!productId && products[0]?.id) {
+      setProductId(products[0].id);
+    }
+  }, [productId, products]);
 
   return (
     <div className="two-columns">
@@ -40,9 +68,11 @@ export function MediaModule() {
           onSubmit={async (event) => {
             event.preventDefault();
             setFormError("");
-            setIsSaving(true);
             try {
-              await addProductImage(productId, label.trim());
+              await addImageMutation.mutateAsync({
+                productId,
+                label: label.trim(),
+              });
               setLabel("");
             } catch (error) {
               setFormError(
@@ -50,8 +80,6 @@ export function MediaModule() {
                   ? error.message
                   : t("common.unexpectedError"),
               );
-            } finally {
-              setIsSaving(false);
             }
           }}
         >
@@ -59,7 +87,9 @@ export function MediaModule() {
           <AppField label={t("labels.product")}>
             <Select
               value={productId}
-              disabled={isSaving || isPromoting}
+              disabled={
+                addImageMutation.isPending || promoteImageMutation.isPending
+              }
               onValueChange={setProductId}
             >
               <SelectTrigger>
@@ -77,13 +107,15 @@ export function MediaModule() {
           <AppField label={t("labels.imagePath")}>
             <Input
               value={label}
-              disabled={isSaving}
+              disabled={addImageMutation.isPending}
               onChange={(event) => setLabel(event.target.value)}
             />
           </AppField>
           <div className="flex gap-2">
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? t("common.saving") : t("common.save")}
+            <Button type="submit" disabled={addImageMutation.isPending}>
+              {addImageMutation.isPending
+                ? t("common.saving")
+                : t("common.save")}
             </Button>
           </div>
         </form>
@@ -118,20 +150,20 @@ export function MediaModule() {
                   <Button
                     variant="outline"
                     type="button"
-                    disabled={isPromoting}
+                    disabled={promoteImageMutation.isPending}
                     onClick={async () => {
                       setFormError("");
-                      setIsPromoting(true);
                       try {
-                        await setPrimaryImage(product.id, image);
+                        await promoteImageMutation.mutateAsync({
+                          productId: product.id,
+                          label: image,
+                        });
                       } catch (error) {
                         setFormError(
                           error instanceof Error
                             ? error.message
                             : t("common.unexpectedError"),
                         );
-                      } finally {
-                        setIsPromoting(false);
                       }
                     }}
                   >
