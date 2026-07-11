@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-} from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext, useMemo } from "react";
 
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -30,19 +22,20 @@ type SessionContextValue = {
 
 const SessionContext = createContext<SessionContextValue | null>(null);
 
-export function SessionProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SessionProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
-  const sessionQuery = useQuery({
+  const {
+    data: session,
+    isFetching: isSessionFetching,
+    isPending: isSessionPending,
+    refetch: refetchSession,
+  } = useQuery({
     queryKey: queryKeys.session,
     queryFn: getSession,
     retry: false,
   });
 
-  const loginMutation = useMutation({
+  const { isPending: isLoginPending, mutateAsync: login } = useMutation({
     mutationFn: ({ login, password }: { login: string; password: string }) =>
       loginRequest({ login, password }),
     onSuccess: async (session) => {
@@ -53,7 +46,7 @@ export function SessionProvider({
     },
   });
 
-  const logoutMutation = useMutation({
+  const { isPending: isLogoutPending, mutateAsync: logout } = useMutation({
     mutationFn: logoutRequest,
     onSettled: async () => {
       queryClient.removeQueries({
@@ -65,29 +58,28 @@ export function SessionProvider({
 
   const value = useMemo<SessionContextValue>(
     () => ({
-      ready: !sessionQuery.isPending,
-      session: sessionQuery.data ?? null,
-      isAuthenticating:
-        loginMutation.isPending ||
-        logoutMutation.isPending ||
-        sessionQuery.isFetching,
-      login: async (login, password) =>
-        loginMutation.mutateAsync({ login, password }),
+      ready: !isSessionPending,
+      session: session ?? null,
+      isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
+      login: async (loginValue, password) =>
+        login({ login: loginValue, password }),
       logout: async () => {
-        await logoutMutation.mutateAsync();
+        await logout();
       },
       refetchSession: async () => {
-        const result = await sessionQuery.refetch();
+        const result = await refetchSession();
         return result.data ?? null;
       },
     }),
     [
-      loginMutation,
-      logoutMutation,
-      sessionQuery.data,
-      sessionQuery.isFetching,
-      sessionQuery.isPending,
-      sessionQuery.refetch,
+      isLoginPending,
+      isLogoutPending,
+      isSessionFetching,
+      isSessionPending,
+      login,
+      logout,
+      refetchSession,
+      session,
     ],
   );
 

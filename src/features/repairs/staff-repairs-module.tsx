@@ -101,7 +101,9 @@ export function StaffRepairsModule({ locale = "ru" }: { locale?: Locale }) {
         {formError ? <div className="error">{formError}</div> : null}
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("labels.customer")}</label>
+            <label className="text-sm font-medium">
+              {t("labels.customer")}
+            </label>
             <Select
               value={draft.customerId}
               onValueChange={(value) =>
@@ -121,7 +123,9 @@ export function StaffRepairsModule({ locale = "ru" }: { locale?: Locale }) {
             </Select>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("labels.instrumentName")}</label>
+            <label className="text-sm font-medium">
+              {t("labels.instrumentName")}
+            </label>
             <Input
               value={draft.instrumentName}
               onChange={(event) =>
@@ -145,7 +149,9 @@ export function StaffRepairsModule({ locale = "ru" }: { locale?: Locale }) {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">{t("labels.repairIssue")}</label>
+            <label className="text-sm font-medium">
+              {t("labels.repairIssue")}
+            </label>
             <Textarea
               rows={4}
               value={draft.issue}
@@ -220,7 +226,11 @@ export function StaffRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                   <div className="muted">{request.notes}</div>
                   <div className="muted">
                     {new Date(request.updatedAt).toLocaleString(
-                      locale === "en" ? "en-US" : locale === "uz" ? "uz-UZ" : "ru-RU",
+                      locale === "en"
+                        ? "en-US"
+                        : locale === "uz"
+                          ? "uz-UZ"
+                          : "ru-RU",
                     )}
                   </div>
                 </CardContent>

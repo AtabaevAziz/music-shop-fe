@@ -7,14 +7,18 @@ import type {
   InventoryMovementsQuery,
 } from "@/services/inventory/inventory-types";
 
-export async function getInventoryMovements(query: InventoryMovementsQuery = {}) {
-  const response = await api.get<{ items: ApiInventoryMovement[] } | ApiInventoryMovement[]>(
-    "inventory/movements",
-    { params: query },
-  );
+export async function getInventoryMovements(
+  query: InventoryMovementsQuery = {},
+) {
+  const response = await api.get<
+    { items: ApiInventoryMovement[] } | ApiInventoryMovement[]
+  >("inventory/movements", { params: query });
   return unwrapListPayload(response).map(fromApiInventoryMovement);
 }
 
 export async function adjustInventoryStock(input: AdjustInventoryRequest) {
-  return api.post<ApiInventoryAdjustmentResponse>("inventory/adjustments", input);
+  return api.post<ApiInventoryAdjustmentResponse>(
+    "inventory/adjustments",
+    input,
+  );
 }

@@ -154,7 +154,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                        {formatMoney(product.price, data.settings.currency, locale)}
+                        {formatMoney(
+                          product.price,
+                          data.settings.currency,
+                          locale,
+                        )}
                       </span>
                     </div>
                   </div>

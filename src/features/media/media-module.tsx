@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AppField } from "@/components/shared/form-field";
 import { PageHeader } from "@/components/shared/page-header";
@@ -26,13 +26,18 @@ export function MediaModule() {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const { data } = useMediaQuery();
-  const products = data?.products ?? [];
+  const products = useMemo(() => data?.products ?? [], [data?.products]);
   const [productId, setProductId] = useState("");
   const [label, setLabel] = useState("");
   const [formError, setFormError] = useState("");
   const addImageMutation = useMutation({
-    mutationFn: async ({ productId, label }: { productId: string; label: string }) =>
-      attachProductImage(productId, { image: label }),
+    mutationFn: async ({
+      productId,
+      label,
+    }: {
+      productId: string;
+      label: string;
+    }) => attachProductImage(productId, { image: label }),
     onSuccess: async () => {
       await invalidateAppQueries(queryClient);
     },

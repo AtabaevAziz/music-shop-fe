@@ -4,22 +4,23 @@ import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import { getActivity } from "@/services/activity";
+import { getProducts } from "@/services/catalog";
 import { getWorkflows } from "@/services/config";
 import { getOrders } from "@/services/orders";
-import { getProducts } from "@/services/catalog";
 import { getSettings } from "@/services/settings";
 
 export function useDashboardQuery() {
   return useQuery({
     queryKey: queryKeys.dashboard,
     queryFn: async () => {
-      const [products, orders, settings, activity, workflows] = await Promise.all([
-        getProducts(),
-        getOrders(),
-        getSettings(),
-        getActivity({ limit: 12 }),
-        getWorkflows(),
-      ]);
+      const [products, orders, settings, activity, workflows] =
+        await Promise.all([
+          getProducts(),
+          getOrders(),
+          getSettings(),
+          getActivity({ limit: 12 }),
+          getWorkflows(),
+        ]);
 
       const revenue = orders
         .filter((order) => order.paymentStatus !== "refunded")

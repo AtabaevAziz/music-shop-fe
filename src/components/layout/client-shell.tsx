@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  Languages,
-  LogOut,
-  Menu,
-  UserRound,
-} from "lucide-react";
+import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,7 +23,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useClientHomeQuery } from "@/hooks/use-client-home-query";
-import { useNavigationQuery, usePermissionsQuery } from "@/hooks/use-config-query";
+import {
+  useNavigationQuery,
+  usePermissionsQuery,
+} from "@/hooks/use-config-query";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 import {
   canAccessRoute,

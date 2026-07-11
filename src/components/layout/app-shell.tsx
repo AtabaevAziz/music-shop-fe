@@ -1,31 +1,12 @@
 "use client";
 
-import {
-  ChevronDown,
-  Languages,
-  LogOut,
-  Menu,
-  UserRound,
-} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 
-import { useNavigationQuery, usePermissionsQuery } from "@/hooks/use-config-query";
-import { Locale, localeLabelKeyMap, locales } from "@/i18n";
-import {
-  canAccessRoute,
-  getRouteIdFromPathname,
-  getVisibleNavigationItems,
-} from "@/lib/navigation";
-import { queryKeys } from "@/lib/query-keys";
-import { dynamicLabel } from "@/lib/translations";
-import { cn } from "@/lib/utils";
-import { useAuthSession } from "@/providers/session-provider";
-import { getSettings } from "@/services/settings";
-import type { Role } from "@/types/music";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +23,22 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  useNavigationQuery,
+  usePermissionsQuery,
+} from "@/hooks/use-config-query";
+import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import {
+  canAccessRoute,
+  getRouteIdFromPathname,
+  getVisibleNavigationItems,
+} from "@/lib/navigation";
+import { queryKeys } from "@/lib/query-keys";
+import { dynamicLabel } from "@/lib/translations";
+import { cn } from "@/lib/utils";
+import { useAuthSession } from "@/providers/session-provider";
+import { getSettings } from "@/services/settings";
+import type { Role } from "@/types/music";
 
 type NavItem = {
   id: string;

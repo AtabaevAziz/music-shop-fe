@@ -3,8 +3,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
-import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
+import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import {

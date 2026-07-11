@@ -11,6 +11,9 @@ export async function getSettings() {
 }
 
 export async function updateSettings(input: UpdateBusinessSettingsRequest) {
-  const response = await api.put<ApiBusinessSettingsResponse>("settings", input);
+  const response = await api.put<ApiBusinessSettingsResponse>(
+    "settings",
+    input,
+  );
   return fromApiBusinessSettings(response.settings);
 }

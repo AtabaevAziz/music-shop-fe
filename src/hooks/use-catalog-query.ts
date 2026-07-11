@@ -3,11 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
-import {
-  getBrands,
-  getCategories,
-  getProducts,
-} from "@/services/catalog";
+import { getBrands, getCategories, getProducts } from "@/services/catalog";
 import { getClientProducts } from "@/services/client";
 import { getSettings } from "@/services/settings";
 

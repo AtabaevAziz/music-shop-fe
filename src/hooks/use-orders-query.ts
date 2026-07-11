@@ -5,10 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 import { getClientOrders } from "@/services/client";
 import { getClientProducts } from "@/services/client";
+import { getWorkflows } from "@/services/config";
 import { getCustomers } from "@/services/customers";
 import { getOrders } from "@/services/orders";
 import { getSettings } from "@/services/settings";
-import { getWorkflows } from "@/services/config";
 
 export function useStaffOrdersQuery() {
   return useQuery({

@@ -19,7 +19,9 @@ export async function getOrders(query: OrdersListQuery = {}) {
 }
 
 export async function getOrderById(orderId: string) {
-  const response = await api.get<ApiOrder | ApiOrderResponse>(`orders/${orderId}`);
+  const response = await api.get<ApiOrder | ApiOrderResponse>(
+    `orders/${orderId}`,
+  );
   return fromApiOrder(unwrapEntityPayload(response, "order"));
 }
 

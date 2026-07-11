@@ -83,7 +83,9 @@ export async function getProducts(query: ProductsListQuery = {}) {
 }
 
 export async function getProductById(id: string) {
-  const response = await api.get<ApiProduct | ApiProductResponse>(`products/${id}`);
+  const response = await api.get<ApiProduct | ApiProductResponse>(
+    `products/${id}`,
+  );
   return fromApiProduct(unwrapEntityPayload(response, "product"));
 }
 

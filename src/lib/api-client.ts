@@ -175,10 +175,18 @@ export const api = {
   get<T>(url: string, options?: Omit<RequestOptions, "method" | "body">) {
     return fetchApi<T>(url, { ...options, method: "GET" });
   },
-  post<T>(url: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) {
+  post<T>(
+    url: string,
+    body?: unknown,
+    options?: Omit<RequestOptions, "method" | "body">,
+  ) {
     return fetchApi<T>(url, { ...options, method: "POST", body });
   },
-  put<T>(url: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) {
+  put<T>(
+    url: string,
+    body?: unknown,
+    options?: Omit<RequestOptions, "method" | "body">,
+  ) {
     return fetchApi<T>(url, { ...options, method: "PUT", body });
   },
   patch<T>(

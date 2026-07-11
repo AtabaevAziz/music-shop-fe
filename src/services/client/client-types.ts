@@ -1,4 +1,10 @@
-import type { Customer, Order, OrderItem, Product, RepairRequest } from "@/types/music";
+import type {
+  Customer,
+  Order,
+  OrderItem,
+  Product,
+  RepairRequest,
+} from "@/types/music";
 
 export type ApiClientCustomer = Customer;
 

@@ -35,7 +35,9 @@ export function FinanceModule({ locale }: { locale: Locale }) {
       0,
     );
     const cost = order.items.reduce((sum, item) => {
-      const product = data.products.find((entry) => entry.id === item.productId);
+      const product = data.products.find(
+        (entry) => entry.id === item.productId,
+      );
       return sum + (product?.costPrice ?? 0) * item.qty;
     }, 0);
     return { order, total, margin: total - cost };

@@ -87,7 +87,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const { data, isPending } = useCatalogQuery();
-  const products = data?.products ?? [];
+  const products = useMemo(() => data?.products ?? [], [data?.products]);
   const categories = data?.categories ?? [];
   const brands = data?.brands ?? [];
   const settings = data?.settings ?? {
@@ -97,7 +97,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     defaultMarkupPercent: 0,
   };
   const saveMutation = useMutation({
-    mutationFn: async (input: Parameters<typeof createProduct>[0] & { id?: string }) => {
+    mutationFn: async (
+      input: Parameters<typeof createProduct>[0] & { id?: string },
+    ) => {
       if (input.id) {
         const { id, ...payload } = input;
         await updateProduct(id, payload);

@@ -39,8 +39,7 @@ export function getVisibleNavigationItems(
   return items
     .filter(
       (item) =>
-        item.roles.includes(role) &&
-        canAccessRoute(role, item.id, permissions),
+        item.roles.includes(role) && canAccessRoute(role, item.id, permissions),
     )
     .map((item) => ({
       ...item,

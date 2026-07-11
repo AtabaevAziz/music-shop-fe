@@ -32,12 +32,10 @@ export function EmployeesModule() {
     data?.dictionaries.roles
       ?.map((role) => role.value)
       .filter((role): role is Exclude<Role, "client"> => role !== "client") ??
-    ([
-      "admin",
-      "store_manager",
-      "catalog_manager",
-      "sales_operator",
-    ] as Exclude<Role, "client">[]);
+    (["admin", "store_manager", "catalog_manager", "sales_operator"] as Exclude<
+      Role,
+      "client"
+    >[]);
   const saveMutation = useMutation({
     mutationFn: async (draft: EmployeeDraft) => {
       const payload = {

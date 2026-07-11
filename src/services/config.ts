@@ -42,6 +42,8 @@ export async function getWorkflows() {
 }
 
 export async function getDictionaries() {
-  const response = await api.get<ApiDictionariesResponse>("config/dictionaries");
+  const response = await api.get<ApiDictionariesResponse>(
+    "config/dictionaries",
+  );
   return fromApiDictionariesConfig(response.dictionaries ?? response);
 }

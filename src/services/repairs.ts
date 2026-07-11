@@ -8,10 +8,9 @@ import type {
 } from "@/services/repairs/repairs-types";
 
 export async function getRepairs(query: RepairsListQuery = {}) {
-  const response = await api.get<{ items: ApiRepairRequest[] } | ApiRepairRequest[]>(
-    "repairs",
-    { params: query },
-  );
+  const response = await api.get<
+    { items: ApiRepairRequest[] } | ApiRepairRequest[]
+  >("repairs", { params: query });
   return unwrapListPayload(response).map(fromApiRepairRequest);
 }
 

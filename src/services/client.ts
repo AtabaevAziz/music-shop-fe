@@ -22,21 +22,24 @@ export async function getClientMe() {
 }
 
 export async function getClientProducts() {
-  const response = await api.get<{ items: ApiClientProduct[] } | ApiClientProduct[]>(
-    "client/products",
-  );
+  const response = await api.get<
+    { items: ApiClientProduct[] } | ApiClientProduct[]
+  >("client/products");
   return unwrapListPayload(response).map(fromApiClientProduct);
 }
 
 export async function getClientOrders() {
-  const response = await api.get<{ items: ApiClientOrder[] } | ApiClientOrder[]>(
-    "client/orders",
-  );
+  const response = await api.get<
+    { items: ApiClientOrder[] } | ApiClientOrder[]
+  >("client/orders");
   return unwrapListPayload(response).map(fromApiClientOrder);
 }
 
 export async function createClientOrder(input: CreateClientOrderRequest) {
-  const response = await api.post<ApiClientOrderResponse>("client/orders", input);
+  const response = await api.post<ApiClientOrderResponse>(
+    "client/orders",
+    input,
+  );
   return fromApiClientOrder(response.order);
 }
 
