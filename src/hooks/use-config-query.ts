@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 import { queryKeys } from "@/lib/query-keys";
 import {
   getAppConfig,
@@ -14,6 +15,7 @@ import {
 
 export function useAppConfigQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.appConfig,
     queryFn: getAppConfig,
   });
@@ -21,6 +23,7 @@ export function useAppConfigQuery() {
 
 export function useAuthConfigQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.authConfig,
     queryFn: getAuthConfig,
   });
@@ -28,6 +31,7 @@ export function useAuthConfigQuery() {
 
 export function useNavigationQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.navigation,
     queryFn: getNavigationConfig,
   });
@@ -35,6 +39,7 @@ export function useNavigationQuery() {
 
 export function usePermissionsQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.permissions,
     queryFn: getPermissions,
   });
@@ -42,6 +47,7 @@ export function usePermissionsQuery() {
 
 export function useWorkflowsQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.workflows,
     queryFn: getWorkflows,
   });
@@ -49,6 +55,7 @@ export function useWorkflowsQuery() {
 
 export function useDictionariesQuery() {
   return useQuery({
+    enabled: hasConfiguredApiBaseUrl(),
     queryKey: queryKeys.dictionaries,
     queryFn: getDictionaries,
   });

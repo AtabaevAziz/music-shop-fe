@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  getConfiguredApiBaseUrl,
+  missingApiBaseUrlMessage,
+} from "@/lib/api-config";
 import { ApiClientError } from "@/lib/api-error";
 
 type RequestOptions = {
@@ -46,14 +50,10 @@ function buildUrlWithParams(
 }
 
 function getApiUrl() {
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_MUSIC_SHOP_BE_URL;
+  const apiUrl = getConfiguredApiBaseUrl();
 
   if (!apiUrl) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_API_BASE_URL. Set it to your backend base URL, for example http://localhost:8080/api/v1.",
-    );
+    throw new Error(missingApiBaseUrlMessage);
   }
 
   return normalizeBaseUrl(apiUrl);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { useDashboardQuery } from "@/hooks/use-dashboard-query";
 import { Locale } from "@/i18n";
-import { dynamicLabel, formatTranslatedMessage } from "@/lib/translations";
+import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
 
 export function DashboardModule({ locale }: { locale: Locale }) {
@@ -31,34 +30,43 @@ export function DashboardModule({ locale }: { locale: Locale }) {
     );
   }
 
+  const customerMap = Object.fromEntries(
+    data.customers.map((customer) => [
+      customer.id,
+      customer.fullName ?? customer.name,
+    ]),
+  );
+
   return (
     <div className="dashboard-shell">
       <section className="table-card dashboard-hero">
+        <PageHeader
+          title={t("nav.dashboard")}
+          subtitle={t("meta.appSubtitle")}
+        />
         <div className="dashboard-overview">
           <Card className="metric-card">
             <CardContent className="p-6">
-              <div className="muted">{t("labels.revenue")}</div>
-              <div className="kpi-value">
-                {formatMoney(data.revenue, data.settings.currency, locale)}
-              </div>
+              <div className="muted">{t("labels.productsCount")}</div>
+              <div className="kpi-value">{data.products.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-              <div className="muted">{t("labels.lowStock")}</div>
-              <div className="kpi-value">{data.lowStock.length}</div>
+              <div className="muted">{t("labels.ordersCount")}</div>
+              <div className="kpi-value">{data.orders.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-              <div className="muted">{t("labels.activeOrders")}</div>
-              <div className="kpi-value">{data.activeOrdersCount}</div>
+              <div className="muted">{t("labels.repairRequestsCount")}</div>
+              <div className="kpi-value">{data.repairs.length}</div>
             </CardContent>
           </Card>
           <Card className="metric-card">
             <CardContent className="p-6">
-              <div className="muted">{t("labels.completedSales")}</div>
-              <div className="kpi-value">{data.completedSalesCount}</div>
+              <div className="muted">{t("labels.customersCount")}</div>
+              <div className="kpi-value">{data.customers.length}</div>
             </CardContent>
           </Card>
         </div>
@@ -67,7 +75,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
       <div className="dashboard-panel-grid">
         <section className="table-card dashboard-panel dashboard-panel-wide">
           <PageHeader
-            title={t("labels.lowStock")}
+            title={t("labels.lowStockProducts")}
             subtitle={t("dashboard.lowStockSubtitle")}
           />
           {data.lowStock.length ? (
@@ -77,7 +85,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                   <TableRow>
                     <TableHead>{t("labels.product")}</TableHead>
                     <TableHead>{t("labels.sku")}</TableHead>
-                    <TableHead>{t("labels.qty")}</TableHead>
+                    <TableHead>{t("labels.stock")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -106,90 +114,124 @@ export function DashboardModule({ locale }: { locale: Locale }) {
 
         <section className="table-card dashboard-panel">
           <PageHeader
-            title={t("labels.orderPipeline")}
-            subtitle={t("dashboard.pipelineSubtitle")}
+            title={t("labels.latestOrders")}
+            subtitle={t("section.ordersSubtitle")}
           />
-          <div className="stats-grid dashboard-status-grid">
-            {data.orderPipeline.map((item) => (
-              <Card key={item.status}>
-                <CardContent className="space-y-2 p-5">
-                  <div className="muted">{dynamicLabel(t, item.status)}</div>
-                  <div className="kpi-value">{item.count}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+          {data.latestOrders.length ? (
+            <div className="responsive-table">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("labels.orderNumber")}</TableHead>
+                    <TableHead>{t("labels.customer")}</TableHead>
+                    <TableHead>{t("labels.total")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.latestOrders.map((order) => {
+                    const total = order.items.reduce(
+                      (sum, item) => sum + item.qty * item.unitPrice,
+                      0,
+                    );
 
-        <section className="table-card dashboard-panel">
-          <PageHeader
-            title={t("dashboard.featuredTitle")}
-            subtitle={t("dashboard.featuredSubtitle")}
-          />
-          <div className="list-clean">
-            {data.featuredProducts.map((product) => {
-              const previewImage = product.primaryImage ?? product.images[0];
-
-              return (
-                <Card key={product.id}>
-                  <CardContent className="space-y-4 p-5">
-                    {previewImage ? (
-                      <Image
-                        src={previewImage}
-                        alt={product.name}
-                        width={720}
-                        height={180}
-                        className="product-thumb product-thumb-featured"
-                      />
-                    ) : null}
-                    <strong>{product.name}</strong>
-                    <div className="muted">{product.sku}</div>
-                    <div className="heading-row">
-                      <Badge variant="secondary">
-                        {dynamicLabel(t, product.status)}
-                      </Badge>
-                      <span>
-                        {formatMoney(
-                          product.price,
-                          data.settings.currency,
-                          locale,
-                        )}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                    return (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <strong>{order.id}</strong>
+                            <div className="muted">
+                              {new Date(order.createdAt).toLocaleDateString(
+                                getIntlLocale(locale),
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {customerMap[order.customerId] ?? order.customerId}
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div>
+                              {formatMoney(
+                                total,
+                                data.settings.currency,
+                                locale,
+                              )}
+                            </div>
+                            <Badge variant="secondary">
+                              {dynamicLabel(t, order.status)}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="empty-state">{t("common.noData")}</div>
+          )}
         </section>
 
         <section className="table-card dashboard-panel dashboard-panel-wide">
           <PageHeader
-            title={t("labels.recentActivity")}
-            subtitle={t("dashboard.activitySubtitle")}
+            title={t("labels.latestRepairs")}
+            subtitle={t("section.repairsSubtitle")}
           />
-          <ul className="list-clean activity-feed">
-            {data.activity.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="space-y-2 p-5">
-                  <strong>
-                    {item.messageKey
-                      ? formatTranslatedMessage(
-                          t,
-                          item.messageKey,
-                          item.messageParams,
-                        )
-                      : item.title}
-                  </strong>
-                  <div className="muted">
-                    {new Date(item.timestamp).toLocaleString(
-                      getIntlLocale(locale),
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </ul>
+          {data.latestRepairs.length ? (
+            <div className="responsive-table">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("labels.requestNumber")}</TableHead>
+                    <TableHead>{t("labels.customer")}</TableHead>
+                    <TableHead>{t("labels.instrumentName")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.latestRepairs.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <strong>{request.id}</strong>
+                          <div className="muted">
+                            {new Date(
+                              request.receivedAt ??
+                                request.createdAt ??
+                                request.updatedAt,
+                            ).toLocaleDateString(getIntlLocale(locale))}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {customerMap[request.customerId] ?? request.customerId}
+                      </TableCell>
+                      <TableCell>{request.instrumentName}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            request.status === "completed"
+                              ? "success"
+                              : request.status === "cancelled"
+                                ? "destructive"
+                                : request.status === "ready"
+                                  ? "warning"
+                                  : "secondary"
+                          }
+                        >
+                          {dynamicLabel(t, request.status)}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="empty-state">{t("common.noData")}</div>
+          )}
         </section>
       </div>
     </div>

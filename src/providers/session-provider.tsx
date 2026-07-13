@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useMemo } from "react";
 
+import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 import { queryKeys } from "@/lib/query-keys";
 import {
   login as loginRequest,
@@ -24,6 +25,7 @@ type SessionContextValue = {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
+  const isApiConfigured = hasConfiguredApiBaseUrl();
   const queryClient = useQueryClient();
   const {
     data: session,
@@ -32,6 +34,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     isPending: isSessionPending,
     refetch: refetchSession,
   } = useQuery({
+    enabled: isApiConfigured,
     queryKey: queryKeys.session,
     queryFn: getSession,
     retry: false,
@@ -60,9 +63,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<SessionContextValue>(
     () => ({
-      ready: !isSessionPending,
+      ready: !isApiConfigured || !isSessionPending,
       session: session ?? null,
-      sessionError: sessionError instanceof Error ? sessionError : null,
+      sessionError:
+        isApiConfigured && sessionError instanceof Error ? sessionError : null,
       isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
       login: async (loginValue, password) =>
         login({ login: loginValue, password }),
@@ -70,6 +74,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await logout();
       },
       refetchSession: async () => {
+        if (!isApiConfigured) {
+          return null;
+        }
+
         const result = await refetchSession();
         return result.data ?? null;
       },
@@ -77,6 +85,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     [
       isLoginPending,
       isLogoutPending,
+      isApiConfigured,
       isSessionFetching,
       isSessionPending,
       login,

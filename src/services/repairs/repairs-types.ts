@@ -14,7 +14,13 @@ export type CreateRepairRequest = {
   brand: string;
   issue: string;
   notes: string;
+  status?: RepairStatus;
+  estimatedCost?: number;
+  assignedMasterName?: string;
+  receivedAt?: string;
 };
+
+export type UpdateRepairRequest = CreateRepairRequest;
 
 export type ApiRepairResponse = {
   repairRequest: ApiRepairRequest;

@@ -41,6 +41,8 @@ Required env:
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
 ```
 
+If the app shows a backend URL configuration error on the login screen, verify that `.env.local` exists and contains `NEXT_PUBLIC_API_BASE_URL` pointing at the running backend.
+
 ## Scripts
 
 ```bash

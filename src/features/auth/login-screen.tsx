@@ -20,10 +20,16 @@ import {
   useAuthConfigQuery,
 } from "@/hooks/use-config-query";
 import { Locale, localeLabelKeyMap } from "@/i18n";
+import {
+  API_BASE_URL_ENV_VAR,
+  API_BASE_URL_EXAMPLE,
+  hasConfiguredApiBaseUrl,
+} from "@/lib/api-config";
 import { getConfiguredLocales } from "@/lib/runtime-config";
 import { useAuthSession } from "@/providers/session-provider";
 
 export function LoginScreen({ locale }: { locale: Locale }) {
+  const isApiConfigured = hasConfiguredApiBaseUrl();
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
@@ -47,22 +53,25 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     ? authConfig.allowClientLogin || authConfig.allowStaffLogin
     : true;
   const isSubmitDisabled =
+    !isApiConfigured ||
     isAuthenticating ||
     isAuthConfigPending ||
     !hasPasswordProvider ||
     !isLoginEnabled;
 
-  const authNotice = authConfig
-    ? !hasPasswordProvider
-      ? t("auth.passwordLoginUnavailable")
-      : !isLoginEnabled
-        ? t("auth.loginUnavailable")
-        : !authConfig.allowClientLogin
-          ? t("auth.clientLoginDisabled")
-          : !authConfig.allowStaffLogin
-            ? t("auth.staffLoginDisabled")
-            : null
-    : null;
+  const authNotice = !isApiConfigured
+    ? null
+    : authConfig
+      ? !hasPasswordProvider
+        ? t("auth.passwordLoginUnavailable")
+        : !isLoginEnabled
+          ? t("auth.loginUnavailable")
+          : !authConfig.allowClientLogin
+            ? t("auth.clientLoginDisabled")
+            : !authConfig.allowStaffLogin
+              ? t("auth.staffLoginDisabled")
+              : null
+      : null;
 
   const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -153,7 +162,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 placeholder={t("auth.loginPlaceholder")}
                 value={loginValue}
                 required
-                disabled={isAuthenticating}
+                disabled={isAuthenticating || !isApiConfigured}
                 onChange={(event) => {
                   if (error) {
                     setError(null);
@@ -174,7 +183,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   placeholder={t("auth.passwordPlaceholder")}
                   value={passwordValue}
                   required
-                  disabled={isAuthenticating}
+                  disabled={isAuthenticating || !isApiConfigured}
                   onChange={(event) => {
                     if (error) {
                       setError(null);
@@ -191,13 +200,28 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                       : t("auth.showPassword")
                   }
                   aria-pressed={isPasswordVisible}
-                  disabled={isAuthenticating}
+                  disabled={isAuthenticating || !isApiConfigured}
                   onClick={() => setIsPasswordVisible((current) => !current)}
                 >
                   {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
+            {!isApiConfigured ? (
+              <div className="auth-form-error" role="alert">
+                <strong>{t("auth.apiBaseUrlMissingTitle")}</strong>
+                <p>
+                  {t("auth.apiBaseUrlMissingText", {
+                    envVar: API_BASE_URL_ENV_VAR,
+                  })}
+                </p>
+                <p>
+                  {t("auth.apiBaseUrlMissingHint", {
+                    exampleUrl: API_BASE_URL_EXAMPLE,
+                  })}
+                </p>
+              </div>
+            ) : null}
             {error ? (
               <p className="auth-form-error" role="alert">
                 {error}

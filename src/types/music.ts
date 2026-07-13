@@ -29,6 +29,7 @@ export type Category = {
   parentId?: string;
   status: "active" | "inactive";
   description: string;
+  productCount?: number;
 };
 
 export type Brand = {
@@ -56,6 +57,7 @@ export type Product = {
   images: string[];
   primaryImage?: string;
   condition: Condition;
+  minStockQty?: number;
 };
 
 export type InventoryMovement = {
@@ -91,6 +93,9 @@ export type RepairRequest = {
   issue: string;
   status: RepairStatus;
   notes: string;
+  estimatedCost?: number;
+  assignedMasterName?: string;
+  receivedAt?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -98,11 +103,15 @@ export type RepairRequest = {
 export type Customer = {
   id: string;
   name: string;
+  fullName?: string;
   phone: string;
   email: string;
   tier: "standard" | "studio" | "vip";
   status: "active" | "inactive";
   notes: string;
+  ordersCount?: number;
+  repairsCount?: number;
+  registeredAt?: string;
 };
 
 export type Employee = {

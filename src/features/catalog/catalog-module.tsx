@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { z } from "zod";
 
 import { AppField } from "@/components/shared/form-field";
+import { PageHeader } from "@/components/shared/page-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,6 +88,7 @@ const productSchema = z.object({
 });
 
 type ProductDraft = Record<string, string>;
+const ALL_CATEGORIES_VALUE = "__all_categories__";
 
 export function CatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -136,6 +138,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     },
   });
   const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORIES_VALUE);
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -146,13 +149,19 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase();
-    if (!value) return products;
-    return products.filter((product) =>
-      `${product.name} ${product.sku} ${product.shortDescription}`
-        .toLowerCase()
-        .includes(value),
-    );
-  }, [products, query]);
+    return products.filter((product) => {
+      const matchesQuery =
+        !value ||
+        `${product.name} ${product.sku} ${product.shortDescription}`
+          .toLowerCase()
+          .includes(value);
+      const matchesCategory =
+        categoryFilter === ALL_CATEGORIES_VALUE ||
+        product.categoryId === categoryFilter;
+
+      return matchesQuery && matchesCategory;
+    });
+  }, [categoryFilter, products, query]);
 
   const categoryMap = Object.fromEntries(
     categories.map((item) => [item.id, item.name]),
@@ -238,26 +247,48 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
         <TabsContent value="products" className="mt-0">
           <section className="table-card">
-            <div className="toolbar page-actions">
-              <div className="flex flex-wrap gap-2">
-                <Input
-                  className="w-full min-w-[220px] md:w-72"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={t("common.search")}
-                />
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setFormError("");
-                    resetDraft();
-                    setIsEditorOpen(true);
-                  }}
-                >
-                  {t("common.addNew")}
-                </Button>
-              </div>
-            </div>
+            <PageHeader
+              title={t("labels.product")}
+              subtitle={t("section.catalogSubtitle")}
+              actions={
+                <>
+                  <Input
+                    className="w-full min-w-[220px] md:w-72"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder={t("common.search")}
+                  />
+                  <Select
+                    value={categoryFilter}
+                    onValueChange={setCategoryFilter}
+                  >
+                    <SelectTrigger className="w-full min-w-[220px] md:w-64">
+                      <SelectValue placeholder={t("labels.category")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_CATEGORIES_VALUE}>
+                        {t("common.select")} {t("labels.category")}
+                      </SelectItem>
+                      {categories.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setFormError("");
+                      resetDraft();
+                      setIsEditorOpen(true);
+                    }}
+                  >
+                    {t("common.addNew")}
+                  </Button>
+                </>
+              }
+            />
             <div className="responsive-table">
               <Table>
                 <TableHeader>
@@ -265,10 +296,9 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                     <TableHead>{t("labels.preview")}</TableHead>
                     <TableHead>{t("labels.product")}</TableHead>
                     <TableHead>{t("labels.category")}</TableHead>
-                    <TableHead>{t("labels.brand")}</TableHead>
                     <TableHead>{t("labels.price")}</TableHead>
                     <TableHead>{t("labels.stock")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead>{t("labels.availability")}</TableHead>
                     <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -297,10 +327,14 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                               {product.shortDescription}
                             </div>
                           </div>
-                          <div className="muted">{product.sku}</div>
+                          <div className="muted">
+                            {product.sku}
+                            {brandMap[product.brandId]
+                              ? ` / ${brandMap[product.brandId]}`
+                              : ""}
+                          </div>
                         </TableCell>
                         <TableCell>{categoryMap[product.categoryId]}</TableCell>
-                        <TableCell>{brandMap[product.brandId]}</TableCell>
                         <TableCell>
                           {formatMoney(
                             product.price,
@@ -322,14 +356,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                         <TableCell>
                           <Badge
                             variant={
-                              product.status === "active"
-                                ? "success"
-                                : product.status === "archived"
-                                  ? "destructive"
-                                  : "secondary"
+                              product.stockQty > 0 ? "success" : "destructive"
                             }
                           >
-                            {dynamicLabel(t, product.status)}
+                            {product.stockQty > 0
+                              ? t("labels.inStock")
+                              : t("labels.outOfStock")}
                           </Badge>
                         </TableCell>
                         <TableCell>

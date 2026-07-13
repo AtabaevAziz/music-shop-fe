@@ -66,7 +66,8 @@ export function InventoryModule({ locale }: { locale: Locale }) {
   const selectedProduct =
     products.find((product) => product.id === productId) ?? products[0];
   const lowStockProducts = products.filter(
-    (product) => product.stockQty <= settings.lowStockThreshold,
+    (product) =>
+      product.stockQty <= (product.minStockQty ?? settings.lowStockThreshold),
   );
   const showroomUnits = products.filter(
     (product) => product.condition === "showroom",
@@ -128,14 +129,17 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 <TableRow>
                   <TableHead>{t("labels.product")}</TableHead>
                   <TableHead>{t("labels.sku")}</TableHead>
-                  <TableHead>{t("labels.available")}</TableHead>
+                  <TableHead>{t("labels.stock")}</TableHead>
+                  <TableHead>{t("labels.minStock")}</TableHead>
+                  <TableHead>{t("labels.availability")}</TableHead>
                   <TableHead>{t("labels.condition")}</TableHead>
-                  <TableHead>{t("labels.replenishmentRisk")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {products.map((product) => {
-                  const isLow = product.stockQty <= settings.lowStockThreshold;
+                  const minStock =
+                    product.minStockQty ?? settings.lowStockThreshold;
+                  const isLow = product.stockQty <= minStock;
                   return (
                     <TableRow key={product.id}>
                       <TableCell>
@@ -147,15 +151,20 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                           {product.stockQty}
                         </Badge>
                       </TableCell>
+                      <TableCell>{minStock}</TableCell>
                       <TableCell>
-                        {dynamicLabel(t, product.condition)}
+                        <Badge
+                          variant={
+                            product.stockQty > 0 ? "success" : "destructive"
+                          }
+                        >
+                          {product.stockQty > 0
+                            ? t("labels.inStock")
+                            : t("labels.outOfStock")}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={isLow ? "warning" : "secondary"}>
-                          {isLow
-                            ? `${t("labels.threshold")}: ${settings.lowStockThreshold}`
-                            : t("labels.stockHealthy")}
-                        </Badge>
+                        {dynamicLabel(t, product.condition)}
                       </TableCell>
                     </TableRow>
                   );
@@ -180,12 +189,19 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <div className="flex flex-wrap gap-2 pt-2">
                       <Badge
                         variant={
-                          selectedProduct.stockQty <= settings.lowStockThreshold
+                          selectedProduct.stockQty <=
+                          (selectedProduct.minStockQty ??
+                            settings.lowStockThreshold)
                             ? "warning"
                             : "success"
                         }
                       >
                         {t("labels.currentStock")}: {selectedProduct.stockQty}
+                      </Badge>
+                      <Badge variant="outline">
+                        {t("labels.minStock")}:{" "}
+                        {selectedProduct.minStockQty ??
+                          settings.lowStockThreshold}
                       </Badge>
                       <Badge variant="secondary">
                         {dynamicLabel(t, selectedProduct.condition)}

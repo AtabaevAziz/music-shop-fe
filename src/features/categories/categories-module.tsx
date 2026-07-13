@@ -15,6 +15,7 @@ import {
 import { Category } from "@/types/music";
 
 const ROOT_CATEGORY_VALUE = "__root__";
+const CATEGORY_NAME_ALPHANUMERIC_PATTERN = /[\p{L}\p{N}]/u;
 
 type CategoryDraft = {
   id?: string;
@@ -23,26 +24,54 @@ type CategoryDraft = {
   parentId: string;
   status: Category["status"];
   description: string;
+  productCount: string;
 };
+
+function validateCategoryDraft(
+  draft: CategoryDraft,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const name = draft.name.trim();
+  const description = draft.description.trim();
+
+  if (name.length < 2 || description.length < 4) {
+    return t("labels.validationFailed");
+  }
+
+  if (!CATEGORY_NAME_ALPHANUMERIC_PATTERN.test(name)) {
+    return t("labels.categoryNameRequiresLettersOrNumbers");
+  }
+
+  return null;
+}
 
 export function CategoriesModule() {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const { data } = useCatalogQuery();
   const categories = data?.categories ?? [];
+  const products = data?.products ?? [];
   const categoryNameMap = Object.fromEntries(
     categories.map((category) => [category.id, category.name]),
   );
+  const categoryProductCountMap = Object.fromEntries(
+    categories.map((category) => [
+      category.id,
+      products.filter((product) => product.categoryId === category.id).length,
+    ]),
+  );
   const saveMutation = useMutation({
     mutationFn: async (draft: CategoryDraft) => {
+      const name = draft.name.trim();
+      const description = draft.description.trim();
       const payload = {
-        name: draft.name,
+        name,
         parentId:
           draft.parentId && draft.parentId !== ROOT_CATEGORY_VALUE
             ? draft.parentId
             : undefined,
         status: draft.status,
-        description: draft.description,
+        description,
       };
 
       if (draft.id) {
@@ -74,12 +103,9 @@ export function CategoriesModule() {
         parentId: ROOT_CATEGORY_VALUE,
         status: "active",
         description: "",
+        productCount: "0",
       })}
-      validateDraft={(draft) =>
-        draft.name.trim().length < 2 || draft.description.trim().length < 4
-          ? t("labels.validationFailed")
-          : null
-      }
+      validateDraft={(draft) => validateCategoryDraft(draft, t)}
       toDraft={(category) => ({
         id: category.id,
         name: category.name,
@@ -87,12 +113,20 @@ export function CategoriesModule() {
         parentId: category.parentId ?? ROOT_CATEGORY_VALUE,
         status: category.status,
         description: category.description,
+        productCount: String(categoryProductCountMap[category.id] ?? 0),
       })}
       getSearchText={(category) =>
         `${category.name} ${category.slug} ${category.description}`.toLowerCase()
       }
       fields={[
         { name: "name", label: t("labels.name") },
+        {
+          name: "productCount",
+          label: t("labels.productCount"),
+          inForm: false,
+          formatValue: (_, category) =>
+            categoryProductCountMap[category.id] ?? 0,
+        },
         {
           name: "slug",
           label: t("labels.slug"),

@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
+import { getProducts } from "@/services/catalog";
 import { getClientOrders } from "@/services/client";
 import { getClientProducts } from "@/services/client";
 import { getAppConfig } from "@/services/config";
@@ -15,16 +16,19 @@ export function useStaffOrdersQuery() {
   return useQuery({
     queryKey: queryKeys.staffOrdersPage,
     queryFn: async () => {
-      const [orders, customers, settings, workflows] = await Promise.all([
-        getOrders(),
-        getCustomers(),
-        getSettings(),
-        getWorkflows(),
-      ]);
+      const [orders, customers, products, settings, workflows] =
+        await Promise.all([
+          getOrders(),
+          getCustomers(),
+          getProducts(),
+          getSettings(),
+          getWorkflows(),
+        ]);
 
       return {
         orders,
         customers,
+        products,
         settings,
         orderWorkflow: workflows.orders ?? null,
       };
