@@ -53,7 +53,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
             <CardContent className="p-6">
               <div className="muted">{t("labels.totalSpent")}</div>
               <div className="kpi-value">
-                {formatMoney(data.spent, data.settings.currency, locale)}
+                {formatMoney(data.spent, data.currency, locale)}
               </div>
             </CardContent>
           </Card>
@@ -164,7 +164,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                       <span>
                         {formatMoney(
                           product.price,
-                          data.settings.currency,
+                          data.currency,
                           locale,
                         )}
                       </span>

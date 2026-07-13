@@ -63,6 +63,12 @@
     "hidePassword": "Скрыть пароль",
     "signInAction": "Войти",
     "invalidCredentials": "Неверный логин или пароль.",
+    "passwordLoginUnavailable": "Вход по паролю сейчас отключён конфигурацией бэкенда.",
+    "loginUnavailable": "Вход сейчас отключён конфигурацией бэкенда.",
+    "clientLoginDisabled": "Вход для клиентов сейчас отключён.",
+    "staffLoginDisabled": "Вход для сотрудников сейчас отключён.",
+    "sessionUnavailableTitle": "Проверка сессии недоступна",
+    "sessionUnavailableText": "Фронтенд не смог восстановить сессию через бэкенд. Проверьте доступность API и cookie-конфигурацию.",
     "adminBlurb": "Полный доступ к каталогу, складу, заказам и клиентам.",
     "storeManagerBlurb": "Заказы, склад, клиенты и ежедневные операции магазина.",
     "catalogManagerBlurb": "Товары, бренды, категории и изображения каталога.",
@@ -179,7 +185,9 @@
     "primary": "основное",
     "setPrimary": "Сделать основным",
     "accessRestrictedTitle": "Доступ ограничен",
-    "accessRestrictedText": "Эта роль может войти в систему, но данный модуль ограничен текущей матрицей прав бэкенда."
+    "accessRestrictedText": "Эта роль может войти в систему, но данный модуль ограничен текущей матрицей прав бэкенда.",
+    "runtimeConfigUnavailableTitle": "Runtime config недоступен",
+    "runtimeConfigUnavailableText": "Фронтенд не смог загрузить навигацию или матрицу прав с бэкенда."
   },
   "flash": {
     "demoResetDone": "Демо-данные восстановлены.",

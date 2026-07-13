@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import {
+  useAppConfigQuery,
+  useAuthConfigQuery,
+} from "@/hooks/use-config-query";
+import { Locale, localeLabelKeyMap } from "@/i18n";
+import { getConfiguredLocales } from "@/lib/runtime-config";
 import { useAuthSession } from "@/providers/session-provider";
 
 export function LoginScreen({ locale }: { locale: Locale }) {
@@ -23,6 +28,9 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: appConfig } = useAppConfigQuery();
+  const { data: authConfig, isPending: isAuthConfigPending } =
+    useAuthConfigQuery();
   const { isAuthenticating, login } = useAuthSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [loginValue, setLoginValue] = useState("");
@@ -31,9 +39,37 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const next = searchParams.get("next");
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const destination = next || `/${locale}`;
+  const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
+  const hasPasswordProvider = authConfig
+    ? authConfig.providers.some((provider) => provider.type === "password")
+    : true;
+  const isLoginEnabled = authConfig
+    ? authConfig.allowClientLogin || authConfig.allowStaffLogin
+    : true;
+  const isSubmitDisabled =
+    isAuthenticating ||
+    isAuthConfigPending ||
+    !hasPasswordProvider ||
+    !isLoginEnabled;
+
+  const authNotice = authConfig
+    ? !hasPasswordProvider
+      ? t("auth.passwordLoginUnavailable")
+      : !isLoginEnabled
+        ? t("auth.loginUnavailable")
+        : !authConfig.allowClientLogin
+          ? t("auth.clientLoginDisabled")
+          : !authConfig.allowStaffLogin
+            ? t("auth.staffLoginDisabled")
+            : null
+    : null;
 
   const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSubmitDisabled) {
+      return;
+    }
 
     const normalizedLogin = loginValue.trim().toLowerCase();
 
@@ -68,7 +104,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  {locales.map((itemLocale) => (
+                  {supportedLocales.map((itemLocale) => (
                     <DropdownMenuItem
                       key={itemLocale}
                       disabled={itemLocale === locale}
@@ -167,10 +203,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 {error}
               </p>
             ) : null}
+            {authNotice ? <p className="muted">{authNotice}</p> : null}
             <Button
               className="auth-submit"
               type="submit"
-              disabled={isAuthenticating}
+              disabled={isSubmitDisabled}
             >
               {t("auth.signInAction")}
             </Button>

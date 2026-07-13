@@ -24,28 +24,22 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  useAppConfigQuery,
   useNavigationQuery,
   usePermissionsQuery,
 } from "@/hooks/use-config-query";
-import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import { Locale, localeLabelKeyMap } from "@/i18n";
 import {
   canAccessRoute,
   getRouteIdFromPathname,
   getVisibleNavigationItems,
 } from "@/lib/navigation";
 import { queryKeys } from "@/lib/query-keys";
+import { getConfiguredLocales } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useAuthSession } from "@/providers/session-provider";
 import { getSettings } from "@/services/settings";
-import type { Role } from "@/types/music";
-
-type NavItem = {
-  id: string;
-  href: string;
-  label: string;
-  subtitle?: string;
-};
 
 const routeTitleKeyMap: Record<string, string> = {
   dashboard: "nav.dashboard",
@@ -71,39 +65,6 @@ const routeSubtitleKeyMap: Record<string, string> = {
   settings: "section.settingsSubtitle",
 };
 
-function getDefaultNavItems(
-  locale: Locale,
-  sessionRole: Role | undefined,
-): Array<Pick<NavItem, "id" | "href">> {
-  if (!sessionRole) {
-    return [];
-  }
-
-  const defaults = [
-    { id: "dashboard", href: `/${locale}` },
-    { id: "catalog", href: `/${locale}/catalog` },
-    { id: "inventory", href: `/${locale}/inventory` },
-    { id: "orders", href: `/${locale}/orders` },
-    { id: "customers", href: `/${locale}/customers` },
-    { id: "repairs", href: `/${locale}/repairs` },
-    { id: "employees", href: `/${locale}/employees` },
-    { id: "finance", href: `/${locale}/finance` },
-    { id: "settings", href: `/${locale}/settings` },
-  ];
-
-  const accessMatrix: Record<Role, string[]> = {
-    admin: defaults.map((item) => item.id),
-    store_manager: defaults.map((item) => item.id),
-    catalog_manager: ["dashboard", "catalog", "inventory"],
-    sales_operator: ["dashboard", "orders", "customers", "repairs"],
-    client: [],
-  };
-
-  return defaults
-    .filter((item) => accessMatrix[sessionRole]?.includes(item.id))
-    .map((item) => item);
-}
-
 export function AppShell({
   locale,
   children,
@@ -115,8 +76,17 @@ export function AppShell({
   const pathname = usePathname();
   const router = useRouter();
   const { session, logout } = useAuthSession();
-  const { data: navigation } = useNavigationQuery();
-  const { data: permissions } = usePermissionsQuery();
+  const { data: appConfig } = useAppConfigQuery();
+  const {
+    data: navigation,
+    error: navigationError,
+    isPending: isNavigationPending,
+  } = useNavigationQuery();
+  const {
+    data: permissions,
+    error: permissionsError,
+    isPending: isPermissionsPending,
+  } = usePermissionsQuery();
   const { data: settings } = useQuery({
     queryKey: queryKeys.settings,
     queryFn: getSettings,
@@ -124,51 +94,41 @@ export function AppShell({
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
+  const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
   const sessionRole = session?.role;
   const routeId = getRouteIdFromPathname(pathname);
-
-  const fallbackNavItems = useMemo(
-    () => getDefaultNavItems(locale, sessionRole),
-    [locale, sessionRole],
-  );
   const visibleNavItems = useMemo(() => {
-    const configItems = getVisibleNavigationItems(
+    return getVisibleNavigationItems(
       navigation,
       locale,
       sessionRole,
       permissions,
     );
-
-    if (!configItems.length) {
-      return fallbackNavItems.map((item) => ({
-        ...item,
-        label: t(routeTitleKeyMap[item.id] ?? "nav.dashboard"),
-        subtitle: t(routeSubtitleKeyMap[item.id] ?? "meta.appSubtitle"),
-      }));
-    }
-
-    return configItems.map((item) => ({
-      id: item.id,
-      href: item.href,
-      label: t(item.titleKey),
-      subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
-    }));
-  }, [fallbackNavItems, locale, navigation, permissions, sessionRole, t]);
+  }, [locale, navigation, permissions, sessionRole]);
+  const localizedNavItems = useMemo(
+    () =>
+      visibleNavItems.map((item) => ({
+        id: item.id,
+        href: item.href,
+        label: t(item.titleKey),
+        subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
+      })),
+    [t, visibleNavItems],
+  );
 
   const currentPage = useMemo(() => {
-    const navItem = visibleNavItems.find((item) => item.id === routeId);
+    const navItem = localizedNavItems.find((item) => item.id === routeId);
     return {
       title: navItem?.label ?? t(routeTitleKeyMap[routeId] ?? "nav.dashboard"),
       subtitle:
         navItem?.subtitle ??
         t(routeSubtitleKeyMap[routeId] ?? "meta.appSubtitle"),
     };
-  }, [routeId, t, visibleNavItems]);
+  }, [localizedNavItems, routeId, t]);
 
-  const isAllowed =
-    !sessionRole || !permissions
-      ? true
-      : canAccessRoute(sessionRole, routeId, permissions);
+  const isAllowed = sessionRole
+    ? canAccessRoute(sessionRole, routeId, permissions)
+    : false;
 
   useEffect(() => {
     setIsNavOpen(false);
@@ -176,6 +136,27 @@ export function AppShell({
 
   if (!session) {
     return null;
+  }
+
+  if (isNavigationPending || isPermissionsPending) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="empty-state">{t("common.loadingWorkspace")}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (navigationError || permissionsError) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <h2>{t("labels.runtimeConfigUnavailableTitle")}</h2>
+          <p className="muted">{t("labels.runtimeConfigUnavailableText")}</p>
+        </div>
+      </div>
+    );
   }
 
   const localizedRole = dynamicLabel(t, session.role);
@@ -190,7 +171,7 @@ export function AppShell({
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
-          {visibleNavItems.map((item) => (
+          {localizedNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -259,7 +240,7 @@ export function AppShell({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {locales.map((itemLocale) => (
+                {supportedLocales.map((itemLocale) => (
                   <DropdownMenuItem
                     key={itemLocale}
                     disabled={itemLocale === locale}

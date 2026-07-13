@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useSettingsQuery } from "@/hooks/use-settings-query";
 import { invalidateAppQueries } from "@/lib/query-utils";
+import { getDictionaryValues } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import { updateSettings } from "@/services/settings";
 import { ModuleSection } from "@/shared/components/module-shell";
@@ -68,9 +69,10 @@ export function SettingsModule() {
   }
 
   const isSaving = saveMutation.isPending;
-  const productStatuses =
-    data.dictionaries.productStatuses?.map((status) => status.value) ??
-    (["draft", "active", "archived"] as ProductStatus[]);
+  const productStatuses = getDictionaryValues<ProductStatus>(
+    data.dictionaries.productStatuses,
+    ["draft", "active", "archived"] as const,
+  );
 
   return (
     <ModuleSection

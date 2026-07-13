@@ -14,6 +14,8 @@ import {
 } from "@/services/catalog";
 import { Category } from "@/types/music";
 
+const ROOT_CATEGORY_VALUE = "__root__";
+
 type CategoryDraft = {
   id?: string;
   name: string;
@@ -35,7 +37,10 @@ export function CategoriesModule() {
     mutationFn: async (draft: CategoryDraft) => {
       const payload = {
         name: draft.name,
-        parentId: draft.parentId,
+        parentId:
+          draft.parentId && draft.parentId !== ROOT_CATEGORY_VALUE
+            ? draft.parentId
+            : undefined,
         status: draft.status,
         description: draft.description,
       };
@@ -66,7 +71,7 @@ export function CategoriesModule() {
       createDraft={() => ({
         name: "",
         slug: "",
-        parentId: "",
+        parentId: ROOT_CATEGORY_VALUE,
         status: "active",
         description: "",
       })}
@@ -79,7 +84,7 @@ export function CategoriesModule() {
         id: category.id,
         name: category.name,
         slug: category.slug,
-        parentId: category.parentId ?? "",
+        parentId: category.parentId ?? ROOT_CATEGORY_VALUE,
         status: category.status,
         description: category.description,
       })}
@@ -97,10 +102,13 @@ export function CategoriesModule() {
           name: "parentId",
           label: t("labels.parent"),
           type: "select",
-          options: categories.map((category) => ({
-            label: category.name,
-            value: category.id,
-          })),
+          options: [
+            { label: t("labels.root"), value: ROOT_CATEGORY_VALUE },
+            ...categories.map((category) => ({
+              label: category.name,
+              value: category.id,
+            })),
+          ],
           formatValue: (value) =>
             (typeof value === "string" && categoryNameMap[value]) ||
             t("labels.root"),

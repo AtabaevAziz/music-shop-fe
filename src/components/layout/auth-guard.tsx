@@ -14,18 +14,39 @@ export function AuthGuard({
   locale: Locale;
   children: React.ReactNode;
 }) {
-  const { ready, session } = useAuthSession();
+  const { ready, session, sessionError } = useAuthSession();
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
 
   useEffect(() => {
-    if (ready && !session) {
+    if (ready && !session && !sessionError) {
       router.replace(`/${locale}/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [ready, session, router, locale, pathname]);
+  }, [ready, session, sessionError, router, locale, pathname]);
 
-  if (!ready || !session) {
+  if (!ready) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="empty-state">{t("common.loadingWorkspace")}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionError) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <h2>{t("auth.sessionUnavailableTitle")}</h2>
+          <p className="muted">{t("auth.sessionUnavailableText")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
     return (
       <div className="auth-page">
         <div className="auth-card">

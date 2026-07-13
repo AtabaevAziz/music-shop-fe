@@ -63,6 +63,12 @@
     "hidePassword": "Hide password",
     "signInAction": "Sign in",
     "invalidCredentials": "Invalid login or password.",
+    "passwordLoginUnavailable": "Password sign-in is currently disabled by backend configuration.",
+    "loginUnavailable": "Login is currently disabled by backend configuration.",
+    "clientLoginDisabled": "Client login is currently disabled.",
+    "staffLoginDisabled": "Staff login is currently disabled.",
+    "sessionUnavailableTitle": "Session check unavailable",
+    "sessionUnavailableText": "The frontend could not restore your session from the backend. Check API availability and cookie configuration.",
     "adminBlurb": "Full access to catalog, inventory, orders, and customers.",
     "storeManagerBlurb": "Orders, inventory, customers, and daily store operations.",
     "catalogManagerBlurb": "Products, brands, categories, and catalog imagery.",
@@ -179,7 +185,9 @@
     "primary": "primary",
     "setPrimary": "Set primary",
     "accessRestrictedTitle": "Access restricted",
-    "accessRestrictedText": "This role can sign in, but this module is restricted by the current backend permission matrix."
+    "accessRestrictedText": "This role can sign in, but this module is restricted by the current backend permission matrix.",
+    "runtimeConfigUnavailableTitle": "Runtime config unavailable",
+    "runtimeConfigUnavailableText": "The frontend could not load navigation or permission config from the backend."
   },
   "flash": {
     "demoResetDone": "Demo data restored.",

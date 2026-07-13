@@ -24,26 +24,20 @@ import {
 } from "@/components/ui/sheet";
 import { useClientHomeQuery } from "@/hooks/use-client-home-query";
 import {
+  useAppConfigQuery,
   useNavigationQuery,
   usePermissionsQuery,
 } from "@/hooks/use-config-query";
-import { Locale, localeLabelKeyMap, locales } from "@/i18n";
+import { Locale, localeLabelKeyMap } from "@/i18n";
 import {
   canAccessRoute,
   getRouteIdFromPathname,
   getVisibleNavigationItems,
 } from "@/lib/navigation";
+import { getConfiguredLocales } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useAuthSession } from "@/providers/session-provider";
-import type { Role } from "@/types/music";
-
-type NavItem = {
-  id: string;
-  href: string;
-  label: string;
-  subtitle?: string;
-};
 
 const routeTitleKeyMap: Record<string, string> = {
   dashboard: "nav.dashboard",
@@ -59,22 +53,6 @@ const routeSubtitleKeyMap: Record<string, string> = {
   repairs: "section.repairsSubtitle",
 };
 
-function getDefaultClientNav(
-  locale: Locale,
-  sessionRole: Role | undefined,
-): Array<Pick<NavItem, "id" | "href">> {
-  if (sessionRole !== "client") {
-    return [];
-  }
-
-  return [
-    { id: "dashboard", href: `/${locale}` },
-    { id: "catalog", href: `/${locale}/catalog` },
-    { id: "orders", href: `/${locale}/orders` },
-    { id: "repairs", href: `/${locale}/repairs` },
-  ];
-}
-
 export function ClientShell({
   locale,
   children,
@@ -86,46 +64,44 @@ export function ClientShell({
   const pathname = usePathname();
   const router = useRouter();
   const { session, logout } = useAuthSession();
-  const { data: navigation } = useNavigationQuery();
-  const { data: permissions } = usePermissionsQuery();
+  const { data: appConfig } = useAppConfigQuery();
+  const {
+    data: navigation,
+    error: navigationError,
+    isPending: isNavigationPending,
+  } = useNavigationQuery();
+  const {
+    data: permissions,
+    error: permissionsError,
+    isPending: isPermissionsPending,
+  } = usePermissionsQuery();
   const { data: homeData } = useClientHomeQuery();
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sessionRole = session?.role;
   const routeId = getRouteIdFromPathname(pathname);
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
-
-  const fallbackNavItems = useMemo(
-    () => getDefaultClientNav(locale, sessionRole),
-    [locale, sessionRole],
-  );
+  const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
   const visibleNavItems = useMemo(() => {
-    const configItems = getVisibleNavigationItems(
+    return getVisibleNavigationItems(
       navigation,
       locale,
       sessionRole,
       permissions,
     );
-
-    if (!configItems.length) {
-      return fallbackNavItems.map((item) => ({
-        ...item,
-        label: t(routeTitleKeyMap[item.id] ?? "nav.dashboard"),
-        subtitle: t(
-          routeSubtitleKeyMap[item.id] ?? "section.clientHomeSubtitle",
-        ),
-      }));
-    }
-
-    return configItems.map((item) => ({
-      id: item.id,
-      href: item.href,
-      label: t(item.titleKey),
-      subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
-    }));
-  }, [fallbackNavItems, locale, navigation, permissions, sessionRole, t]);
+  }, [locale, navigation, permissions, sessionRole]);
+  const localizedNavItems = useMemo(
+    () =>
+      visibleNavItems.map((item) => ({
+        id: item.id,
+        href: item.href,
+        label: t(item.titleKey),
+        subtitle: item.subtitleKey ? t(item.subtitleKey) : undefined,
+      })),
+    [t, visibleNavItems],
+  );
 
   const currentPage = useMemo(() => {
-    const navItem = visibleNavItems.find((item) => item.id === routeId);
+    const navItem = localizedNavItems.find((item) => item.id === routeId);
     const forceClientSubtitle = routeId === "dashboard";
     return {
       title: navItem?.label ?? t(routeTitleKeyMap[routeId] ?? "nav.dashboard"),
@@ -133,12 +109,11 @@ export function ClientShell({
         (!forceClientSubtitle ? navItem?.subtitle : undefined) ??
         t(routeSubtitleKeyMap[routeId] ?? "section.clientHomeSubtitle"),
     };
-  }, [routeId, t, visibleNavItems]);
+  }, [localizedNavItems, routeId, t]);
 
-  const isAllowed =
-    !sessionRole || !permissions
-      ? true
-      : canAccessRoute(sessionRole, routeId, permissions);
+  const isAllowed = sessionRole
+    ? canAccessRoute(sessionRole, routeId, permissions)
+    : false;
 
   useEffect(() => {
     setIsNavOpen(false);
@@ -146,6 +121,27 @@ export function ClientShell({
 
   if (!session) {
     return null;
+  }
+
+  if (isNavigationPending || isPermissionsPending) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="empty-state">{t("common.loadingWorkspace")}</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (navigationError || permissionsError) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <h2>{t("labels.runtimeConfigUnavailableTitle")}</h2>
+          <p className="muted">{t("labels.runtimeConfigUnavailableText")}</p>
+        </div>
+      </div>
+    );
   }
 
   const localizedRole = dynamicLabel(t, session.role);
@@ -160,7 +156,7 @@ export function ClientShell({
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
-          {visibleNavItems.map((item) => (
+          {localizedNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -230,7 +226,7 @@ export function ClientShell({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                {locales.map((itemLocale) => (
+                {supportedLocales.map((itemLocale) => (
                   <DropdownMenuItem
                     key={itemLocale}
                     disabled={itemLocale === locale}

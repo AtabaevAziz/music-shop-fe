@@ -3,25 +3,25 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
+import { getAppConfig } from "@/services/config";
 import {
   getClientMe,
   getClientOrders,
   getClientProducts,
   getClientRepairs,
 } from "@/services/client";
-import { getSettings } from "@/services/settings";
 
 export function useClientHomeQuery() {
   return useQuery({
     queryKey: queryKeys.clientHome,
     queryFn: async () => {
-      const [customer, orders, repairRequests, products, settings] =
+      const [customer, orders, repairRequests, products, appConfig] =
         await Promise.all([
           getClientMe(),
           getClientOrders(),
           getClientRepairs(),
           getClientProducts(),
-          getSettings(),
+          getAppConfig(),
         ]);
 
       const activeOrders = orders.filter(
@@ -51,7 +51,7 @@ export function useClientHomeQuery() {
         orders,
         repairRequests,
         products,
-        settings,
+        currency: appConfig.defaultCurrency,
         activeOrdersCount: activeOrders.length,
         openRepairsCount: openRepairs.length,
         readyCount,

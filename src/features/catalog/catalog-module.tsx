@@ -58,6 +58,10 @@ import { MediaModule } from "@/features/media/media-module";
 import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
 import { invalidateAppQueries } from "@/lib/query-utils";
+import {
+  getDictionarySelectOptions,
+  getDictionaryValues,
+} from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, parseList } from "@/lib/utils";
 import {
@@ -66,6 +70,7 @@ import {
   updateProduct,
 } from "@/services/catalog";
 import { ModuleSection } from "@/shared/components/module-shell";
+import { Condition, ProductStatus } from "@/types/music";
 
 const productSchema = z.object({
   name: z.string().min(2),
@@ -77,8 +82,8 @@ const productSchema = z.object({
   brandId: z.string().min(1),
   shortDescription: z.string().min(4),
   description: z.string().min(4),
-  status: z.enum(["draft", "active", "archived"]),
-  condition: z.enum(["new", "used", "showroom"]),
+  status: z.string().min(1),
+  condition: z.string().min(1),
 });
 
 type ProductDraft = Record<string, string>;
@@ -90,6 +95,18 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const products = useMemo(() => data?.products ?? [], [data?.products]);
   const categories = data?.categories ?? [];
   const brands = data?.brands ?? [];
+  const productStatuses = getDictionaryValues<ProductStatus>(
+    data?.dictionaries.productStatuses,
+    ["draft", "active", "archived"] as const,
+  );
+  const conditionOptions = getDictionarySelectOptions(
+    t,
+    data?.dictionaries.conditions,
+    ["new", "used", "showroom"] as const,
+  );
+  const conditionValues = conditionOptions.map(
+    (option) => option.value,
+  ) as Condition[];
   const settings = data?.settings ?? {
     currency: "UZS",
     lowStockThreshold: 0,
@@ -124,7 +141,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ProductDraft>({
     status: "draft",
-    condition: "new",
+    condition: conditionValues[0] ?? "new",
   });
 
   const filtered = useMemo(() => {
@@ -147,7 +164,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   function resetDraft() {
     setDraft({
       status: settings.defaultProductStatus,
-      condition: "new",
+      condition: conditionValues[0] ?? "new",
     });
   }
 
@@ -157,6 +174,15 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       setFormError(t("labels.validationFailed"));
       return;
     }
+
+    if (
+      !productStatuses.includes(parsed.data.status as ProductStatus) ||
+      !conditionValues.includes(parsed.data.condition as Condition)
+    ) {
+      setFormError(t("labels.validationFailed"));
+      return;
+    }
+
     const specs = Object.fromEntries(
       parseList(draft.specs ?? "").map((row) => {
         const [key, ...rest] = row.split(":");
@@ -171,6 +197,8 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         specs,
         images: parseList(draft.images ?? ""),
         primaryImage: parseList(draft.images ?? "")[0],
+        status: parsed.data.status as ProductStatus,
+        condition: parsed.data.condition as Condition,
         price: Number(draft.price),
         costPrice: Number(draft.costPrice),
         stockQty: Number(draft.stockQty),
@@ -518,13 +546,11 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new">{dynamicLabel(t, "new")}</SelectItem>
-                  <SelectItem value="used">
-                    {dynamicLabel(t, "used")}
-                  </SelectItem>
-                  <SelectItem value="showroom">
-                    {dynamicLabel(t, "showroom")}
-                  </SelectItem>
+                  {conditionOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </AppField>
@@ -582,15 +608,11 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">
-                    {dynamicLabel(t, "draft")}
-                  </SelectItem>
-                  <SelectItem value="active">
-                    {dynamicLabel(t, "active")}
-                  </SelectItem>
-                  <SelectItem value="archived">
-                    {dynamicLabel(t, "archived")}
-                  </SelectItem>
+                  {productStatuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {dynamicLabel(t, status)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </AppField>

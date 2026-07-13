@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
 import { invalidateAppQueries } from "@/lib/query-utils";
+import { getDictionarySelectOptions } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import {
   createCustomer,
@@ -29,6 +30,11 @@ export function CustomersModule() {
   const queryClient = useQueryClient();
   const { data, isPending } = useCustomersQuery();
   const customers = data?.customers ?? [];
+  const tierOptions = getDictionarySelectOptions(
+    t,
+    data?.dictionaries.customerTiers,
+    ["standard", "studio", "vip"] as const,
+  );
   const saveMutation = useMutation({
     mutationFn: async (draft: CustomerDraft) => {
       const payload = {
@@ -75,7 +81,7 @@ export function CustomersModule() {
         name: "",
         phone: "",
         email: "",
-        tier: "standard",
+        tier: (tierOptions[0]?.value as Customer["tier"]) ?? "standard",
         status: "active",
         notes: "",
       })}
@@ -106,11 +112,7 @@ export function CustomersModule() {
           name: "tier",
           label: t("labels.tier"),
           type: "select",
-          options: [
-            { label: dynamicLabel(t, "standard"), value: "standard" },
-            { label: dynamicLabel(t, "studio"), value: "studio" },
-            { label: dynamicLabel(t, "vip"), value: "vip" },
-          ],
+          options: tierOptions,
         },
         {
           name: "status",

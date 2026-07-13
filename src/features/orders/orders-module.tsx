@@ -24,21 +24,13 @@ import { formatMoney } from "@/lib/utils";
 import { changeOrderStatus } from "@/services/orders";
 import type { OrderStatus } from "@/types/music";
 
-const transitions = [
-  "new",
-  "confirmed",
-  "packed",
-  "ready_for_pickup",
-  "completed",
-  "cancelled",
-] as const;
-
 export function OrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const { data, isPending } = useStaffOrdersQuery();
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
+  const workflowStatuses = data?.orderWorkflow?.statuses ?? [];
   const statusMutation = useMutation({
     mutationFn: ({
       orderId,
@@ -153,7 +145,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   </div>
                   <p>{order.notes}</p>
                   <div className="flex flex-wrap gap-2">
-                    {transitions.map((status) => (
+                    {workflowStatuses.map((status) => (
                       <Button
                         key={status}
                         variant="outline"

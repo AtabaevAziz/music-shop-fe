@@ -63,6 +63,12 @@
     "hidePassword": "Parolni yashirish",
     "signInAction": "Kirish",
     "invalidCredentials": "Login yoki parol noto'g'ri.",
+    "passwordLoginUnavailable": "Parol orqali kirish hozir backend konfiguratsiyasi bilan o'chirilgan.",
+    "loginUnavailable": "Kirish hozir backend konfiguratsiyasi bilan o'chirilgan.",
+    "clientLoginDisabled": "Mijozlar uchun kirish hozir o'chirilgan.",
+    "staffLoginDisabled": "Xodimlar uchun kirish hozir o'chirilgan.",
+    "sessionUnavailableTitle": "Sessiyani tekshirib bo'lmadi",
+    "sessionUnavailableText": "Frontend sessiyani backend orqali tiklay olmadi. API va cookie konfiguratsiyasini tekshiring.",
     "adminBlurb": "Katalog, ombor, buyurtmalar va mijozlarga to'liq kirish.",
     "storeManagerBlurb": "Buyurtmalar, ombor, mijozlar va do'konning kundalik amallari.",
     "catalogManagerBlurb": "Mahsulotlar, brendlar, kategoriyalar va katalog rasmlari.",
@@ -179,7 +185,9 @@
     "primary": "asosiy",
     "setPrimary": "Asosiy qilish",
     "accessRestrictedTitle": "Kirish cheklangan",
-    "accessRestrictedText": "Bu rol tizimga kira oladi, ammo ushbu modul joriy backend ruxsat matritsasi bilan cheklangan."
+    "accessRestrictedText": "Bu rol tizimga kira oladi, ammo ushbu modul joriy backend ruxsat matritsasi bilan cheklangan.",
+    "runtimeConfigUnavailableTitle": "Runtime config mavjud emas",
+    "runtimeConfigUnavailableText": "Frontend backenddan navigatsiya yoki ruxsat konfiguratsiyasini yuklay olmadi."
   },
   "flash": {
     "demoResetDone": "Demo ma'lumotlari tiklandi.",

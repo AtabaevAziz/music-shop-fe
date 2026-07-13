@@ -91,7 +91,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                         <span>
                           {formatMoney(
                             item.qty * item.unitPrice,
-                            data.settings.currency,
+                            data.currency,
                             locale,
                           )}
                         </span>
@@ -102,7 +102,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                 <div className="heading-row">
                   <div className="muted">{order.notes}</div>
                   <strong>
-                    {formatMoney(total, data.settings.currency, locale)}
+                    {formatMoney(total, data.currency, locale)}
                   </strong>
                 </div>
               </CardContent>

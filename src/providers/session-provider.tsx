@@ -14,6 +14,7 @@ import type { Session } from "@/types/music";
 type SessionContextValue = {
   ready: boolean;
   session: Session | null;
+  sessionError: Error | null;
   isAuthenticating: boolean;
   login: (login: string, password: string) => Promise<Session>;
   logout: () => Promise<void>;
@@ -26,6 +27,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const {
     data: session,
+    error: sessionError,
     isFetching: isSessionFetching,
     isPending: isSessionPending,
     refetch: refetchSession,
@@ -60,6 +62,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ready: !isSessionPending,
       session: session ?? null,
+      sessionError: sessionError instanceof Error ? sessionError : null,
       isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
       login: async (loginValue, password) =>
         login({ login: loginValue, password }),
@@ -80,6 +83,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       logout,
       refetchSession,
       session,
+      sessionError,
     ],
   );
 

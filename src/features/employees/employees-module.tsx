@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { useEmployeesQuery } from "@/hooks/use-employees-query";
 import { invalidateAppQueries } from "@/lib/query-utils";
+import { getDictionarySelectOptions } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
 import {
   createEmployee,
@@ -28,14 +29,16 @@ export function EmployeesModule() {
   const queryClient = useQueryClient();
   const { data, isPending } = useEmployeesQuery();
   const employees = data?.employees ?? [];
-  const availableRoles =
-    data?.dictionaries.roles
-      ?.map((role) => role.value)
-      .filter((role): role is Exclude<Role, "client"> => role !== "client") ??
-    (["admin", "store_manager", "catalog_manager", "sales_operator"] as Exclude<
-      Role,
-      "client"
-    >[]);
+  const availableRoles = getDictionarySelectOptions(
+    t,
+    data?.dictionaries.roles?.filter((role) => role.value !== "client"),
+    [
+      "admin",
+      "store_manager",
+      "catalog_manager",
+      "sales_operator",
+    ] as const,
+  );
   const saveMutation = useMutation({
     mutationFn: async (draft: EmployeeDraft) => {
       const payload = {
@@ -81,7 +84,7 @@ export function EmployeesModule() {
         name: "",
         email: "",
         phone: "",
-        role: "sales_operator",
+        role: (availableRoles[0]?.value as Employee["role"]) ?? "sales_operator",
         status: "active",
       })}
       validateDraft={(draft) =>
@@ -110,10 +113,7 @@ export function EmployeesModule() {
           name: "role",
           label: t("labels.role"),
           type: "select",
-          options: availableRoles.map((role) => ({
-            label: dynamicLabel(t, role),
-            value: role,
-          })),
+          options: availableRoles,
         },
         {
           name: "status",
