@@ -39,12 +39,11 @@ export function getDictionarySelectOptions<TValue extends string>(
   options: ApiDictionaryOption<TValue>[] | undefined,
   fallback: readonly TValue[],
 ) {
-  const resolvedOptions =
-    options?.length
-      ? options
-      : fallback.map((value) => ({
-          value,
-        }));
+  const resolvedOptions = options?.length
+    ? options
+    : fallback.map((value) => ({
+        value,
+      }));
 
   return resolvedOptions.map((option) => ({
     label: getDictionaryLabel(t, option),

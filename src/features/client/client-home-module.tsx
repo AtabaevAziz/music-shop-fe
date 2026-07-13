@@ -162,11 +162,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                        {formatMoney(
-                          product.price,
-                          data.currency,
-                          locale,
-                        )}
+                        {formatMoney(product.price, data.currency, locale)}
                       </span>
                     </div>
                   </CardContent>

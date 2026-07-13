@@ -3,9 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
-import { getAppConfig, getDictionaries } from "@/services/config";
 import { getBrands, getCategories, getProducts } from "@/services/catalog";
 import { getClientProducts } from "@/services/client";
+import { getAppConfig, getDictionaries } from "@/services/config";
 import { getSettings } from "@/services/settings";
 
 export function useCatalogQuery() {

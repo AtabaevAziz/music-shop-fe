@@ -139,11 +139,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                     <div className="heading-row">
                       <strong>{product.name}</strong>
                       <Badge
-                        variant={
-                          product.stockQty <= 1
-                            ? "warning"
-                            : "success"
-                        }
+                        variant={product.stockQty <= 1 ? "warning" : "success"}
                       >
                         {t("labels.stock")}: {product.stockQty}
                       </Badge>
@@ -154,11 +150,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                          {formatMoney(
-                            product.price,
-                            data.currency,
-                            locale,
-                          )}
+                        {formatMoney(product.price, data.currency, locale)}
                       </span>
                     </div>
                   </div>
@@ -207,11 +199,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
               <div className="text-sm font-medium">{purchaseTarget?.name}</div>
               <div className="muted">
                 {purchaseTarget
-                  ? formatMoney(
-                      purchaseTarget.price,
-                      data.currency,
-                      locale,
-                    )
+                  ? formatMoney(purchaseTarget.price, data.currency, locale)
                   : null}
               </div>
             </div>

@@ -101,9 +101,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                 </div>
                 <div className="heading-row">
                   <div className="muted">{order.notes}</div>
-                  <strong>
-                    {formatMoney(total, data.currency, locale)}
-                  </strong>
+                  <strong>{formatMoney(total, data.currency, locale)}</strong>
                 </div>
               </CardContent>
             </Card>

@@ -3,13 +3,13 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
-import { getAppConfig } from "@/services/config";
 import {
   getClientMe,
   getClientOrders,
   getClientProducts,
   getClientRepairs,
 } from "@/services/client";
+import { getAppConfig } from "@/services/config";
 
 export function useClientHomeQuery() {
   return useQuery({

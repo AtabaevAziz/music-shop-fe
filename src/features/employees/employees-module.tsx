@@ -32,12 +32,7 @@ export function EmployeesModule() {
   const availableRoles = getDictionarySelectOptions(
     t,
     data?.dictionaries.roles?.filter((role) => role.value !== "client"),
-    [
-      "admin",
-      "store_manager",
-      "catalog_manager",
-      "sales_operator",
-    ] as const,
+    ["admin", "store_manager", "catalog_manager", "sales_operator"] as const,
   );
   const saveMutation = useMutation({
     mutationFn: async (draft: EmployeeDraft) => {
@@ -84,7 +79,8 @@ export function EmployeesModule() {
         name: "",
         email: "",
         phone: "",
-        role: (availableRoles[0]?.value as Employee["role"]) ?? "sales_operator",
+        role:
+          (availableRoles[0]?.value as Employee["role"]) ?? "sales_operator",
         status: "active",
       })}
       validateDraft={(draft) =>
