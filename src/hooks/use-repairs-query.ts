@@ -15,7 +15,7 @@ export function useClientRepairsQuery() {
   });
 }
 
-export function useStaffRepairsQuery() {
+export function useAdminRepairsQuery() {
   return useQuery({
     queryKey: queryKeys.repairs,
     queryFn: async () => ({

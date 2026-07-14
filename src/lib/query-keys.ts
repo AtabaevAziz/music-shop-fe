@@ -26,7 +26,7 @@ export const queryKeys = {
   catalog: ["page", "catalog"] as const,
   clientCatalog: ["page", "client-catalog"] as const,
   inventoryPage: ["page", "inventory"] as const,
-  staffOrdersPage: ["page", "orders", "staff"] as const,
+  adminOrdersPage: ["page", "orders", "admin"] as const,
   clientOrdersPage: ["page", "orders", "client"] as const,
   customersPage: ["page", "customers"] as const,
   clientRepairsPage: ["page", "repairs", "client"] as const,

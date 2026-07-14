@@ -4,8 +4,8 @@ Music Shop Online is a Next.js storefront and backoffice frontend for a musical 
 
 The app includes:
 
-- a localized sign-in experience for staff and clients
-- a protected staff workspace for dashboard, catalog, inventory, orders, and customers
+- a localized sign-in experience for admins and clients
+- a protected admin workspace for dashboard, catalog, inventory, orders, and customers
 - a client portal for personal orders, repair requests, and self-service browsing
 - shared business settings, media handling, and typed domain entities already modeled in the frontend
 
@@ -71,8 +71,8 @@ pnpm prepare
 
 The login flow uses the seeded backend accounts.
 
-- Staff login: use one of `admin`, `store_manager`, `catalog_manager`, `sales_operator`
-- Staff password: `Secret!1`
+- Admin login: `admin`
+- Admin password: `Secret!1`
 - Client login: use an active customer email from the seeded data
 - Client password: use the same email value
 
@@ -95,14 +95,14 @@ Current locale-scoped routes:
 
 Route behavior depends on session role:
 
-- Staff users currently see dashboard, catalog, inventory, orders, customers, employees, finance, and settings
+- Admin users currently see dashboard, catalog, inventory, orders, customers, employees, finance, and settings
 - Client users see a client portal on the same protected route shell, including client orders and repairs
 - `catalog` already groups products, categories, brands, and media inside tabbed UI
 - `repairs` is currently mounted as a client-facing route
 
 ## Main Modules
 
-- Auth: locale-aware sign-in with staff and client access
+- Auth: locale-aware sign-in with admin and client access
 - Dashboard: revenue snapshot, low stock, order pipeline, featured products, recent activity
 - Catalog: products, categories, brands, pricing, stock, specs, and product media
 - Inventory: stock adjustments, low-stock awareness, movement history
@@ -120,7 +120,7 @@ music-shop-fe/
 ├── src/
 │   ├── app/
 │   │   ├── [locale]/
-│   │   │   ├── (protected)/     # Auth-protected staff/client routes
+│   │   │   ├── (protected)/     # Auth-protected admin/client routes
 │   │   │   └── login/           # Locale-aware sign-in page
 │   │   ├── globals.css          # Global theme, layout, and UI tokens
 │   │   ├── layout.tsx           # Root HTML shell and font setup
@@ -171,7 +171,7 @@ music-shop-fe/
 
 The current frontend store already defines the behavior a backend needs to support:
 
-- session-aware auth for staff and clients
+- session-aware auth for admins and clients
 - CRUD for categories, brands, customers, employees, and products
 - stock adjustments and inventory movement history
 - order creation and order status transitions
@@ -187,7 +187,7 @@ The recommended API contract, enums, payload keys, validation rules, and Scala D
 - Navigation supports locale switching and theme switching in protected shells
 - Shared controls come from `shadcn/ui`-style components in `src/components/ui`
 - Notifications are shown through `sonner`
-- The client and staff experiences share typed API services and role-aware shells
+- The client and admin experiences share typed API services and role-aware shells
 
 ## Demo Assets
 

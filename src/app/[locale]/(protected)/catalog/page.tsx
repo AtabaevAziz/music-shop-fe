@@ -12,7 +12,7 @@ export default async function CatalogPage({
   return (
     <RoleRoute
       client={<ClientCatalogModule locale={locale} />}
-      staff={<CatalogModule locale={locale} />}
+      admin={<CatalogModule locale={locale} />}
     />
   );
 }

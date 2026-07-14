@@ -12,9 +12,9 @@ import { getCustomers } from "@/services/customers";
 import { getOrders } from "@/services/orders";
 import { getSettings } from "@/services/settings";
 
-export function useStaffOrdersQuery() {
+export function useAdminOrdersQuery() {
   return useQuery({
-    queryKey: queryKeys.staffOrdersPage,
+    queryKey: queryKeys.adminOrdersPage,
     queryFn: async () => {
       const [orders, customers, products, settings, workflows] =
         await Promise.all([

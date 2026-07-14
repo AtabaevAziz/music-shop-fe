@@ -1,8 +1,5 @@
 export type Role =
   | "admin"
-  | "store_manager"
-  | "catalog_manager"
-  | "sales_operator"
   | "client";
 export type PaymentStatus = "pending" | "partial" | "paid" | "refunded";
 export type OrderStatus =

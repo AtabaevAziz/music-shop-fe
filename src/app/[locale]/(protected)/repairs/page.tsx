@@ -1,6 +1,6 @@
 import { RoleRoute } from "@/components/layout/role-route";
 import { ClientRepairsModule } from "@/features/client/client-repairs-module";
-import { StaffRepairsModule } from "@/features/repairs/staff-repairs-module";
+import { AdminRepairsModule } from "@/features/repairs/admin-repairs-module";
 import { Locale } from "@/i18n";
 
 export default async function RepairsPage({
@@ -12,7 +12,7 @@ export default async function RepairsPage({
   return (
     <RoleRoute
       client={<ClientRepairsModule locale={locale} />}
-      staff={<StaffRepairsModule locale={locale} />}
+      admin={<AdminRepairsModule locale={locale} />}
     />
   );
 }

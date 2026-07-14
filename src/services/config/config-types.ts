@@ -24,7 +24,7 @@ export type ApiAuthProviderConfig = {
 export type ApiAuthConfig = {
   providers: ApiAuthProviderConfig[];
   allowClientLogin: boolean;
-  allowStaffLogin: boolean;
+  allowAdminLogin: boolean;
 };
 
 export type ApiNavigationItem = {

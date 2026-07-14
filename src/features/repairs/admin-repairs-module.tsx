@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
-import { useStaffRepairsQuery } from "@/hooks/use-repairs-query";
+import { useAdminRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
@@ -90,10 +90,10 @@ const initialDraft: RepairDraft = {
   receivedAt: "",
 };
 
-export function StaffRepairsModule({ locale = "ru" }: { locale?: Locale }) {
+export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
   const t = useTranslations();
   const queryClient = useQueryClient();
-  const { data: repairsData, isPending } = useStaffRepairsQuery();
+  const { data: repairsData, isPending } = useAdminRepairsQuery();
   const { data: customersData } = useCustomersQuery();
   const [draft, setDraft] = useState<RepairDraft>(initialDraft);
   const [formError, setFormError] = useState("");

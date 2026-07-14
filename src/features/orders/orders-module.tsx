@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStaffOrdersQuery } from "@/hooks/use-orders-query";
+import { useAdminOrdersQuery } from "@/hooks/use-orders-query";
 import { Locale } from "@/i18n";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
@@ -27,7 +27,7 @@ import type { OrderStatus } from "@/types/music";
 export function OrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
   const queryClient = useQueryClient();
-  const { data, isPending } = useStaffOrdersQuery();
+  const { data, isPending } = useAdminOrdersQuery();
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");

@@ -12,7 +12,7 @@ export default async function OrdersPage({
   return (
     <RoleRoute
       client={<ClientOrdersModule locale={locale} />}
-      staff={<OrdersModule locale={locale} />}
+      admin={<OrdersModule locale={locale} />}
     />
   );
 }

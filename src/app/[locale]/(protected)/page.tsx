@@ -12,7 +12,7 @@ export default async function DashboardPage({
   return (
     <RoleRoute
       client={<ClientHomeModule locale={locale} />}
-      staff={<DashboardModule locale={locale} />}
+      admin={<DashboardModule locale={locale} />}
     />
   );
 }

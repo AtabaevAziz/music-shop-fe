@@ -4,12 +4,12 @@ import { useAuthSession } from "@/providers/session-provider";
 
 export function RoleRoute({
   client,
-  staff,
+  admin,
 }: {
   client: React.ReactNode;
-  staff: React.ReactNode;
+  admin: React.ReactNode;
 }) {
   const { session } = useAuthSession();
 
-  return session?.role === "client" ? <>{client}</> : <>{staff}</>;
+  return session?.role === "client" ? <>{client}</> : <>{admin}</>;
 }

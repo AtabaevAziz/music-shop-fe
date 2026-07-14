@@ -50,7 +50,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     ? authConfig.providers.some((provider) => provider.type === "password")
     : true;
   const isLoginEnabled = authConfig
-    ? authConfig.allowClientLogin || authConfig.allowStaffLogin
+    ? authConfig.allowClientLogin || authConfig.allowAdminLogin
     : true;
   const isSubmitDisabled =
     !isApiConfigured ||
@@ -68,8 +68,8 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           ? t("auth.loginUnavailable")
           : !authConfig.allowClientLogin
             ? t("auth.clientLoginDisabled")
-            : !authConfig.allowStaffLogin
-              ? t("auth.staffLoginDisabled")
+            : !authConfig.allowAdminLogin
+              ? t("auth.adminLoginDisabled")
               : null
       : null;
 
