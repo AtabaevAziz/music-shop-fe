@@ -1,6 +1,4 @@
-export type Role =
-  | "admin"
-  | "client";
+export type Role = "admin" | "client";
 export type PaymentStatus = "pending" | "partial" | "paid" | "refunded";
 export type OrderStatus =
   | "new"

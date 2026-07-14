@@ -9,8 +9,6 @@ The app includes:
 - a client portal for personal orders, repair requests, and self-service browsing
 - shared business settings, media handling, and typed domain entities already modeled in the frontend
 
-The backend handoff document lives in [BACKEND_CONTRACT.md](BACKEND_CONTRACT.md).
-
 ## Tech Stack
 
 - Next.js 15 with App Router
@@ -151,15 +149,10 @@ music-shop-fe/
 │   │   ├── en.json
 │   │   ├── ru.json
 │   │   └── uz.json
-│   ├── store/
-│   │   ├── music-store-domain.ts
-│   │   ├── music-store.tsx
-│   │   └── seed.ts
 │   └── types/
 │       └── music.ts
 ├── public/
 │   └── products/
-├── BACKEND_CONTRACT.md
 ├── components.json
 ├── Dockerfile
 ├── next.config.ts
@@ -169,7 +162,7 @@ music-shop-fe/
 
 ## Backend Integration Direction
 
-The current frontend store already defines the behavior a backend needs to support:
+The active frontend integration is defined by the current API-backed services and runtime config layer:
 
 - session-aware auth for admins and clients
 - CRUD for categories, brands, customers, employees, and products
@@ -178,8 +171,9 @@ The current frontend store already defines the behavior a backend needs to suppo
 - repair request creation and repair status tracking
 - business settings updates
 - product media attachment and primary image selection
+- locale-aware runtime config for auth, navigation, permissions, workflows, and dictionaries
 
-The recommended API contract, enums, payload keys, validation rules, and Scala DTO mapping are documented in [BACKEND_CONTRACT.md](BACKEND_CONTRACT.md).
+The source of truth for the integration lives in the typed service clients under `src/services/` and the protected route shells that consume backend runtime config.
 
 ## UI Notes
 
