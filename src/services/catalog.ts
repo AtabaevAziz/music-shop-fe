@@ -45,7 +45,9 @@ export async function updateCategory(id: string, input: UpdateCategoryRequest) {
     `categories/${id}`,
     input,
   );
-  return fromApiCategory(unwrapEntityPayload(response, "category"));
+  return fromApiCategory(
+    unwrapEntityPayload<ApiCategory, "category">(response, "category"),
+  );
 }
 
 export async function deleteCategory(id: string) {
@@ -67,7 +69,9 @@ export async function updateBrand(id: string, input: UpdateBrandRequest) {
     `brands/${id}`,
     input,
   );
-  return fromApiBrand(unwrapEntityPayload(response, "brand"));
+  return fromApiBrand(
+    unwrapEntityPayload<ApiBrand, "brand">(response, "brand"),
+  );
 }
 
 export async function deleteBrand(id: string) {
@@ -86,7 +90,9 @@ export async function getProductById(id: string) {
   const response = await api.get<ApiProduct | ApiProductResponse>(
     `products/${id}`,
   );
-  return fromApiProduct(unwrapEntityPayload(response, "product"));
+  return fromApiProduct(
+    unwrapEntityPayload<ApiProduct, "product">(response, "product"),
+  );
 }
 
 export async function createProduct(input: CreateProductRequest) {
@@ -99,7 +105,9 @@ export async function updateProduct(id: string, input: UpdateProductRequest) {
     `products/${id}`,
     input,
   );
-  return fromApiProduct(unwrapEntityPayload(response, "product"));
+  return fromApiProduct(
+    unwrapEntityPayload<ApiProduct, "product">(response, "product"),
+  );
 }
 
 export async function deleteProduct(id: string) {

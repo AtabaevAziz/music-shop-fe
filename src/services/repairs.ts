@@ -25,5 +25,10 @@ export async function updateRepair(id: string, input: UpdateRepairRequest) {
     `repairs/${id}`,
     input,
   );
-  return fromApiRepairRequest(unwrapEntityPayload(response, "repairRequest"));
+  return fromApiRepairRequest(
+    unwrapEntityPayload<ApiRepairRequest, "repairRequest">(
+      response,
+      "repairRequest",
+    ),
+  );
 }

@@ -24,7 +24,9 @@ export async function updateCustomer(id: string, input: UpdateCustomerRequest) {
     `customers/${id}`,
     input,
   );
-  return fromApiCustomer(unwrapEntityPayload(response, "customer"));
+  return fromApiCustomer(
+    unwrapEntityPayload<ApiCustomer, "customer">(response, "customer"),
+  );
 }
 
 export async function deleteCustomer(id: string) {

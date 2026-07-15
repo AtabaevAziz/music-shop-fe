@@ -24,7 +24,9 @@ export async function updateEmployee(id: string, input: UpdateEmployeeRequest) {
     `employees/${id}`,
     input,
   );
-  return fromApiEmployee(unwrapEntityPayload(response, "employee"));
+  return fromApiEmployee(
+    unwrapEntityPayload<ApiEmployee, "employee">(response, "employee"),
+  );
 }
 
 export async function deleteEmployee(id: string) {

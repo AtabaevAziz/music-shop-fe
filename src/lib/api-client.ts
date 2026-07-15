@@ -160,7 +160,7 @@ async function fetchApi<T>(
       status: response.status,
       message:
         apiError?.error?.message ??
-        (typeof errorPayload === "string" && errorPayload) ??
+        (typeof errorPayload === "string" ? errorPayload : undefined) ??
         `Request failed with status ${response.status}.`,
       code: apiError?.error?.code,
       field: apiError?.error?.field,

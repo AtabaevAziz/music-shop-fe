@@ -5,7 +5,7 @@ import type { ApiDictionaryOption } from "@/services/config/config-types";
 
 type TranslateFn = (
   key: string,
-  values?: Record<string, string | number>,
+  values?: Record<string, string | number | Date>,
 ) => string;
 
 export function getConfiguredLocales(
