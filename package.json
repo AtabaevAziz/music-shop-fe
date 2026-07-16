@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node ./scripts/typecheck.mjs",
     "prepare": "husky",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,jsx,json,css,md}\""
   },
