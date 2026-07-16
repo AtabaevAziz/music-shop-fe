@@ -34,4 +34,6 @@ export const queryKeys = {
   employeesPage: ["page", "employees"] as const,
   financePage: ["page", "finance"] as const,
   mediaPage: ["page", "media"] as const,
+  storefrontCatalog: ["page", "storefront", "catalog"] as const,
+  storefrontProduct: ["page", "storefront", "product"] as const,
 };

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -75,6 +75,7 @@ export function AppShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { session, logout } = useAuthSession();
   const { data: appConfig } = useAppConfigQuery();
   const {
@@ -93,6 +94,7 @@ export function AppShell({
     enabled: session?.role !== "client",
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const queryString = searchParams.toString();
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
   const sessionRole = session?.role;
@@ -244,9 +246,14 @@ export function AppShell({
                   <DropdownMenuItem
                     key={itemLocale}
                     disabled={itemLocale === locale}
-                    onSelect={() =>
-                      router.push(`/${itemLocale}${pathname.slice(3)}`)
-                    }
+                    onSelect={() => {
+                      const nextPath = pathname.slice(3) || "";
+                      router.push(
+                        `/${itemLocale}${nextPath}${
+                          queryString ? `?${queryString}` : ""
+                        }`,
+                      );
+                    }}
                   >
                     {t(localeLabelKeyMap[itemLocale])}
                   </DropdownMenuItem>
@@ -288,7 +295,7 @@ export function AppShell({
                   className="profile-menu-item profile-menu-item-danger"
                   onSelect={() => {
                     void logout().then(() => {
-                      router.replace(`/${locale}/login`);
+                      router.replace(`/${locale}`);
                     });
                   }}
                 >

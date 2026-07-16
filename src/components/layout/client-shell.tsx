@@ -3,7 +3,7 @@
 import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -63,6 +63,7 @@ export function ClientShell({
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { session, logout } = useAuthSession();
   const { data: appConfig } = useAppConfigQuery();
   const {
@@ -77,6 +78,7 @@ export function ClientShell({
   } = usePermissionsQuery();
   const { data: homeData } = useClientHomeQuery();
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const queryString = searchParams.toString();
   const sessionRole = session?.role;
   const routeId = getRouteIdFromPathname(pathname);
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
@@ -230,9 +232,14 @@ export function ClientShell({
                   <DropdownMenuItem
                     key={itemLocale}
                     disabled={itemLocale === locale}
-                    onSelect={() =>
-                      router.push(`/${itemLocale}${pathname.slice(3)}`)
-                    }
+                    onSelect={() => {
+                      const nextPath = pathname.slice(3) || "";
+                      router.push(
+                        `/${itemLocale}${nextPath}${
+                          queryString ? `?${queryString}` : ""
+                        }`,
+                      );
+                    }}
                   >
                     {t(localeLabelKeyMap[itemLocale])}
                   </DropdownMenuItem>
@@ -274,7 +281,7 @@ export function ClientShell({
                   className="profile-menu-item profile-menu-item-danger"
                   onSelect={() => {
                     void logout().then(() => {
-                      router.replace(`/${locale}/login`);
+                      router.replace(`/${locale}`);
                     });
                   }}
                 >

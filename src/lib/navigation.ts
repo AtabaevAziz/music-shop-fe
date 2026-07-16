@@ -10,8 +10,13 @@ export function resolveNavigationHref(path: string, locale: Locale) {
 }
 
 export function getRouteIdFromPathname(pathname: string) {
-  const segment = pathname.split("/")[2] ?? "";
-  return segment || "dashboard";
+  const [, , firstSegment = "", secondSegment = ""] = pathname.split("/");
+
+  if (firstSegment === "app") {
+    return secondSegment || "dashboard";
+  }
+
+  return firstSegment || "dashboard";
 }
 
 export function canAccessRoute(

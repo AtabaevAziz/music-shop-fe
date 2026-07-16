@@ -44,7 +44,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const [error, setError] = useState<string | null>(null);
   const next = searchParams.get("next");
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
-  const destination = next || `/${locale}`;
+  const destination = next || `/${locale}/app`;
   const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
   const hasPasswordProvider = authConfig
     ? authConfig.providers.some((provider) => provider.type === "password")
@@ -179,7 +179,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   name="signin_secret"
                   className="auth-input auth-input-with-toggle"
                   type={isPasswordVisible ? "text" : "password"}
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   placeholder={t("auth.passwordPlaceholder")}
                   value={passwordValue}
                   required
@@ -235,6 +235,22 @@ export function LoginScreen({ locale }: { locale: Locale }) {
             >
               {t("auth.signInAction")}
             </Button>
+            <div className="auth-footer-links">
+              <button
+                type="button"
+                className="auth-inline-link"
+                onClick={() => router.push(`/${locale}`)}
+              >
+                {t("storefront.backToStorefront")}
+              </button>
+              <button
+                type="button"
+                className="auth-inline-link"
+                onClick={() => router.push(`/${locale}/catalog`)}
+              >
+                {t("storefront.goToCatalog")}
+              </button>
+            </div>
           </form>
         </section>
       </div>

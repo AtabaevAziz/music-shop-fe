@@ -1,7 +1,13 @@
 {
   "meta": {
     "appName": "Music Shop Online",
-    "appSubtitle": "Katalog, buyurtmalar va ombor bilan onlayn do'kon"
+    "appSubtitle": "Musiqa asboblari, studiya jihozlari va ta'mirlash bir do'konda.",
+    "catalogTitle": "Katalog | Music Shop Online",
+    "catalogDescription": "Akkauntga kirmasdan oldin faol mahsulotlarni ko'rib chiqing.",
+    "productTitle": "Mahsulot sahifasi | Music Shop Online",
+    "productDescription": "Faol mahsulotlarning xususiyatlari, narxi va mavjudligini ko'ring.",
+    "loginTitle": "Kirish | Music Shop Online",
+    "loginDescription": "Vitrinani ko'rgandan so'ng mijoz kabineti yoki admin paneliga kiring."
   },
   "common": {
     "brand": "Music Shop",
@@ -48,8 +54,8 @@
     "resetDemo": "Demo holatini tiklash"
   },
   "auth": {
-    "title": "Musiqa asboblari onlayn do'koni va boshqaruv paneli",
-    "text": "Mahsulotlar, ombor, buyurtmalar, mijozlar va ta'mirlash uchun real backendga ulangan musiqa asboblari onlayn do'koni va ish maydoni.",
+    "title": "Mijoz va administrator uchun kirish",
+    "text": "Avval vitrina va katalogni ko'ring, so'ng buyurtma berish, ta'mirlashni kuzatish yoki do'konni boshqarish uchun kiring.",
     "modulesLabel": "Bo'limlar",
     "modulesValue": "Bosh sahifa, katalog, ombor, buyurtmalar, mijozlar va ta'mirlash",
     "demoLabel": "Demo rejimi",
@@ -74,6 +80,67 @@
     "sessionUnavailableText": "Frontend sessiyani backend orqali tiklay olmadi. API va cookie konfiguratsiyasini tekshiring.",
     "adminBlurb": "Katalog, ombor, buyurtmalar va mijozlarga to'liq kirish.",
     "clientBlurb": "Sotib olish va ta'mirlash so'rovlari uchun mijoz kabineti."
+  },
+  "storefront": {
+    "headerTagline": "Asboblar, studiya va servis",
+    "homeLink": "Vitrina",
+    "badge": "Jonli katalogga ega musiqa do'koni",
+    "heroTitle": "Sahna, studiya va kundalik mashq uchun mos jihozlarni tanlang.",
+    "heroText": "Endi tashrifchi katalogni ochib, faol mahsulotlarni taqqoslab, faqat sotib olish paytida kabinetga o'tadi.",
+    "primaryCta": "Katalogni ochish",
+    "secondaryCta": "Kabinetga kirish",
+    "proofProducts": "ko'rish uchun faol pozitsiyalar",
+    "proofLocales": "xaridorlar uchun tillar",
+    "proofDispatch": "ombordagi mahsulotlar jo'natish muddati",
+    "featuredKicker": "Bugungi tanlov",
+    "heroFallbackProduct": "Vitrinadagi yangi mahsulotlar",
+    "servicesKicker": "Nima uchun bu sotadi",
+    "servicesTitle": "Sayt endi faqat ichki tizim emas, haqiqiy do'kon ko'rinishida.",
+    "servicesText": "Mahsulotlar, ta'mirlash va mijoz scenariylari kirishdan oldin ko'rinadi.",
+    "serviceCards": {
+      "selection": {
+        "title": "Assortiment tanlovi",
+        "text": "Bosh sahifada ichki modullar emas, faol mahsulotlar ko'rsatiladi."
+      },
+      "delivery": {
+        "title": "Aniq yetkazib berish",
+        "text": "Xaridor jo'natish bo'yicha kutishni kirishdan oldin ko'radi."
+      },
+      "warranty": {
+        "title": "Ishonch va kafolat",
+        "text": "Qo'llab-quvvatlash va kafolat erta bosqichda tushuntiriladi."
+      },
+      "repairs": {
+        "title": "Servis va ta'mirlash",
+        "text": "Ta'mirlash yashirin admin funksiyasi emas, tijoriy ustunlik sifatida ko'rsatiladi."
+      }
+    },
+    "categoriesKicker": "Kategoriya bo'yicha xarid",
+    "categoriesTitle": "Faol katalogdagi mashhur kategoriyalar",
+    "categoriesText": "Birinchi marta kirgan foydalanuvchi kabinet tuzilmasini bilmasdan kerakli bo'limga o'ta oladi.",
+    "catalogKicker": "Hozir mavjud",
+    "catalogTitle": "Jonli assortimentdan mahsulotlar",
+    "catalogText": "Mahsulot kartalari endi majburiy login devoriga emas, ommaviy mahsulot sahifasiga olib boradi.",
+    "catalogPageTitle": "Ommaviy katalog",
+    "catalogPageText": "Avval faol mahsulotlarni ko'ring, keyin xarid yoki buyurtma boshqaruvi uchun kiring.",
+    "searchPlaceholder": "Nomi, SKU yoki qisqa tavsif bo'yicha qidiring",
+    "allCategories": "Barcha kategoriyalar",
+    "noProducts": "So'rovga mos faol mahsulot topilmadi.",
+    "catalogUnavailable": "Ommaviy katalog vaqtincha mavjud emas.",
+    "apiUnavailable": "Ommaviy vitrini yuklash uchun backend URL manzilini sozlang.",
+    "imageUnavailable": "Mahsulot rasmi mavjud emas",
+    "productUnavailable": "Mahsulot mavjud emas yoki endi ommaviy ko'rsatilmaydi.",
+    "productPrimaryCta": "Buyurtma uchun kirish",
+    "backToCatalog": "Katalogga qaytish",
+    "specsKicker": "Xususiyatlar",
+    "specsTitle": "Mahsulot tafsilotlari",
+    "specsText": "Asosiy xususiyatlar endi avtorizatsiyadan oldin ham ko'rinadi va yangi xaridor uchun to'siqni kamaytiradi.",
+    "repairsKicker": "Servis yordami",
+    "repairsTitle": "Ta'mirlash endi yashirin ichki bo'lim emas, sotuv hikoyasining bir qismi.",
+    "repairsText": "Tashrifchi akkaunt yaratishdan oldin ham servis imkoniyatini ko'radi.",
+    "repairsCta": "Ta'mirlash so'rovi uchun kirish",
+    "backToStorefront": "Vitrinaga qaytish",
+    "goToCatalog": "Ommaviy katalogni ochish"
   },
   "dashboard": {
     "lowStockSubtitle": "To'ldirish chegarasidan past mahsulotlar",

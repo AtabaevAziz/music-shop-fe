@@ -14,7 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Music Shop Online",
   description:
-    "Online musical instrument store with catalog, inventory, orders, repairs, and admin workflows.",
+    "Shop instruments, studio gear, and service support from one localized music storefront.",
 };
 
 export default function RootLayout({

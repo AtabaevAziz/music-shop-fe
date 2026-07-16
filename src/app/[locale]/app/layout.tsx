@@ -2,7 +2,7 @@ import { AuthGuard } from "@/components/layout/auth-guard";
 import { ProtectedShell } from "@/components/layout/protected-shell";
 import { Locale } from "@/i18n";
 
-export default async function ProtectedLayout({
+export default async function ProtectedAppLayout({
   children,
   params,
 }: {

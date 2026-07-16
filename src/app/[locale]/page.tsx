@@ -1,7 +1,7 @@
-import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { LoginScreen } from "@/features/auth/login-screen";
+import { PublicShell } from "@/components/layout/public-shell";
+import { StorefrontHomeModule } from "@/features/storefront/storefront-home-module";
 import { Locale } from "@/i18n";
 
 export async function generateMetadata({
@@ -13,20 +13,21 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "meta" });
 
   return {
-    title: t("loginTitle"),
-    description: t("loginDescription"),
+    title: t("appName"),
+    description: t("appSubtitle"),
   };
 }
 
-export default async function LoginPage({
+export default async function StorefrontHomePage({
   params,
 }: {
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
+
   return (
-    <Suspense fallback={null}>
-      <LoginScreen locale={locale} />
-    </Suspense>
+    <PublicShell locale={locale}>
+      <StorefrontHomeModule locale={locale} />
+    </PublicShell>
   );
 }
