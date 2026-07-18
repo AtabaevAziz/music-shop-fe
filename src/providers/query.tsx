@@ -10,6 +10,10 @@ import { ReactNode, useState } from "react";
 
 import { ApiClientError } from "@/lib/api-error";
 
+function shouldLogReactQueryError(error: unknown) {
+  return !(error instanceof ApiClientError && error.status < 500);
+}
+
 export default function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -32,12 +36,16 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
         },
         queryCache: new QueryCache({
           onError: (error) => {
-            console.error("Query error:", error);
+            if (shouldLogReactQueryError(error)) {
+              console.error("Query error:", error);
+            }
           },
         }),
         mutationCache: new MutationCache({
           onError: (error) => {
-            console.error("Mutation error:", error);
+            if (shouldLogReactQueryError(error)) {
+              console.error("Mutation error:", error);
+            }
           },
         }),
       }),

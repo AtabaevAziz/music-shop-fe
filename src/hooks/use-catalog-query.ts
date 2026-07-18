@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
-import { getBrands, getCategories, getProducts } from "@/services/catalog";
+import { getCategories, getProducts } from "@/services/catalog";
 import { getClientProducts } from "@/services/client";
 import { getAppConfig, getDictionaries } from "@/services/config";
 import { getSettings } from "@/services/settings";
@@ -12,19 +12,16 @@ export function useCatalogQuery() {
   return useQuery({
     queryKey: queryKeys.catalog,
     queryFn: async () => {
-      const [products, categories, brands, settings, dictionaries] =
-        await Promise.all([
-          getProducts(),
-          getCategories(),
-          getBrands(),
-          getSettings(),
-          getDictionaries(),
-        ]);
+      const [products, categories, settings, dictionaries] = await Promise.all([
+        getProducts(),
+        getCategories(),
+        getSettings(),
+        getDictionaries(),
+      ]);
 
       return {
         products,
         categories,
-        brands,
         settings,
         dictionaries,
       };

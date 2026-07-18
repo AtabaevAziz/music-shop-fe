@@ -1,3 +1,4 @@
+import { normalizeProductBrand } from "@/lib/product-brand";
 import type {
   ApiClientCustomer,
   ApiClientOrder,
@@ -15,6 +16,7 @@ export function fromApiClientCustomer(
 export function fromApiClientProduct(product: ApiClientProduct): Product {
   return {
     ...product,
+    brand: normalizeProductBrand(product.brand),
     barcode: product.barcode || undefined,
     primaryImage: product.primaryImage || undefined,
   };

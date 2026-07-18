@@ -6,13 +6,6 @@ export type StorefrontCategory = {
   slug: string;
 };
 
-export type StorefrontBrand = {
-  id: string;
-  name: string;
-  country: string;
-  website: string;
-};
-
 export type StorefrontProduct = {
   id: string;
   name: string;
@@ -26,7 +19,7 @@ export type StorefrontProduct = {
   primaryImage?: string;
   condition: Condition;
   category: StorefrontCategory;
-  brand: StorefrontBrand;
+  brand: string;
 };
 
 export type ApiStorefrontProduct = {
@@ -42,7 +35,7 @@ export type ApiStorefrontProduct = {
   primaryImage: string | null;
   condition: Condition;
   category: StorefrontCategory;
-  brand: StorefrontBrand;
+  brand?: string | { name?: string | null } | null;
 };
 
 export type ApiStorefrontProductListResponse = {

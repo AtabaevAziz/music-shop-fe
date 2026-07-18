@@ -62,9 +62,9 @@
     "demoValue": "Состояние хранится на клиенте и сохраняется локально",
     "enterAs": "Вход в аккаунт",
     "loginLabel": "Логин",
-    "loginPlaceholder": "admin или email@example.com",
+    "loginPlaceholder": "Введите логин или email",
     "passwordLabel": "Пароль",
-    "passwordPlaceholder": "Введите пароль",
+    "passwordPlaceholder": "Введите пароль от аккаунта",
     "showPassword": "Показать пароль",
     "hidePassword": "Скрыть пароль",
     "signInAction": "Войти",
@@ -150,7 +150,7 @@
     "activitySubtitle": "Последние операционные события из бэкенда"
   },
   "section": {
-    "catalogSubtitle": "Товары, категории, бренды и изображения в едином каталоге магазина.",
+    "catalogSubtitle": "Товары и категории в едином каталоге, а бренд ищется прямо в товарах.",
     "categoriesSubtitle": "Структурированная товарная таксономия для музыкального каталога.",
     "brandsSubtitle": "Справочник брендов, вендоров и производителей.",
     "ordersSubtitle": "Обработка заказов и продвижение по этапам выполнения.",

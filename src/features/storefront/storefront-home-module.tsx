@@ -232,7 +232,7 @@ export function StorefrontHomeModule({ locale }: { locale: Locale }) {
                         </div>
                       )}
                       <div className="storefront-product-copy">
-                        <span className="muted">{product.brand.name}</span>
+                        <span className="muted">{product.brand}</span>
                         <strong>{product.name}</strong>
                         <p>{product.shortDescription}</p>
                       </div>

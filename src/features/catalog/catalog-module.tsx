@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import { AppField } from "@/components/shared/form-field";
@@ -53,11 +53,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { BrandsModule } from "@/features/brands/brands-module";
 import { CategoriesModule } from "@/features/categories/categories-module";
-import { MediaModule } from "@/features/media/media-module";
 import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
+import { normalizeProductBrand } from "@/lib/product-brand";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import {
   getDictionarySelectOptions,
@@ -80,7 +79,7 @@ const productSchema = z.object({
   costPrice: z.coerce.number().min(1),
   stockQty: z.coerce.number().min(0),
   categoryId: z.string().min(1),
-  brandId: z.string().min(1),
+  brand: z.string().min(2),
   shortDescription: z.string().min(4),
   description: z.string().min(4),
   status: z.string().min(1),
@@ -88,7 +87,9 @@ const productSchema = z.object({
 });
 
 type ProductDraft = Record<string, string>;
+
 const ALL_CATEGORIES_VALUE = "__all_categories__";
+const ALL_BRANDS_VALUE = "__all_brands__";
 
 export function CatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -96,7 +97,6 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const { data, isPending } = useCatalogQuery();
   const products = useMemo(() => data?.products ?? [], [data?.products]);
   const categories = data?.categories ?? [];
-  const brands = data?.brands ?? [];
   const productStatuses = getDictionaryValues<ProductStatus>(
     data?.dictionaries.productStatuses,
     ["draft", "active", "archived"] as const,
@@ -139,47 +139,118 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   });
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORIES_VALUE);
+  const [brandFilter, setBrandFilter] = useState(ALL_BRANDS_VALUE);
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ProductDraft>({
     status: "draft",
     condition: conditionValues[0] ?? "new",
+    primaryImage: "",
   });
+
+  const categoryMap = Object.fromEntries(
+    categories.map((item) => [item.id, item.name]),
+  );
+  const availableBrands = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          products
+            .map((product) => normalizeProductBrand(product.brand))
+            .filter((brand) => brand.length > 0),
+        ),
+      ).sort((left, right) => left.localeCompare(right)),
+    [products],
+  );
+  const draftImages = useMemo(() => parseList(draft.images ?? ""), [draft.images]);
+
+  useEffect(() => {
+    if (!isEditorOpen) {
+      return;
+    }
+
+    const nextPrimaryImage = draftImages.includes(draft.primaryImage ?? "")
+      ? draft.primaryImage ?? ""
+      : (draftImages[0] ?? "");
+
+    if ((draft.primaryImage ?? "") !== nextPrimaryImage) {
+      setDraft((current) => ({
+        ...current,
+        primaryImage: nextPrimaryImage,
+      }));
+    }
+  }, [draft.primaryImage, draftImages, isEditorOpen]);
 
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase();
+
     return products.filter((product) => {
       const matchesQuery =
         !value ||
-        `${product.name} ${product.sku} ${product.shortDescription}`
+        `${product.name} ${product.sku} ${product.shortDescription} ${normalizeProductBrand(product.brand)}`
           .toLowerCase()
           .includes(value);
       const matchesCategory =
         categoryFilter === ALL_CATEGORIES_VALUE ||
         product.categoryId === categoryFilter;
+      const matchesBrand =
+        brandFilter === ALL_BRANDS_VALUE ||
+        normalizeProductBrand(product.brand) === brandFilter;
 
-      return matchesQuery && matchesCategory;
+      return matchesQuery && matchesCategory && matchesBrand;
     });
-  }, [categoryFilter, products, query]);
-
-  const categoryMap = Object.fromEntries(
-    categories.map((item) => [item.id, item.name]),
-  );
-  const brandMap = Object.fromEntries(
-    brands.map((item) => [item.id, item.name]),
-  );
+  }, [brandFilter, categoryFilter, products, query]);
 
   function resetDraft() {
     setDraft({
       status: settings.defaultProductStatus,
       condition: conditionValues[0] ?? "new",
+      primaryImage: "",
     });
+  }
+
+  function openCreateDialog() {
+    setFormError("");
+    resetDraft();
+    setIsEditorOpen(true);
+  }
+
+  function openEditDialog(productId: string) {
+    const product = products.find((item) => item.id === productId);
+    if (!product) {
+      return;
+    }
+
+    setFormError("");
+    setDraft({
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      barcode: product.barcode ?? "",
+      categoryId: product.categoryId,
+      brand: normalizeProductBrand(product.brand),
+      price: String(product.price),
+      costPrice: String(product.costPrice),
+      stockQty: String(product.stockQty),
+      status: product.status,
+      shortDescription: product.shortDescription,
+      description: product.description,
+      condition: product.condition,
+      primaryImage: product.primaryImage ?? product.images[0] ?? "",
+      images: product.images.join("\n"),
+      specs: Object.entries(product.specs)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join("\n"),
+    });
+    setIsEditorOpen(true);
   }
 
   async function submit() {
     const parsed = productSchema.safeParse(draft);
-    if (!parsed.success) {
+    const images = parseList(draft.images ?? "");
+
+    if (!parsed.success || images.length === 0) {
       setFormError(t("labels.validationFailed"));
       return;
     }
@@ -198,14 +269,19 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         return [key.trim(), rest.join(":").trim()];
       }),
     );
+    const primaryImage = images.includes(draft.primaryImage ?? "")
+      ? draft.primaryImage
+      : images[0];
+
     try {
       await saveMutation.mutateAsync({
         id: draft.id,
         ...parsed.data,
+        brand: parsed.data.brand.trim(),
         barcode: draft.barcode,
         specs,
-        images: parseList(draft.images ?? ""),
-        primaryImage: parseList(draft.images ?? "")[0],
+        images,
+        primaryImage,
         status: parsed.data.status as ProductStatus,
         condition: parsed.data.condition as Condition,
         price: Number(draft.price),
@@ -240,8 +316,6 @@ export function CatalogModule({ locale }: { locale: Locale }) {
           <TabsList className="h-auto w-full flex-wrap justify-start gap-2 bg-transparent p-0">
             <TabsTrigger value="products">{t("labels.product")}</TabsTrigger>
             <TabsTrigger value="categories">{t("nav.categories")}</TabsTrigger>
-            <TabsTrigger value="brands">{t("nav.brands")}</TabsTrigger>
-            <TabsTrigger value="media">{t("nav.media")}</TabsTrigger>
           </TabsList>
         </ModuleSection>
 
@@ -276,14 +350,22 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      setFormError("");
-                      resetDraft();
-                      setIsEditorOpen(true);
-                    }}
-                  >
+                  <Select value={brandFilter} onValueChange={setBrandFilter}>
+                    <SelectTrigger className="w-full min-w-[220px] md:w-64">
+                      <SelectValue placeholder={t("labels.brand")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_BRANDS_VALUE}>
+                        {t("common.select")} {t("labels.brand")}
+                      </SelectItem>
+                      {availableBrands.map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" onClick={openCreateDialog}>
                     {t("common.addNew")}
                   </Button>
                 </>
@@ -296,6 +378,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                     <TableHead>{t("labels.preview")}</TableHead>
                     <TableHead>{t("labels.product")}</TableHead>
                     <TableHead>{t("labels.category")}</TableHead>
+                    <TableHead>{t("labels.brand")}</TableHead>
                     <TableHead>{t("labels.price")}</TableHead>
                     <TableHead>{t("labels.stock")}</TableHead>
                     <TableHead>{t("labels.availability")}</TableHead>
@@ -327,14 +410,12 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                               {product.shortDescription}
                             </div>
                           </div>
-                          <div className="muted">
-                            {product.sku}
-                            {brandMap[product.brandId]
-                              ? ` / ${brandMap[product.brandId]}`
-                              : ""}
-                          </div>
+                          <div className="muted">{product.sku}</div>
                         </TableCell>
                         <TableCell>{categoryMap[product.categoryId]}</TableCell>
+                        <TableCell>
+                          {normalizeProductBrand(product.brand)}
+                        </TableCell>
                         <TableCell>
                           {formatMoney(
                             product.price,
@@ -375,33 +456,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                                     type="button"
                                     disabled={isSaving || isDeleting}
                                     aria-label={t("common.edit")}
-                                    onClick={() => {
-                                      setFormError("");
-                                      setDraft({
-                                        id: product.id,
-                                        name: product.name,
-                                        sku: product.sku,
-                                        barcode: product.barcode ?? "",
-                                        categoryId: product.categoryId,
-                                        brandId: product.brandId,
-                                        price: String(product.price),
-                                        costPrice: String(product.costPrice),
-                                        stockQty: String(product.stockQty),
-                                        status: product.status,
-                                        shortDescription:
-                                          product.shortDescription,
-                                        description: product.description,
-                                        condition: product.condition,
-                                        images: product.images.join("\n"),
-                                        specs: Object.entries(product.specs)
-                                          .map(
-                                            ([key, value]) =>
-                                              `${key}: ${value}`,
-                                          )
-                                          .join("\n"),
-                                      });
-                                      setIsEditorOpen(true);
-                                    }}
+                                    onClick={() => openEditDialog(product.id)}
                                   >
                                     <Pen />
                                   </Button>
@@ -443,14 +498,6 @@ export function CatalogModule({ locale }: { locale: Locale }) {
 
         <TabsContent value="categories" className="mt-0">
           <CategoriesModule />
-        </TabsContent>
-
-        <TabsContent value="brands" className="mt-0">
-          <BrandsModule />
-        </TabsContent>
-
-        <TabsContent value="media" className="mt-0">
-          <MediaModule />
         </TabsContent>
       </Tabs>
 
@@ -541,27 +588,16 @@ export function CatalogModule({ locale }: { locale: Locale }) {
               </Select>
             </AppField>
             <AppField label={t("labels.brand")}>
-              <Select
-                value={draft.brandId ?? ""}
+              <Input
+                value={draft.brand ?? ""}
                 disabled={isSaving}
-                onValueChange={(value) =>
+                onChange={(event) =>
                   setDraft((current) => ({
                     ...current,
-                    brandId: value,
+                    brand: event.target.value,
                   }))
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("common.select")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </AppField>
             <AppField label={t("labels.condition")}>
               <Select
@@ -693,6 +729,48 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 }
               />
             </AppField>
+            {draftImages.length > 0 ? (
+              <div className="media-grid md:col-span-2">
+                {draftImages.map((image) => {
+                  const isPrimary = (draft.primaryImage ?? "") === image;
+
+                  return (
+                    <div key={image} className="media-tile">
+                      <div className="art-preview">
+                        <Image
+                          src={image}
+                          alt={draft.name ?? image}
+                          width={640}
+                          height={480}
+                          className="media-image"
+                        />
+                      </div>
+                      <div className="stack-row spread">
+                        <span>{image.split("/").pop()}</span>
+                        {isPrimary ? (
+                          <Badge variant="success">{t("labels.primary")}</Badge>
+                        ) : null}
+                      </div>
+                      {!isPrimary ? (
+                        <Button
+                          variant="outline"
+                          type="button"
+                          disabled={isSaving}
+                          onClick={() =>
+                            setDraft((current) => ({
+                              ...current,
+                              primaryImage: image,
+                            }))
+                          }
+                        >
+                          {t("labels.setPrimary")}
+                        </Button>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <AppField
               label={t("labels.specsKeyValue")}
               className="md:col-span-2"
@@ -761,10 +839,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             >
               {isDeleting ? t("common.deleting") : t("common.delete")}
             </AlertDialogAction>
-            <AlertDialogCancel
-              disabled={isDeleting}
-              onClick={() => setDeleteTargetId(null)}
-            >
+            <AlertDialogCancel disabled={isDeleting}>
               {t("common.cancel")}
             </AlertDialogCancel>
           </AlertDialogFooter>

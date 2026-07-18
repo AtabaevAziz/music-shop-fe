@@ -62,9 +62,9 @@
     "demoValue": "Frontend-only state with local persistence",
     "enterAs": "Sign in to your account",
     "loginLabel": "Login",
-    "loginPlaceholder": "admin or email@example.com",
+    "loginPlaceholder": "Enter your login or email",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "Enter your password",
+    "passwordPlaceholder": "Enter your account password",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "signInAction": "Sign in",
@@ -150,7 +150,7 @@
     "activitySubtitle": "Latest operational events from the backend"
   },
   "section": {
-    "catalogSubtitle": "Products, categories, brands, and imagery in one catalog workspace.",
+    "catalogSubtitle": "Products and categories in one workspace, with brand search directly in products.",
     "categoriesSubtitle": "Structured product taxonomy for the music retail catalog.",
     "brandsSubtitle": "Reusable vendor and manufacturer records.",
     "ordersSubtitle": "Internal order processing and fulfillment progression.",

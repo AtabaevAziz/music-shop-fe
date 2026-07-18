@@ -62,9 +62,9 @@
     "demoValue": "Holat klient tomonida saqlanadi va localda eslab qolinadi",
     "enterAs": "Akkauntga kirish",
     "loginLabel": "Login",
-    "loginPlaceholder": "admin yoki email@example.com",
+    "loginPlaceholder": "Login yoki emailni kiriting",
     "passwordLabel": "Parol",
-    "passwordPlaceholder": "Parolni kiriting",
+    "passwordPlaceholder": "Akkaunt parolini kiriting",
     "showPassword": "Parolni ko'rsatish",
     "hidePassword": "Parolni yashirish",
     "signInAction": "Kirish",
@@ -150,7 +150,7 @@
     "activitySubtitle": "Backenddan kelgan so'nggi operatsion voqealar"
   },
   "section": {
-    "catalogSubtitle": "Mahsulotlar, kategoriyalar, brendlar va rasmlar bitta katalog ish maydonida.",
+    "catalogSubtitle": "Mahsulot va kategoriyalar bitta joyda, brend esa mahsulotlar ichida qidiriladi.",
     "categoriesSubtitle": "Musiqa retail katalogi uchun tuzilgan mahsulot taksonomiyasi.",
     "brandsSubtitle": "Yetkazib beruvchi va ishlab chiqaruvchilar bo'yicha qayta ishlatiladigan yozuvlar.",
     "ordersSubtitle": "Ichki buyurtmalarni qayta ishlash va bajarish bosqichlari.",

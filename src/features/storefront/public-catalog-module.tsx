@@ -144,7 +144,7 @@ export function PublicCatalogModule({ locale }: { locale: Locale }) {
                 )}
                 <div className="storefront-product-topline">
                   <Badge variant="secondary">{product.category.name}</Badge>
-                  <span className="muted">{product.brand.name}</span>
+                  <span className="muted">{product.brand}</span>
                 </div>
                 <div className="storefront-product-copy">
                   <strong>{product.name}</strong>

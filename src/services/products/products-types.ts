@@ -3,11 +3,14 @@ import type { Product } from "@/types/music";
 export type ProductsListQuery = {
   status?: Product["status"];
   categoryId?: string;
-  brandId?: string;
+  brand?: string;
   search?: string;
 };
 
-export type ApiProduct = Product;
+export type ApiProduct = Omit<Product, "brand"> & {
+  brand?: string | { name?: string | null } | null;
+  brandId?: string | null;
+};
 
 export type CreateProductRequest = Omit<Product, "id">;
 

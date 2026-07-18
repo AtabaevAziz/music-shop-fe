@@ -1,3 +1,4 @@
+import { normalizeProductBrand } from "@/lib/product-brand";
 import type {
   ApiStorefrontProduct,
   StorefrontProduct,
@@ -8,6 +9,7 @@ export function fromApiStorefrontProduct(
 ): StorefrontProduct {
   return {
     ...product,
+    brand: normalizeProductBrand(product.brand),
     primaryImage: product.primaryImage || undefined,
   };
 }

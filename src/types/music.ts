@@ -27,21 +27,13 @@ export type Category = {
   productCount?: number;
 };
 
-export type Brand = {
-  id: string;
-  name: string;
-  country: string;
-  website: string;
-  status: "active" | "inactive";
-};
-
 export type Product = {
   id: string;
   name: string;
   sku: string;
   barcode?: string;
   categoryId: string;
-  brandId: string;
+  brand: string;
   price: number;
   costPrice: number;
   stockQty: number;
@@ -141,7 +133,6 @@ export type Session = {
 
 export type Database = {
   categories: Category[];
-  brands: Brand[];
   products: Product[];
   inventoryMovements: InventoryMovement[];
   orders: Order[];

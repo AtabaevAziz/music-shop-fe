@@ -25,6 +25,7 @@ import {
   API_BASE_URL_EXAMPLE,
   hasConfiguredApiBaseUrl,
 } from "@/lib/api-config";
+import { ApiClientError } from "@/lib/api-error";
 import { getConfiguredLocales } from "@/lib/runtime-config";
 import { useAuthSession } from "@/providers/session-provider";
 
@@ -39,6 +40,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     useAuthConfigQuery();
   const { isAuthenticating, login } = useAuthSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isManualEntryEnabled, setIsManualEntryEnabled] = useState(false);
   const [loginValue, setLoginValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
               : null
       : null;
 
-  const handleSignIn = (event: FormEvent<HTMLFormElement>) => {
+  const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isSubmitDisabled) {
@@ -83,13 +85,18 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     const normalizedLogin = loginValue.trim().toLowerCase();
 
     setError(null);
-    void login(normalizedLogin, passwordValue)
-      .then(() => router.push(destination))
-      .catch((error) => {
-        setError(
-          error instanceof Error ? error.message : t("auth.invalidCredentials"),
-        );
-      });
+    try {
+      await login(normalizedLogin, passwordValue);
+      router.push(destination);
+    } catch (error) {
+      setError(
+        error instanceof ApiClientError && error.status === 401
+          ? t("auth.invalidCredentials")
+          : error instanceof Error
+            ? error.message
+            : t("auth.invalidCredentials"),
+      );
+    }
   };
 
   return (
@@ -147,6 +154,8 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           <form
             className="auth-signin-panel"
             autoComplete="off"
+            onFocusCapture={() => setIsManualEntryEnabled(true)}
+            onPointerDownCapture={() => setIsManualEntryEnabled(true)}
             onSubmit={handleSignIn}
           >
             <div className="auth-field-group">
@@ -160,6 +169,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                 autoCorrect="off"
                 spellCheck={false}
                 placeholder={t("auth.loginPlaceholder")}
+                readOnly={!isManualEntryEnabled}
                 value={loginValue}
                 required
                 disabled={isAuthenticating || !isApiConfigured}
@@ -179,8 +189,9 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                   name="signin_secret"
                   className="auth-input auth-input-with-toggle"
                   type={isPasswordVisible ? "text" : "password"}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   placeholder={t("auth.passwordPlaceholder")}
+                  readOnly={!isManualEntryEnabled}
                   value={passwordValue}
                   required
                   disabled={isAuthenticating || !isApiConfigured}

@@ -83,7 +83,7 @@ export function PublicProductModule({
         <div className="storefront-product-panel">
           <div className="storefront-product-topline">
             <Badge variant="secondary">{product.category.name}</Badge>
-            <span className="muted">{product.brand.name}</span>
+            <span className="muted">{product.brand}</span>
           </div>
           <h1>{product.name}</h1>
           <p>{product.description}</p>
@@ -103,7 +103,7 @@ export function PublicProductModule({
             </div>
             <div>
               <span>{t("labels.brand")}</span>
-              <strong>{product.brand.name}</strong>
+              <strong>{product.brand}</strong>
             </div>
             <div>
               <span>{t("labels.category")}</span>

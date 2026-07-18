@@ -1,11 +1,4 @@
 import { api, unwrapEntityPayload, unwrapListPayload } from "@/lib/api-client";
-import { fromApiBrand } from "@/services/brands/brands-mapper";
-import type {
-  ApiBrand,
-  ApiBrandResponse,
-  CreateBrandRequest,
-  UpdateBrandRequest,
-} from "@/services/brands/brands-types";
 import { fromApiCategory } from "@/services/categories/categories-mapper";
 import type {
   ApiCategory,
@@ -52,30 +45,6 @@ export async function updateCategory(id: string, input: UpdateCategoryRequest) {
 
 export async function deleteCategory(id: string) {
   await api.delete<void>(`categories/${id}`);
-}
-
-export async function getBrands() {
-  const response = await api.get<{ items: ApiBrand[] } | ApiBrand[]>("brands");
-  return unwrapListPayload(response).map(fromApiBrand);
-}
-
-export async function createBrand(input: CreateBrandRequest) {
-  const response = await api.post<ApiBrandResponse>("brands", input);
-  return fromApiBrand(response.brand);
-}
-
-export async function updateBrand(id: string, input: UpdateBrandRequest) {
-  const response = await api.put<ApiBrand | ApiBrandResponse>(
-    `brands/${id}`,
-    input,
-  );
-  return fromApiBrand(
-    unwrapEntityPayload<ApiBrand, "brand">(response, "brand"),
-  );
-}
-
-export async function deleteBrand(id: string) {
-  await api.delete<void>(`brands/${id}`);
 }
 
 export async function getProducts(query: ProductsListQuery = {}) {
