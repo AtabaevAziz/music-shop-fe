@@ -2578,7 +2578,51 @@ tbody tr:hover {
   border: 1px solid rgba(109, 132, 164, 0.16);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.78);
+  text-align: left;
   font-weight: 700;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+  cursor: pointer;
+}
+
+.storefront-category-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(14, 143, 136, 0.28);
+  box-shadow: var(--shadow-sm);
+}
+
+.storefront-category-card.active {
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(11, 111, 112, 0.96), rgba(14, 143, 136, 0.92));
+  color: #f4fffd;
+  box-shadow: var(--shadow-md);
+}
+
+.storefront-category-card-copy,
+.storefront-category-card-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.storefront-category-card-meta {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.storefront-category-card-meta strong {
+  color: var(--text);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.storefront-category-card.active .storefront-category-card-meta,
+.storefront-category-card.active .storefront-category-card-meta strong,
+.storefront-category-panel-meta {
+  color: inherit;
 }
 
 .storefront-product-card .p-5,
@@ -2757,5 +2801,9 @@ tbody tr:hover {
   .storefront-product-footer {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .storefront-category-card {
+    min-height: 0;
   }
 }

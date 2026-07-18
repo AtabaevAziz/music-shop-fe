@@ -40,6 +40,7 @@ export function PublicShell({
         </Link>
         <nav className="storefront-nav">
           <Link href={`/${locale}`}>{t("storefront.homeLink")}</Link>
+          <Link href={`/${locale}/categories`}>{t("nav.categories")}</Link>
           <Link href={`/${locale}/catalog`}>{t("nav.catalog")}</Link>
           <a href={`/${locale}#repairs`}>{t("nav.repairs")}</a>
         </nav>

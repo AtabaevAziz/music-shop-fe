@@ -166,7 +166,7 @@ export function StorefrontHomeModule({ locale }: { locale: Locale }) {
             categories.map((category) => (
               <Link
                 key={category.id}
-                href={`/${locale}/catalog?category=${category.slug}`}
+                href={`/${locale}/categories?category=${category.slug}`}
                 className="storefront-category-card"
               >
                 <span>{category.name}</span>

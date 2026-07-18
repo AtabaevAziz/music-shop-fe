@@ -129,14 +129,28 @@ async function fetchApi<T>(
     requestHeaders.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(fullUrl, {
-    method,
-    headers: requestHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    cache,
-    signal,
-    credentials,
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(fullUrl, {
+      method,
+      headers: requestHeaders,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      cache,
+      signal,
+      credentials,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+
+    throw new ApiClientError({
+      status: 0,
+      message: "Failed to reach the backend API.",
+      payload: error,
+    });
+  }
 
   if (!response.ok) {
     let errorPayload: unknown;

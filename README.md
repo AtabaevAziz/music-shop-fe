@@ -41,6 +41,13 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
 
 If the app shows a backend URL configuration error on the login screen, verify that `.env.local` exists and contains `NEXT_PUBLIC_API_BASE_URL` pointing at the running backend.
 
+Local integration checklist:
+
+1. Start the backend first and confirm `http://localhost:8080/api/v1/health` returns `200`.
+2. Confirm `http://localhost:8080/api/v1/auth/session` returns `{ "session": null }` before login.
+3. Start the frontend on `http://localhost:3000`.
+4. Verify backend `.env` contains `CLIENT_ORIGIN=http://localhost:3000` and `SESSION_SECURE_COOKIE=false` for local HTTP development.
+
 ## Scripts
 
 ```bash
@@ -82,14 +89,18 @@ Current locale-scoped routes:
 
 - `/{locale}/login`
 - `/{locale}`
+- `/{locale}/categories`
 - `/{locale}/catalog`
-- `/{locale}/inventory`
-- `/{locale}/orders`
-- `/{locale}/customers`
-- `/{locale}/repairs`
-- `/{locale}/employees`
-- `/{locale}/finance`
-- `/{locale}/settings`
+- `/{locale}/products/[id]`
+- `/{locale}/app`
+- `/{locale}/app/catalog`
+- `/{locale}/app/inventory`
+- `/{locale}/app/orders`
+- `/{locale}/app/customers`
+- `/{locale}/app/repairs`
+- `/{locale}/app/employees`
+- `/{locale}/app/finance`
+- `/{locale}/app/settings`
 
 Route behavior depends on session role:
 
@@ -198,4 +209,5 @@ docker run -p 3000:3000 music-shop-fe
 ## Notes
 
 - The frontend requires a running backend with cookie-based auth and seeded PostgreSQL data
+- If protected routes show a backend-unavailable/session-check error, verify backend reachability first with `/api/v1/health`, then confirm `CLIENT_ORIGIN`, cookies, and `NEXT_PUBLIC_API_BASE_URL`.
 - Legacy demo-store code may still exist in the repo, but active routes use API-backed queries and mutations

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { createContext, useContext, useMemo } from "react";
 
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
@@ -26,7 +27,10 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const isApiConfigured = hasConfiguredApiBaseUrl();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+  const shouldLoadSession =
+    isApiConfigured && /^\/[^/]+\/app(?:\/|$)/.test(pathname);
   const {
     data: session,
     error: sessionError,
@@ -34,7 +38,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     isPending: isSessionPending,
     refetch: refetchSession,
   } = useQuery({
-    enabled: isApiConfigured,
+    enabled: shouldLoadSession,
     queryKey: queryKeys.session,
     queryFn: getSession,
     retry: false,
@@ -63,10 +67,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<SessionContextValue>(
     () => ({
-      ready: !isApiConfigured || !isSessionPending,
+      ready: !shouldLoadSession || !isSessionPending,
       session: session ?? null,
       sessionError:
-        isApiConfigured && sessionError instanceof Error ? sessionError : null,
+        shouldLoadSession && sessionError instanceof Error ? sessionError : null,
       isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
       login: async (loginValue, password) =>
         login({ login: loginValue, password }),
@@ -74,7 +78,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await logout();
       },
       refetchSession: async () => {
-        if (!isApiConfigured) {
+        if (!shouldLoadSession) {
           return null;
         }
 
@@ -85,11 +89,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     [
       isLoginPending,
       isLogoutPending,
-      isApiConfigured,
       isSessionFetching,
       isSessionPending,
       login,
       logout,
+      shouldLoadSession,
       refetchSession,
       session,
       sessionError,
