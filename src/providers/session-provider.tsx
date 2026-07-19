@@ -30,8 +30,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const shouldLoadSession =
-    isApiConfigured &&
-    /^\/[^/]+\/(?:app(?:\/|$)|login(?:\/|$))/.test(pathname);
+    isApiConfigured && /^\/[^/]+\/(?:app(?:\/|$)|login(?:\/|$))/.test(pathname);
   const {
     data: session,
     error: sessionError,

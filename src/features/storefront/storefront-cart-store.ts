@@ -97,7 +97,9 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
         })),
       syncProducts: (products) =>
         set((state) => {
-          const productMap = new Map(products.map((product) => [product.id, product]));
+          const productMap = new Map(
+            products.map((product) => [product.id, product]),
+          );
 
           return {
             items: state.items.flatMap((item) => {

@@ -151,7 +151,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
                     aria-controls="storefront-category-products"
                     aria-pressed={isActive}
                     className={`storefront-category-card${
-                      isActive ? " active" : ""
+                      isActive ? "active" : ""
                     }`}
                     onClick={() => handleCategoryToggle(category.slug)}
                   >
