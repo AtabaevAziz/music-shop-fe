@@ -148,7 +148,6 @@
     "apiUnavailable": "Configure the backend API URL to load the public storefront.",
     "imageUnavailable": "Product image unavailable",
     "productUnavailable": "This product is unavailable or no longer public.",
-    "purchaseRequiresLogin": "Sign in to buy.",
     "productPrimaryCta": "Sign in to order",
     "backToCatalog": "Back to catalog",
     "specsKicker": "Specs",

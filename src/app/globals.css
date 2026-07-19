@@ -2679,10 +2679,6 @@ tbody tr:hover {
   letter-spacing: -0.04em;
 }
 
-.storefront-disabled-buy-button {
-  min-width: 116px;
-}
-
 .storefront-filter-bar {
   display: grid;
   gap: 16px;

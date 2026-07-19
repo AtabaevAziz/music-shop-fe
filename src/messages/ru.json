@@ -148,7 +148,6 @@
     "apiUnavailable": "Настройте URL бэкенда, чтобы загрузить публичную витрину.",
     "imageUnavailable": "Изображение товара недоступно",
     "productUnavailable": "Товар недоступен или больше не показывается публично.",
-    "purchaseRequiresLogin": "Войдите, чтобы купить.",
     "productPrimaryCta": "Войти для покупки",
     "backToCatalog": "Назад в каталог",
     "specsKicker": "Характеристики",
