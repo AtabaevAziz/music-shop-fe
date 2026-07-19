@@ -2,20 +2,17 @@
 
 import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { useStorefrontProductsQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
-import { formatMoney } from "@/lib/utils";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
+
+import { StorefrontProductCard } from "./storefront-product-card";
 
 type CategoryGroup = {
   id: string;
@@ -110,8 +107,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
     <div className="storefront-flow">
       <section className="storefront-section storefront-section-tight">
         <div className="storefront-section-head">
-          <div>
-            <span className="storefront-kicker">{t("storefront.categoriesKicker")}</span>
+          <div className="storefront-section-title">
             <h1>{t("storefront.categoriesPageTitle")}</h1>
           </div>
           <p>{t("storefront.categoriesPageText")}</p>
@@ -210,46 +206,12 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
           ) : (
             <div className="storefront-products-grid">
               {selectedCategory.products.map((product) => (
-                <Card key={product.id} className="storefront-product-card">
-                  <CardContent className="p-5">
-                    {product.primaryImage ? (
-                      <Image
-                        src={product.primaryImage}
-                        alt={product.name}
-                        width={720}
-                        height={320}
-                        className="storefront-product-image"
-                      />
-                    ) : (
-                      <div className="storefront-product-image storefront-product-image-placeholder">
-                        {t("storefront.imageUnavailable")}
-                      </div>
-                    )}
-                    <div className="storefront-product-topline">
-                      <Badge variant="secondary">{product.category.name}</Badge>
-                      <span className="muted">{product.brand}</span>
-                    </div>
-                    <div className="storefront-product-copy">
-                      <strong>{product.name}</strong>
-                      <p>{product.shortDescription}</p>
-                    </div>
-                    <div className="storefront-product-footer">
-                      <span>{formatMoney(product.price, currency, locale)}</span>
-                      <div className="storefront-card-actions">
-                        <Button asChild variant="outline">
-                          <Link href={`/${locale}/products/${product.id}`}>
-                            {t("common.details")}
-                          </Link>
-                        </Button>
-                        <Button asChild>
-                          <Link href={`/${locale}/login?next=/${locale}/app/catalog`}>
-                            {t("labels.buyNow")}
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <StorefrontProductCard
+                  key={product.id}
+                  product={product}
+                  currency={currency}
+                  locale={locale}
+                />
               ))}
             </div>
           )}

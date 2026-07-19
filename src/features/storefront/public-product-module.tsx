@@ -111,9 +111,19 @@ export function PublicProductModule({
             </div>
           </div>
           <div className="storefront-cta-row">
-            <Button asChild size="lg">
+            <Button
+              type="button"
+              size="lg"
+              disabled
+              title={t("storefront.purchaseRequiresLogin")}
+              aria-label={t("storefront.purchaseRequiresLogin")}
+              className="storefront-disabled-buy-button"
+            >
+              {t("labels.buyNow")}
+            </Button>
+            <Button asChild variant="outline" size="lg">
               <Link href={`/${locale}/login?next=/${locale}/app/catalog`}>
-                {t("storefront.productPrimaryCta")}
+                {t("auth.signInAction")}
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">

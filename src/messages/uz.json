@@ -89,47 +89,12 @@
   "storefront": {
     "headerTagline": "Asboblar, studiya va servis",
     "homeLink": "Vitrina",
-    "badge": "Jonli katalogga ega musiqa do'koni",
-    "heroTitle": "Sahna, studiya va kundalik mashq uchun mos jihozlarni tanlang.",
-    "heroText": "Endi tashrifchi katalogni ochib, faol mahsulotlarni taqqoslab, faqat sotib olish paytida kabinetga o'tadi.",
-    "primaryCta": "Katalogni ochish",
-    "secondaryCta": "Kabinetga kirish",
-    "proofProducts": "ko'rish uchun faol pozitsiyalar",
-    "proofLocales": "xaridorlar uchun tillar",
-    "proofDispatch": "ombordagi mahsulotlar jo'natish muddati",
-    "featuredKicker": "Bugungi tanlov",
-    "heroFallbackProduct": "Vitrinadagi yangi mahsulotlar",
-    "servicesKicker": "Nima uchun bu sotadi",
-    "servicesTitle": "Sayt endi faqat ichki tizim emas, haqiqiy do'kon ko'rinishida.",
-    "servicesText": "Mahsulotlar, ta'mirlash va mijoz scenariylari kirishdan oldin ko'rinadi.",
-    "serviceCards": {
-      "selection": {
-        "title": "Assortiment tanlovi",
-        "text": "Bosh sahifada ichki modullar emas, faol mahsulotlar ko'rsatiladi."
-      },
-      "delivery": {
-        "title": "Aniq yetkazib berish",
-        "text": "Xaridor jo'natish bo'yicha kutishni kirishdan oldin ko'radi."
-      },
-      "warranty": {
-        "title": "Ishonch va kafolat",
-        "text": "Qo'llab-quvvatlash va kafolat erta bosqichda tushuntiriladi."
-      },
-      "repairs": {
-        "title": "Servis va ta'mirlash",
-        "text": "Ta'mirlash yashirin admin funksiyasi emas, tijoriy ustunlik sifatida ko'rsatiladi."
-      }
-    },
-    "categoriesKicker": "Kategoriya bo'yicha xarid",
-    "categoriesTitle": "Faol katalogdagi mashhur kategoriyalar",
-    "categoriesText": "Birinchi marta kirgan foydalanuvchi kabinet tuzilmasini bilmasdan kerakli bo'limga o'ta oladi.",
-    "catalogKicker": "Hozir mavjud",
-    "catalogTitle": "Jonli assortimentdan mahsulotlar",
-    "catalogText": "Mahsulot kartalari endi majburiy login devoriga emas, ommaviy mahsulot sahifasiga olib boradi.",
+    "catalogLandingTitle": "Mahsulotlar katalogi",
+    "catalogLandingText": "Mahsulotlarni ko'ring, kategoriyalarni filtrlang va kirishsiz sahifalarni oching.",
     "categoriesPageTitle": "Katalogni kategoriya bo'yicha ko'ring",
     "categoriesPageText": "Avval mahsulot oilasini tanlang, keyin kerakli kategoriyaning jonli assortimentini sahifadan chiqmasdan oching.",
-    "catalogPageTitle": "Ommaviy katalog",
-    "catalogPageText": "Avval faol mahsulotlarni ko'ring, keyin xarid yoki buyurtma boshqaruvi uchun kiring.",
+    "catalogPageTitle": "Barcha mahsulotlar",
+    "catalogPageText": "Assortimentni kirishsiz ko'ring. Xarid qilish uchun kabinetga kiring.",
     "chooseCategoryPrompt": "Mahsulotlarni ko'rish uchun kategoriyani tanlang.",
     "categoryProductsTitle": "{category} mahsulotlari",
     "categoryProductsEmpty": "Bu kategoriyada hozir ommaviy ko'rsatiladigan mahsulot yo'q.",
@@ -140,15 +105,12 @@
     "apiUnavailable": "Ommaviy vitrini yuklash uchun backend URL manzilini sozlang.",
     "imageUnavailable": "Mahsulot rasmi mavjud emas",
     "productUnavailable": "Mahsulot mavjud emas yoki endi ommaviy ko'rsatilmaydi.",
+    "purchaseRequiresLogin": "Xarid qilish uchun kiring.",
     "productPrimaryCta": "Buyurtma uchun kirish",
     "backToCatalog": "Katalogga qaytish",
     "specsKicker": "Xususiyatlar",
     "specsTitle": "Mahsulot tafsilotlari",
     "specsText": "Asosiy xususiyatlar endi avtorizatsiyadan oldin ham ko'rinadi va yangi xaridor uchun to'siqni kamaytiradi.",
-    "repairsKicker": "Servis yordami",
-    "repairsTitle": "Ta'mirlash endi yashirin ichki bo'lim emas, sotuv hikoyasining bir qismi.",
-    "repairsText": "Tashrifchi akkaunt yaratishdan oldin ham servis imkoniyatini ko'radi.",
-    "repairsCta": "Ta'mirlash so'rovi uchun kirish",
     "backToStorefront": "Vitrinaga qaytish",
     "goToCatalog": "Ommaviy katalogni ochish"
   },

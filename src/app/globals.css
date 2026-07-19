@@ -2524,6 +2524,25 @@ tbody tr:hover {
   max-width: 520px;
 }
 
+.storefront-section-copy {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.storefront-guest-note {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid rgba(14, 143, 136, 0.16);
+  border-radius: 999px;
+  background: rgba(14, 143, 136, 0.08);
+  color: var(--brand-strong);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .storefront-services-grid,
 .storefront-products-grid,
 .storefront-category-grid {
@@ -2650,6 +2669,10 @@ tbody tr:hover {
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: -0.04em;
+}
+
+.storefront-disabled-buy-button {
+  min-width: 116px;
 }
 
 .storefront-filter-bar {

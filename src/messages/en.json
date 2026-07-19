@@ -89,47 +89,12 @@
   "storefront": {
     "headerTagline": "Instruments, studio gear, and service",
     "homeLink": "Storefront",
-    "badge": "Trusted music retail",
-    "heroTitle": "Choose gear that is ready for stage, studio, and everyday practice.",
-    "heroText": "Open the catalog, compare active products, and move into checkout-ready client workflows only when you want to buy.",
-    "primaryCta": "Browse catalog",
-    "secondaryCta": "Open account",
-    "proofProducts": "active positions ready to review",
-    "proofLocales": "locales supported for buyers",
-    "proofDispatch": "target dispatch for stocked items",
-    "featuredKicker": "Featured today",
-    "heroFallbackProduct": "Fresh arrivals from the storefront",
-    "servicesKicker": "Why buyers stay",
-    "servicesTitle": "The site already has the ingredients of a serious shop.",
-    "servicesText": "Products, repairs, and customer workflows are now visible before login instead of being hidden behind the portal.",
-    "serviceCards": {
-      "selection": {
-        "title": "Curated selection",
-        "text": "Focus the homepage on active products instead of internal modules."
-      },
-      "delivery": {
-        "title": "Fast dispatch",
-        "text": "Set delivery expectations before asking the customer to sign in."
-      },
-      "warranty": {
-        "title": "Warranty clarity",
-        "text": "Explain guarantee and support to build trust earlier in the journey."
-      },
-      "repairs": {
-        "title": "Repair desk",
-        "text": "Surface service and maintenance as a commercial advantage."
-      }
-    },
-    "categoriesKicker": "Shop by family",
-    "categoriesTitle": "Popular categories from the active catalog",
-    "categoriesText": "Use category-led entry points so a first-time visitor can navigate without knowing the backend structure.",
-    "catalogKicker": "Available now",
-    "catalogTitle": "Sampled products from the live assortment",
-    "catalogText": "Each product card now leads to a public detail page instead of a forced login wall.",
+    "catalogLandingTitle": "Product catalog",
+    "catalogLandingText": "Browse products, filter categories, and open product pages before signing in.",
     "categoriesPageTitle": "Browse the catalog by category",
     "categoriesPageText": "Start from product families, then open the live assortment of each category without leaving the page.",
-    "catalogPageTitle": "Public catalog",
-    "catalogPageText": "Browse active products first, then sign in only when you are ready to buy or manage orders.",
+    "catalogPageTitle": "All products",
+    "catalogPageText": "Browse the assortment without signing in. Sign in when you are ready to buy.",
     "chooseCategoryPrompt": "Choose a category to reveal its products.",
     "categoryProductsTitle": "{category} products",
     "categoryProductsEmpty": "No public products are available in this category right now.",
@@ -140,15 +105,12 @@
     "apiUnavailable": "Configure the backend API URL to load the public storefront.",
     "imageUnavailable": "Product image unavailable",
     "productUnavailable": "This product is unavailable or no longer public.",
+    "purchaseRequiresLogin": "Sign in to buy.",
     "productPrimaryCta": "Sign in to order",
     "backToCatalog": "Back to catalog",
     "specsKicker": "Specs",
     "specsTitle": "Product details",
     "specsText": "Key specifications stay visible before authorization, which reduces friction for new buyers.",
-    "repairsKicker": "Service support",
-    "repairsTitle": "Repairs are now part of the sales story, not a hidden admin feature.",
-    "repairsText": "Let visitors discover maintenance and repair support before they ever create an account.",
-    "repairsCta": "Sign in for repair requests",
     "backToStorefront": "Back to storefront",
     "goToCatalog": "View public catalog"
   },
