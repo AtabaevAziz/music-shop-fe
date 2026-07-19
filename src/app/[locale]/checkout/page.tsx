@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { PublicCheckoutModule } from "@/features/storefront/public-checkout-module";
@@ -26,8 +27,10 @@ export default async function PublicCheckoutPage({
   const { locale } = await params;
 
   return (
-    <PublicShell locale={locale}>
-      <PublicCheckoutModule locale={locale} />
-    </PublicShell>
+    <Suspense fallback={null}>
+      <PublicShell locale={locale}>
+        <PublicCheckoutModule locale={locale} />
+      </PublicShell>
+    </Suspense>
   );
 }

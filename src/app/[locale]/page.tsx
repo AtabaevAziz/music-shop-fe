@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { StorefrontHomeModule } from "@/features/storefront/storefront-home-module";
@@ -26,8 +27,10 @@ export default async function StorefrontHomePage({
   const { locale } = await params;
 
   return (
-    <PublicShell locale={locale}>
-      <StorefrontHomeModule locale={locale} />
-    </PublicShell>
+    <Suspense fallback={null}>
+      <PublicShell locale={locale}>
+        <StorefrontHomeModule locale={locale} />
+      </PublicShell>
+    </Suspense>
   );
 }

@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { PublicRepairRequestModule } from "@/features/storefront/public-repair-request-module";
@@ -26,8 +27,10 @@ export default async function PublicRepairsPage({
   const { locale } = await params;
 
   return (
-    <PublicShell locale={locale}>
-      <PublicRepairRequestModule locale={locale} />
-    </PublicShell>
+    <Suspense fallback={null}>
+      <PublicShell locale={locale}>
+        <PublicRepairRequestModule locale={locale} />
+      </PublicShell>
+    </Suspense>
   );
 }

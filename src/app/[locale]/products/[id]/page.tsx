@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { PublicProductModule } from "@/features/storefront/public-product-module";
@@ -26,8 +27,10 @@ export default async function PublicProductPage({
   const { locale, id } = await params;
 
   return (
-    <PublicShell locale={locale}>
-      <PublicProductModule id={id} locale={locale} />
-    </PublicShell>
+    <Suspense fallback={null}>
+      <PublicShell locale={locale}>
+        <PublicProductModule id={id} locale={locale} />
+      </PublicShell>
+    </Suspense>
   );
 }

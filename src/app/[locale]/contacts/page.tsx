@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { PublicContactsModule } from "@/features/storefront/public-contacts-module";
@@ -26,8 +27,10 @@ export default async function PublicContactsPage({
   const { locale } = await params;
 
   return (
-    <PublicShell locale={locale}>
-      <PublicContactsModule />
-    </PublicShell>
+    <Suspense fallback={null}>
+      <PublicShell locale={locale}>
+        <PublicContactsModule />
+      </PublicShell>
+    </Suspense>
   );
 }
