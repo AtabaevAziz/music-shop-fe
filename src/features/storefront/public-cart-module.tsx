@@ -7,13 +7,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAppConfigQuery } from "@/hooks/use-config-query";
-import { Locale } from "@/i18n";
 import {
   getStorefrontCartItemsCount,
   getStorefrontCartTotal,
   useStorefrontCartStore,
 } from "@/features/storefront/storefront-cart-store";
+import { useAppConfigQuery } from "@/hooks/use-config-query";
+import { Locale } from "@/i18n";
 import { formatMoney } from "@/lib/utils";
 
 export function PublicCartModule({ locale }: { locale: Locale }) {
@@ -142,7 +142,11 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                   {t("storefront.proceedToCheckout")}
                 </Link>
               </Button>
-              <Button type="button" variant="outline" onClick={() => clearCart()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => clearCart()}
+              >
                 {t("storefront.clearCart")}
               </Button>
             </CardContent>

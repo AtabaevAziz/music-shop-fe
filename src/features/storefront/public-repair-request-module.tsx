@@ -93,10 +93,7 @@ export function PublicRepairRequestModule({ locale }: { locale: Locale }) {
               })}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Button
-                type="button"
-                onClick={() => setRepairRequestId(null)}
-              >
+              <Button type="button" onClick={() => setRepairRequestId(null)}>
                 {t("labels.requestRepair")}
               </Button>
               <Button asChild variant="outline">

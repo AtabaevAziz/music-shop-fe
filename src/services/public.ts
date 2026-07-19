@@ -1,15 +1,18 @@
 import { api } from "@/lib/api-client";
 import { fromApiOrder } from "@/services/orders/orders-mapper";
-import { fromApiRepairRequest } from "@/services/repairs/repairs-mapper";
 import type {
   ApiPublicOrderResponse,
   ApiPublicRepairResponse,
   CreatePublicOrderRequest,
   CreatePublicRepairRequest,
 } from "@/services/public/public-types";
+import { fromApiRepairRequest } from "@/services/repairs/repairs-mapper";
 
 export async function createPublicOrder(input: CreatePublicOrderRequest) {
-  const response = await api.post<ApiPublicOrderResponse>("public/orders", input);
+  const response = await api.post<ApiPublicOrderResponse>(
+    "public/orders",
+    input,
+  );
   return fromApiOrder(response.order);
 }
 

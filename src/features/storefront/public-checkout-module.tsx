@@ -27,15 +27,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppConfigQuery } from "@/hooks/use-config-query";
-import { Locale } from "@/i18n";
-import { formatMoney } from "@/lib/utils";
-import { createPublicOrder } from "@/services/public";
 import {
   getStorefrontCartItemsCount,
   getStorefrontCartTotal,
   useStorefrontCartStore,
 } from "@/features/storefront/storefront-cart-store";
+import { useAppConfigQuery } from "@/hooks/use-config-query";
+import { Locale } from "@/i18n";
+import { formatMoney } from "@/lib/utils";
+import { createPublicOrder } from "@/services/public";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2),

@@ -34,8 +34,12 @@ export function PublicContactsModule() {
             <Phone size={18} />
             <strong>{t("storefront.contactsPhoneTitle")}</strong>
             <div className="grid gap-1">
-              <a href="tel:+998712000000">{t("storefront.contactsPhonePrimary")}</a>
-              <a href="tel:+998909990000">{t("storefront.contactsPhoneWorkshop")}</a>
+              <a href="tel:+998712000000">
+                {t("storefront.contactsPhonePrimary")}
+              </a>
+              <a href="tel:+998909990000">
+                {t("storefront.contactsPhoneWorkshop")}
+              </a>
             </div>
           </CardContent>
         </Card>
