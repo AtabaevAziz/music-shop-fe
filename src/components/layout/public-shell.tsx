@@ -17,6 +17,7 @@ import {
   getStorefrontCartItemsCount,
   useStorefrontCartStore,
 } from "@/features/storefront/storefront-cart-store";
+import { useStorefrontCartSync } from "@/features/storefront/use-storefront-cart-sync";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 
 export function PublicShell({
@@ -30,6 +31,7 @@ export function PublicShell({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  useStorefrontCartSync();
   const queryString = searchParams.toString();
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
   const cartItemsCount = useStorefrontCartStore((state) =>

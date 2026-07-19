@@ -3,7 +3,7 @@
 import { ChevronDown, Eye, EyeOff, Languages } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const { data: appConfig } = useAppConfigQuery();
   const { data: authConfig, isPending: isAuthConfigPending } =
     useAuthConfigQuery();
-  const { isAuthenticating, login } = useAuthSession();
+  const { isAuthenticating, login, ready, session } = useAuthSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isManualEntryEnabled, setIsManualEntryEnabled] = useState(false);
   const [loginValue, setLoginValue] = useState("");
@@ -74,6 +74,12 @@ export function LoginScreen({ locale }: { locale: Locale }) {
               ? t("auth.adminLoginDisabled")
               : null
       : null;
+
+  useEffect(() => {
+    if (ready && session) {
+      router.replace(destination);
+    }
+  }, [destination, ready, router, session]);
 
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

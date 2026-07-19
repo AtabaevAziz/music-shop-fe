@@ -22,6 +22,7 @@ type StorefrontCartState = {
   addProduct: (product: StorefrontProduct, qty?: number) => void;
   removeProduct: (productId: string) => void;
   setProductQty: (productId: string, qty: number) => void;
+  syncProducts: (products: StorefrontProduct[]) => void;
   clearCart: () => void;
 };
 
@@ -94,6 +95,32 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
             ];
           }),
         })),
+      syncProducts: (products) =>
+        set((state) => {
+          const productMap = new Map(products.map((product) => [product.id, product]));
+
+          return {
+            items: state.items.flatMap((item) => {
+              const product = productMap.get(item.productId);
+
+              if (!product || product.stockQty < 1) {
+                return [];
+              }
+
+              return [
+                {
+                  ...item,
+                  name: product.name,
+                  brand: product.brand,
+                  price: product.price,
+                  stockQty: product.stockQty,
+                  primaryImage: product.primaryImage,
+                  qty: Math.max(1, Math.min(item.qty, product.stockQty)),
+                },
+              ];
+            }),
+          };
+        }),
       clearCart: () => set({ items: [] }),
     }),
     {
