@@ -4,7 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 import { queryKeys } from "@/lib/query-keys";
-import { getStorefrontProduct, getStorefrontProducts } from "@/services/storefront";
+import {
+  getStorefrontProduct,
+  getStorefrontProducts,
+} from "@/services/storefront";
 
 export function useStorefrontProductsQuery(search?: string) {
   return useQuery({

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -55,16 +55,24 @@ export function AuthGuard({
               : t("auth.sessionUnavailableText")}
           </p>
           <div className="auth-footer-links">
-            <Button type="button" variant="outline" onClick={() => void refetchSession()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void refetchSession()}
+            >
               {t("auth.retrySessionCheck")}
             </Button>
             <Button asChild variant="outline">
-              <Link href={`/${locale}/login?next=${encodeURIComponent(pathname)}`}>
+              <Link
+                href={`/${locale}/login?next=${encodeURIComponent(pathname)}`}
+              >
                 {t("auth.signInAction")}
               </Link>
             </Button>
             <Button asChild>
-              <Link href={`/${locale}`}>{t("storefront.backToStorefront")}</Link>
+              <Link href={`/${locale}`}>
+                {t("storefront.backToStorefront")}
+              </Link>
             </Button>
           </div>
         </div>

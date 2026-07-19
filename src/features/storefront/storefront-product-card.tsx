@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useStorefrontCartStore } from "@/features/storefront/storefront-cart-store";
 import { Locale } from "@/i18n";
 import { formatMoney } from "@/lib/utils";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
@@ -21,6 +22,12 @@ export function StorefrontProductCard({
   locale: Locale;
 }) {
   const t = useTranslations();
+  const addProduct = useStorefrontCartStore((state) => state.addProduct);
+  const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
+  const quantityInCart = useStorefrontCartStore(
+    (state) =>
+      state.items.find((item) => item.productId === product.id)?.qty ?? 0,
+  );
 
   return (
     <Card className="storefront-product-card">
@@ -50,16 +57,18 @@ export function StorefrontProductCard({
           <span>{formatMoney(product.price, currency, locale)}</span>
           <div className="storefront-card-actions">
             <Button asChild variant="outline">
-              <Link href={`/${locale}/products/${product.id}`}>{t("common.details")}</Link>
+              <Link href={`/${locale}/products/${product.id}`}>
+                {t("common.details")}
+              </Link>
             </Button>
             <Button
               type="button"
-              disabled
-              title={t("storefront.purchaseRequiresLogin")}
-              aria-label={t("storefront.purchaseRequiresLogin")}
-              className="storefront-disabled-buy-button"
+              disabled={product.stockQty < 1}
+              onClick={() => addProduct(product)}
             >
-              {t("labels.buyNow")}
+              {hasHydrated && quantityInCart > 0
+                ? `${t("labels.addToCart")} (${quantityInCart})`
+                : t("labels.addToCart")}
             </Button>
           </div>
         </div>

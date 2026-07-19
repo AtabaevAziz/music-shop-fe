@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useStorefrontCartStore } from "@/features/storefront/storefront-cart-store";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { useStorefrontProductQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
@@ -24,6 +25,11 @@ export function PublicProductModule({
   const isApiConfigured = hasConfiguredApiBaseUrl();
   const { data: appConfig } = useAppConfigQuery();
   const { data: product, isPending, error } = useStorefrontProductQuery(id);
+  const addProduct = useStorefrontCartStore((state) => state.addProduct);
+  const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
+  const quantityInCart = useStorefrontCartStore(
+    (state) => state.items.find((item) => item.productId === id)?.qty ?? 0,
+  );
   const currency = appConfig?.defaultCurrency ?? "UZS";
 
   if (!isApiConfigured) {
@@ -55,7 +61,9 @@ export function PublicProductModule({
       <section className="storefront-section storefront-section-tight">
         <Card className="storefront-empty-card">
           <CardContent className="p-6">
-            <div className="empty-state">{t("storefront.productUnavailable")}</div>
+            <div className="empty-state">
+              {t("storefront.productUnavailable")}
+            </div>
           </CardContent>
         </Card>
       </section>
@@ -94,7 +102,9 @@ export function PublicProductModule({
             <div>
               <span>{t("labels.availability")}</span>
               <strong>
-                {product.stockQty > 0 ? t("labels.inStock") : t("labels.outOfStock")}
+                {product.stockQty > 0
+                  ? t("labels.inStock")
+                  : t("labels.outOfStock")}
               </strong>
             </div>
             <div>
@@ -114,20 +124,25 @@ export function PublicProductModule({
             <Button
               type="button"
               size="lg"
-              disabled
-              title={t("storefront.purchaseRequiresLogin")}
-              aria-label={t("storefront.purchaseRequiresLogin")}
-              className="storefront-disabled-buy-button"
+              disabled={product.stockQty < 1}
+              onClick={() => addProduct(product)}
             >
-              {t("labels.buyNow")}
+              {hasHydrated && quantityInCart > 0
+                ? `${t("labels.addToCart")} (${quantityInCart})`
+                : t("labels.addToCart")}
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link href={`/${locale}/cart`}>{t("storefront.viewCart")}</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href={`/${locale}/login?next=/${locale}/app/catalog`}>
-                {t("auth.signInAction")}
+                {t("storefront.clientPortalCta")}
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href={`/${locale}/catalog`}>{t("storefront.backToCatalog")}</Link>
+              <Link href={`/${locale}/catalog`}>
+                {t("storefront.backToCatalog")}
+              </Link>
             </Button>
           </div>
         </div>
@@ -136,7 +151,9 @@ export function PublicProductModule({
       <section className="storefront-section storefront-section-tight">
         <div className="storefront-section-head">
           <div>
-            <span className="storefront-kicker">{t("storefront.specsKicker")}</span>
+            <span className="storefront-kicker">
+              {t("storefront.specsKicker")}
+            </span>
             <h2>{t("storefront.specsTitle")}</h2>
           </div>
           <p>{t("storefront.specsText")}</p>

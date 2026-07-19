@@ -11,11 +11,7 @@ export function normalizeProductBrand(brand: ProductBrandInput) {
     return brand.trim();
   }
 
-  if (
-    brand &&
-    typeof brand === "object" &&
-    typeof brand.name === "string"
-  ) {
+  if (brand && typeof brand === "object" && typeof brand.name === "string") {
     return brand.name.trim();
   }
 

@@ -45,7 +45,10 @@ export function StorefrontCatalogBrowser({
   } = useStorefrontProductsQuery(deferredQuery);
   const categories = Array.from(
     new Map(
-      (products ?? []).map((product) => [product.category.slug, product.category]),
+      (products ?? []).map((product) => [
+        product.category.slug,
+        product.category,
+      ]),
     ).values(),
   );
   const currency = appConfig?.defaultCurrency ?? "UZS";
@@ -91,7 +94,7 @@ export function StorefrontCatalogBrowser({
           <div className="storefront-section-copy">
             <p>{description}</p>
             <span className="storefront-guest-note">
-              {t("storefront.purchaseRequiresLogin")}
+              {t("storefront.catalogHelperText")}
             </span>
           </div>
         </div>
@@ -128,7 +131,9 @@ export function StorefrontCatalogBrowser({
         {!isApiConfigured ? (
           <Card className="storefront-empty-card">
             <CardContent className="p-6">
-              <div className="empty-state">{t("storefront.apiUnavailable")}</div>
+              <div className="empty-state">
+                {t("storefront.apiUnavailable")}
+              </div>
             </CardContent>
           </Card>
         ) : isPending ? (
@@ -140,7 +145,9 @@ export function StorefrontCatalogBrowser({
         ) : error ? (
           <Card className="storefront-empty-card">
             <CardContent className="p-6">
-              <div className="empty-state">{t("storefront.catalogUnavailable")}</div>
+              <div className="empty-state">
+                {t("storefront.catalogUnavailable")}
+              </div>
             </CardContent>
           </Card>
         ) : visibleProducts.length === 0 ? (

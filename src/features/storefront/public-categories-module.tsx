@@ -28,15 +28,11 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
-  const [selectedCategorySlug, setSelectedCategorySlug] = useState<string | null>(
-    null,
-  );
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState<
+    string | null
+  >(null);
   const { data: appConfig } = useAppConfigQuery();
-  const {
-    data: products,
-    error,
-    isPending,
-  } = useStorefrontProductsQuery();
+  const { data: products, error, isPending } = useStorefrontProductsQuery();
 
   const categories = useMemo(() => {
     const categoryMap = new Map<string, CategoryGroup>();
@@ -67,7 +63,8 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
 
   const selectedCategory = useMemo(
     () =>
-      categories.find((category) => category.slug === selectedCategorySlug) ?? null,
+      categories.find((category) => category.slug === selectedCategorySlug) ??
+      null,
     [categories, selectedCategorySlug],
   );
   const currency = appConfig?.defaultCurrency ?? "UZS";
@@ -116,7 +113,9 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
         {!isApiConfigured ? (
           <Card className="storefront-empty-card">
             <CardContent className="p-6">
-              <div className="empty-state">{t("storefront.apiUnavailable")}</div>
+              <div className="empty-state">
+                {t("storefront.apiUnavailable")}
+              </div>
             </CardContent>
           </Card>
         ) : isPending ? (
@@ -128,7 +127,9 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
         ) : error ? (
           <Card className="storefront-empty-card">
             <CardContent className="p-6">
-              <div className="empty-state">{t("storefront.catalogUnavailable")}</div>
+              <div className="empty-state">
+                {t("storefront.catalogUnavailable")}
+              </div>
             </CardContent>
           </Card>
         ) : categories.length === 0 ? (
@@ -149,7 +150,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
                     type="button"
                     aria-controls="storefront-category-products"
                     aria-pressed={isActive}
-                    className={`storefront-category-card${isActive ? " active" : ""}`}
+                    className={`storefront-category-card${isActive ? "active" : ""}`}
                     onClick={() => handleCategoryToggle(category.slug)}
                   >
                     <div className="storefront-category-card-copy">
@@ -179,7 +180,10 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
       </section>
 
       {selectedCategory ? (
-        <section id="storefront-category-products" className="storefront-section">
+        <section
+          id="storefront-category-products"
+          className="storefront-section"
+        >
           <div className="storefront-section-head">
             <div>
               <span className="storefront-kicker">{t("nav.categories")}</span>

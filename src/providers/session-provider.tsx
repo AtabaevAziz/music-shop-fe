@@ -70,7 +70,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       ready: !shouldLoadSession || !isSessionPending,
       session: session ?? null,
       sessionError:
-        shouldLoadSession && sessionError instanceof Error ? sessionError : null,
+        shouldLoadSession && sessionError instanceof Error
+          ? sessionError
+          : null,
       isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
       login: async (loginValue, password) =>
         login({ login: loginValue, password }),

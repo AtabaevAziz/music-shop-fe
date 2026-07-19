@@ -1,6 +1,6 @@
 "use client";
 
-import { Languages, LogIn } from "lucide-react";
+import { Languages, LogIn, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -13,6 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  getStorefrontCartItemsCount,
+  useStorefrontCartStore,
+} from "@/features/storefront/storefront-cart-store";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 
 export function PublicShell({
@@ -27,6 +31,10 @@ export function PublicShell({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
+  const cartItemsCount = useStorefrontCartStore((state) =>
+    getStorefrontCartItemsCount(state.items),
+  );
 
   return (
     <div className="storefront-shell">
@@ -42,12 +50,28 @@ export function PublicShell({
           <Link href={`/${locale}`}>{t("storefront.homeLink")}</Link>
           <Link href={`/${locale}/categories`}>{t("nav.categories")}</Link>
           <Link href={`/${locale}/catalog`}>{t("nav.catalog")}</Link>
-          <a href={`/${locale}#repairs`}>{t("nav.repairs")}</a>
+          <Link href={`/${locale}/repairs`}>{t("nav.repairs")}</Link>
+          <Link href={`/${locale}/contacts`}>{t("nav.contacts")}</Link>
         </nav>
         <div className="storefront-actions">
+          <Button asChild variant="outline">
+            <Link href={`/${locale}/cart`}>
+              <ShoppingCart size={16} />
+              {t("nav.cart")}
+              {hasHydrated && cartItemsCount > 0 ? (
+                <span className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                  {cartItemsCount}
+                </span>
+              ) : null}
+            </Link>
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" aria-label={t("common.language")}>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={t("common.language")}
+              >
                 <Languages size={16} />
               </Button>
             </DropdownMenuTrigger>

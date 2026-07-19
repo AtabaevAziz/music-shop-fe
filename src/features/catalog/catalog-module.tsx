@@ -163,7 +163,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       ).sort((left, right) => left.localeCompare(right)),
     [products],
   );
-  const draftImages = useMemo(() => parseList(draft.images ?? ""), [draft.images]);
+  const draftImages = useMemo(
+    () => parseList(draft.images ?? ""),
+    [draft.images],
+  );
 
   useEffect(() => {
     if (!isEditorOpen) {
@@ -171,7 +174,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     }
 
     const nextPrimaryImage = draftImages.includes(draft.primaryImage ?? "")
-      ? draft.primaryImage ?? ""
+      ? (draft.primaryImage ?? "")
       : (draftImages[0] ?? "");
 
     if ((draft.primaryImage ?? "") !== nextPrimaryImage) {
