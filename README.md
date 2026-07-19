@@ -210,4 +210,6 @@ docker run -p 3000:3000 music-shop-fe
 
 - The frontend requires a running backend with cookie-based auth and seeded PostgreSQL data
 - If protected routes show a backend-unavailable/session-check error, verify backend reachability first with `/api/v1/health`, then confirm `CLIENT_ORIGIN`, cookies, and `NEXT_PUBLIC_API_BASE_URL`.
+- For a free remote deployment that keeps data after the local computer is off, see `../FREE_DEPLOYMENT.md`.
+- Product images can use absolute remote HTTPS URLs; this is the preferred free-friendly production approach over local runtime file storage.
 - Legacy demo-store code may still exist in the repo, but active routes use API-backed queries and mutations
