@@ -45,6 +45,8 @@ export type Product = {
   primaryImage?: string;
   condition: Condition;
   minStockQty?: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type InventoryMovement = {

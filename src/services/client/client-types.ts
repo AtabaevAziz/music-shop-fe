@@ -8,10 +8,7 @@ import type {
 
 export type ApiClientCustomer = Customer;
 
-export type ApiClientProduct = Omit<Product, "brand"> & {
-  brand?: string | { name?: string | null } | null;
-  brandId?: string | null;
-};
+export type ApiClientProduct = Product;
 
 export type ApiClientOrder = Order;
 

@@ -2,9 +2,17 @@ import type { Customer } from "@/types/music";
 
 export type ApiCustomer = Customer;
 
-export type CreateCustomerRequest = Omit<Customer, "id">;
+export type CreateCustomerRequest = {
+  name: string;
+  fullName?: string;
+  phone: string;
+  email: string;
+  tier: Customer["tier"];
+  status: Customer["status"];
+  notes: string;
+};
 
-export type UpdateCustomerRequest = Omit<Customer, "id">;
+export type UpdateCustomerRequest = Partial<CreateCustomerRequest>;
 
 export type ApiCustomerResponse = {
   customer: ApiCustomer;

@@ -35,7 +35,7 @@ export type ApiStorefrontProduct = {
   primaryImage: string | null;
   condition: Condition;
   category: StorefrontCategory;
-  brand?: string | { name?: string | null } | null;
+  brand: string;
 };
 
 export type ApiStorefrontProductListResponse = {

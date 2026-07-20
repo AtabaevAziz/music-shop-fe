@@ -110,6 +110,7 @@ export function CustomersModule() {
     mutationFn: async (draft: CustomerDraft) => {
       const payload = {
         name: draft.name,
+        fullName: draft.name,
         phone: draft.phone,
         email: draft.email,
         tier: draft.tier,

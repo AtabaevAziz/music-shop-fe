@@ -7,14 +7,28 @@ export type ProductsListQuery = {
   search?: string;
 };
 
-export type ApiProduct = Omit<Product, "brand"> & {
-  brand?: string | { name?: string | null } | null;
-  brandId?: string | null;
+export type ApiProduct = Product;
+
+export type CreateProductRequest = {
+  name: string;
+  sku: string;
+  barcode?: string;
+  categoryId: string;
+  brand: string;
+  price: number;
+  costPrice: number;
+  stockQty: number;
+  minStockQty?: number;
+  status: Product["status"];
+  shortDescription: string;
+  description: string;
+  specs: Product["specs"];
+  images: string[];
+  primaryImage?: string;
+  condition: Product["condition"];
 };
 
-export type CreateProductRequest = Omit<Product, "id">;
-
-export type UpdateProductRequest = Omit<Product, "id">;
+export type UpdateProductRequest = Partial<CreateProductRequest>;
 
 export type ApiProductResponse = {
   product: ApiProduct;
