@@ -1,3 +1,4 @@
+import { resolveProductMediaPath, resolveProductMediaPaths } from "@/lib/media";
 import { normalizeProductBrand } from "@/lib/product-brand";
 import type {
   ApiClientCustomer,
@@ -18,7 +19,8 @@ export function fromApiClientProduct(product: ApiClientProduct): Product {
     ...product,
     brand: normalizeProductBrand(product.brand),
     barcode: product.barcode || undefined,
-    primaryImage: product.primaryImage || undefined,
+    images: resolveProductMediaPaths(product.images),
+    primaryImage: resolveProductMediaPath(product.primaryImage),
   };
 }
 

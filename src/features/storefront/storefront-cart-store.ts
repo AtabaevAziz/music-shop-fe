@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { resolveProductMediaPath } from "@/lib/media";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
 
 export type StorefrontCartItem = {
@@ -25,6 +26,10 @@ type StorefrontCartState = {
   syncProducts: (products: StorefrontProduct[]) => void;
   clearCart: () => void;
 };
+
+function normalizeCartItemImage(primaryImage?: string) {
+  return resolveProductMediaPath(primaryImage);
+}
 
 export const useStorefrontCartStore = create<StorefrontCartState>()(
   persist(
@@ -50,7 +55,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   price: product.price,
                   qty: nextQty,
                   stockQty: product.stockQty,
-                  primaryImage: product.primaryImage,
+                  primaryImage: normalizeCartItemImage(product.primaryImage),
                 },
               ],
             };
@@ -65,7 +70,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                     brand: product.brand,
                     price: product.price,
                     stockQty: product.stockQty,
-                    primaryImage: product.primaryImage,
+                    primaryImage: normalizeCartItemImage(product.primaryImage),
                     qty: Math.min(item.qty + nextQty, product.stockQty),
                   }
                 : item,
@@ -116,7 +121,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   brand: product.brand,
                   price: product.price,
                   stockQty: product.stockQty,
-                  primaryImage: product.primaryImage,
+                  primaryImage: normalizeCartItemImage(product.primaryImage),
                   qty: Math.max(1, Math.min(item.qty, product.stockQty)),
                 },
               ];
@@ -129,7 +134,17 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
       name: "music-shop-storefront-cart",
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+        if (!state) {
+          return;
+        }
+
+        useStorefrontCartStore.setState({
+          hasHydrated: true,
+          items: state.items.map((item) => ({
+            ...item,
+            primaryImage: normalizeCartItemImage(item.primaryImage),
+          })),
+        });
       },
     },
   ),

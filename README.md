@@ -163,7 +163,7 @@ music-shop-fe/
 │   └── types/
 │       └── music.ts
 ├── public/
-│   └── products/
+│   └── assets/
 ├── components.json
 ├── Dockerfile
 ├── next.config.ts
@@ -196,8 +196,9 @@ The source of truth for the integration lives in the typed service clients under
 
 ## Demo Assets
 
-- Product media is served from `public/products/`
-- Seeded assets include `fender-player-stratocaster.jpg`, `yamaha-p125.jpg`, `roland-spd-sx.jpg`, and `shure-sm7b.jpg`
+- Local media is served from `public/assets/`
+- Product photos include `fender-player-stratocaster.jpg`, `yamaha-p125.jpg`, `roland-spd-sx.jpg`, and `shure-sm7b.jpg`
+- Category artwork includes `dombra.png`, `acoustic-guitar.png`, `electric-guitar.png`, `drum-kit.png`, `grand-piano.png`, `violin.png`, `saxophone.png`, `trumpet.png`, `cello.png`, and `flute.png`
 
 ## Docker
 

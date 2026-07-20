@@ -2,6 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, useMemo, useState } from "react";
 
@@ -10,6 +11,7 @@ import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { useStorefrontProductsQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
+import { resolveCategoryAssetPath } from "@/lib/media";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
 
 import { StorefrontProductCard } from "./storefront-product-card";
@@ -19,6 +21,7 @@ type CategoryGroup = {
   name: string;
   slug: string;
   products: StorefrontProduct[];
+  previewImage?: string;
 };
 
 export function PublicCategoriesModule({ locale }: { locale: Locale }) {
@@ -54,6 +57,12 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
     return Array.from(categoryMap.values())
       .map((category) => ({
         ...category,
+        previewImage:
+          resolveCategoryAssetPath(category.slug) ??
+          category.products.find(
+            (product) => product.primaryImage ?? product.images[0],
+          )?.primaryImage ??
+          category.products.find((product) => product.images[0])?.images[0],
         products: [...category.products].sort((left, right) =>
           left.name.localeCompare(right.name, locale),
         ),
@@ -155,6 +164,22 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
                     }`}
                     onClick={() => handleCategoryToggle(category.slug)}
                   >
+                    {category.previewImage ? (
+                      <div className="storefront-category-card-visual">
+                        <Image
+                          src={category.previewImage}
+                          alt={category.name}
+                          width={160}
+                          height={160}
+                          className="storefront-category-card-image"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        aria-hidden="true"
+                        className="storefront-category-card-visual storefront-category-card-placeholder"
+                      />
+                    )}
                     <div className="storefront-category-card-copy">
                       <span>{category.name}</span>
                       <div className="storefront-category-card-meta">
@@ -162,7 +187,10 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
                         <span>{t("labels.productsCount")}</span>
                       </div>
                     </div>
-                    <ArrowRight size={16} />
+                    <ArrowRight
+                      size={16}
+                      className="storefront-category-card-arrow"
+                    />
                   </button>
                 );
               })}

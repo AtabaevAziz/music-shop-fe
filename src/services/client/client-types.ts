@@ -26,10 +26,12 @@ export type CreateClientOrderRequest = {
   notes: string;
 };
 
-export type CreateClientRepairRequest = Omit<
-  RepairRequest,
-  "id" | "customerId" | "status" | "createdAt" | "updatedAt"
->;
+export type CreateClientRepairRequest = {
+  instrumentName: string;
+  brand: string;
+  issue: string;
+  notes: string;
+};
 
 export type ApiClientOrderResponse = {
   order: ApiClientOrder;
