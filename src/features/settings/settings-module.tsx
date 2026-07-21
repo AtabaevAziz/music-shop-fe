@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSettingsQuery } from "@/hooks/use-settings-query";
+import { normalizeRequiredString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { getDictionaryValues } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
@@ -85,15 +86,31 @@ export function SettingsModule() {
         onSubmit={async (event) => {
           event.preventDefault();
           setFormError("");
+
+          const normalizedCurrency = normalizeRequiredString(draft.currency);
+          const lowStockThreshold = Number(draft.lowStockThreshold);
+          const defaultMarkupPercent = Number(draft.defaultMarkupPercent);
+
+          if (
+            normalizedCurrency.length !== 3 ||
+            !Number.isFinite(lowStockThreshold) ||
+            lowStockThreshold < 0 ||
+            !Number.isFinite(defaultMarkupPercent) ||
+            defaultMarkupPercent < 0
+          ) {
+            setFormError(t("labels.validationFailed"));
+            return;
+          }
+
           try {
             await saveMutation.mutateAsync({
-              currency: draft.currency,
-              lowStockThreshold: Number(draft.lowStockThreshold),
+              currency: normalizedCurrency,
+              lowStockThreshold,
               defaultProductStatus: draft.defaultProductStatus as
                 | "draft"
                 | "active"
                 | "archived",
-              defaultMarkupPercent: Number(draft.defaultMarkupPercent),
+              defaultMarkupPercent,
             });
           } catch (error) {
             setFormError(

@@ -21,16 +21,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Locale } from "@/i18n";
+import {
+  normalizeRequiredString,
+  optionalTrimmedEmail,
+  optionalTrimmedUrl,
+  requiredTrimmedString,
+} from "@/lib/form-utils";
 import { createPublicRepair } from "@/services/public";
 
 const repairSchema = z.object({
-  customerName: z.string().min(2),
-  phone: z.string().min(6),
-  email: z.string().email().optional().or(z.literal("")),
-  instrumentType: z.string().min(2),
-  instrumentModel: z.string().min(2),
-  issueDescription: z.string().min(8),
-  photoUrl: z.string().url().optional().or(z.literal("")),
+  customerName: requiredTrimmedString(2),
+  phone: requiredTrimmedString(6),
+  email: optionalTrimmedEmail(),
+  instrumentType: requiredTrimmedString(2),
+  instrumentModel: requiredTrimmedString(2),
+  issueDescription: requiredTrimmedString(8),
+  photoUrl: optionalTrimmedUrl(),
 });
 
 type RepairFormValues = z.infer<typeof repairSchema>;
@@ -60,13 +66,13 @@ export function PublicRepairRequestModule({ locale }: { locale: Locale }) {
 
   async function submit(values: RepairFormValues) {
     await repairMutation.mutateAsync({
-      customerName: values.customerName,
-      phone: values.phone,
-      email: values.email || undefined,
-      instrumentType: values.instrumentType,
-      instrumentModel: values.instrumentModel,
-      issueDescription: values.issueDescription,
-      photoUrl: values.photoUrl || undefined,
+      customerName: normalizeRequiredString(values.customerName),
+      phone: normalizeRequiredString(values.phone),
+      email: values.email,
+      instrumentType: normalizeRequiredString(values.instrumentType),
+      instrumentModel: normalizeRequiredString(values.instrumentModel),
+      issueDescription: normalizeRequiredString(values.issueDescription),
+      photoUrl: values.photoUrl,
     });
   }
 

@@ -34,16 +34,23 @@ import {
 } from "@/features/storefront/storefront-cart-store";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { Locale } from "@/i18n";
+import {
+  normalizeOptionalString,
+  normalizeRequiredString,
+  optionalTrimmedEmail,
+  optionalTrimmedString,
+  requiredTrimmedString,
+} from "@/lib/form-utils";
 import { formatMoney } from "@/lib/utils";
 import { createPublicOrder } from "@/services/public";
 
 const checkoutSchema = z.object({
-  customerName: z.string().min(2),
-  phone: z.string().min(6),
-  email: z.string().email().optional().or(z.literal("")),
-  address: z.string().min(4),
+  customerName: requiredTrimmedString(2),
+  phone: requiredTrimmedString(6),
+  email: optionalTrimmedEmail(),
+  address: requiredTrimmedString(4),
   paymentMethod: z.enum(["cash", "card", "transfer"]),
-  comment: z.string().optional(),
+  comment: optionalTrimmedString(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -92,12 +99,12 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
 
   async function submit(values: CheckoutFormValues) {
     await orderMutation.mutateAsync({
-      customerName: values.customerName,
-      phone: values.phone,
-      email: values.email || undefined,
-      address: values.address,
+      customerName: normalizeRequiredString(values.customerName),
+      phone: normalizeRequiredString(values.phone),
+      email: values.email,
+      address: normalizeRequiredString(values.address),
       paymentMethod: values.paymentMethod,
-      comment: values.comment?.trim() || undefined,
+      comment: normalizeOptionalString(values.comment),
       items: items.map((item) => ({
         productId: item.productId,
         qty: item.qty,

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { useEmployeesQuery } from "@/hooks/use-employees-query";
+import { normalizeEmail, normalizeRequiredString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import {
@@ -29,9 +30,9 @@ export function EmployeesModule() {
   const saveMutation = useMutation({
     mutationFn: async (draft: EmployeeDraft) => {
       const payload = {
-        name: draft.name,
-        email: draft.email,
-        phone: draft.phone,
+        name: normalizeRequiredString(draft.name),
+        email: normalizeEmail(draft.email),
+        phone: normalizeRequiredString(draft.phone),
         status: draft.status,
       };
 
@@ -75,7 +76,7 @@ export function EmployeesModule() {
       validateDraft={(draft) =>
         draft.name.trim().length < 2 ||
         draft.phone.trim().length < 6 ||
-        draft.email.trim().length < 5
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())
           ? t("labels.validationFailed")
           : null
       }
@@ -106,9 +107,9 @@ export function EmployeesModule() {
       onSave={(draft) =>
         saveMutation.mutateAsync({
           id: draft.id,
-          name: draft.name,
-          email: draft.email,
-          phone: draft.phone,
+          name: normalizeRequiredString(draft.name),
+          email: normalizeEmail(draft.email),
+          phone: normalizeRequiredString(draft.phone),
           status: draft.status,
         })
       }

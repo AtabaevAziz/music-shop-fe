@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { GenericCrudModule } from "@/features/shared/generic-crud";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
+import { normalizeEmail, normalizeRequiredString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { getDictionarySelectOptions } from "@/lib/runtime-config";
 import { dynamicLabel } from "@/lib/translations";
@@ -109,13 +110,13 @@ export function CustomersModule() {
   const saveMutation = useMutation({
     mutationFn: async (draft: CustomerDraft) => {
       const payload = {
-        name: draft.name,
-        fullName: draft.name,
-        phone: draft.phone,
-        email: draft.email,
+        name: normalizeRequiredString(draft.name),
+        fullName: normalizeRequiredString(draft.name),
+        phone: normalizeRequiredString(draft.phone),
+        email: normalizeEmail(draft.email),
         tier: draft.tier,
         status: draft.status,
-        notes: draft.notes,
+        notes: normalizeRequiredString(draft.notes),
       };
 
       if (draft.id) {
@@ -165,7 +166,7 @@ export function CustomersModule() {
         validateDraft={(draft) =>
           draft.name.trim().length < 2 ||
           draft.phone.trim().length < 6 ||
-          draft.email.trim().length < 5
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim())
             ? t("labels.validationFailed")
             : null
         }

@@ -56,6 +56,10 @@ import {
 import { CategoriesModule } from "@/features/categories/categories-module";
 import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
+import {
+  normalizeOptionalString,
+  requiredTrimmedString,
+} from "@/lib/form-utils";
 import { normalizeProductBrand } from "@/lib/product-brand";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import {
@@ -73,15 +77,15 @@ import { ModuleSection } from "@/shared/components/module-shell";
 import { Condition, ProductStatus } from "@/types/music";
 
 const productSchema = z.object({
-  name: z.string().min(2),
-  sku: z.string().min(3),
+  name: requiredTrimmedString(2),
+  sku: requiredTrimmedString(3),
   price: z.coerce.number().min(1),
   costPrice: z.coerce.number().min(1),
   stockQty: z.coerce.number().min(0),
   categoryId: z.string().min(1),
-  brand: z.string().min(2),
-  shortDescription: z.string().min(4),
-  description: z.string().min(4),
+  brand: requiredTrimmedString(2),
+  shortDescription: requiredTrimmedString(4),
+  description: requiredTrimmedString(4),
   status: z.string().min(1),
   condition: z.string().min(1),
 });
@@ -280,8 +284,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       await saveMutation.mutateAsync({
         id: draft.id,
         ...parsed.data,
-        brand: parsed.data.brand.trim(),
-        barcode: draft.barcode,
+        barcode: normalizeOptionalString(draft.barcode),
         specs,
         images,
         primaryImage,

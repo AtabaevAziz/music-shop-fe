@@ -38,19 +38,32 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
 import { useAdminRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
+import {
+  normalizeOptionalString,
+  requiredTrimmedString,
+} from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
 import { createRepair, updateRepair } from "@/services/repairs";
 import type { RepairStatus } from "@/types/music";
 
+const repairStatuses = [
+  "new",
+  "diagnostics",
+  "in_progress",
+  "ready",
+  "completed",
+  "cancelled",
+] as const satisfies readonly RepairStatus[];
+
 const repairSchema = z.object({
   customerId: z.string().min(1),
-  instrumentName: z.string().min(2),
-  brand: z.string().min(2),
-  issue: z.string().min(8),
-  notes: z.string().min(4),
-  status: z.string().min(1),
+  instrumentName: requiredTrimmedString(2),
+  brand: requiredTrimmedString(2),
+  issue: requiredTrimmedString(8),
+  notes: requiredTrimmedString(4),
+  status: z.enum(repairStatuses),
   estimatedCost: z.string().optional(),
   assignedMasterName: z.string().optional(),
   receivedAt: z.string().optional(),
@@ -68,15 +81,6 @@ type RepairDraft = {
   assignedMasterName: string;
   receivedAt: string;
 };
-
-const repairStatuses: RepairStatus[] = [
-  "new",
-  "diagnostics",
-  "in_progress",
-  "ready",
-  "completed",
-  "cancelled",
-];
 
 const initialDraft: RepairDraft = {
   customerId: "",
@@ -111,18 +115,22 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
   );
   const saveMutation = useMutation({
     mutationFn: async (value: RepairDraft) => {
+      const parsed = repairSchema.parse(value);
+      const normalizedEstimatedCost = normalizeOptionalString(
+        parsed.estimatedCost,
+      );
       const payload = {
-        customerId: value.customerId,
-        instrumentName: value.instrumentName.trim(),
-        brand: value.brand.trim(),
-        issue: value.issue.trim(),
-        notes: value.notes.trim(),
-        status: value.status,
-        estimatedCost: value.estimatedCost
-          ? Number(value.estimatedCost)
+        customerId: parsed.customerId,
+        instrumentName: parsed.instrumentName,
+        brand: parsed.brand,
+        issue: parsed.issue,
+        notes: parsed.notes,
+        status: parsed.status,
+        estimatedCost: normalizedEstimatedCost
+          ? Number(normalizedEstimatedCost)
           : undefined,
-        assignedMasterName: value.assignedMasterName.trim() || undefined,
-        receivedAt: value.receivedAt || undefined,
+        assignedMasterName: normalizeOptionalString(parsed.assignedMasterName),
+        receivedAt: normalizeOptionalString(parsed.receivedAt),
       };
 
       if (value.id) {

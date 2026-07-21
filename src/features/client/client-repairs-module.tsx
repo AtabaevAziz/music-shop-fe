@@ -13,16 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
+import { requiredTrimmedString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";
 import { createClientRepair } from "@/services/client";
 
 const repairSchema = z.object({
-  instrumentName: z.string().min(2),
-  brand: z.string().min(2),
-  issue: z.string().min(8),
-  notes: z.string().min(4),
+  instrumentName: requiredTrimmedString(2),
+  brand: requiredTrimmedString(2),
+  issue: requiredTrimmedString(8),
+  notes: requiredTrimmedString(4),
 });
 
 type RepairDraft = {

@@ -46,7 +46,8 @@ Local integration checklist:
 1. Start the backend first and confirm `http://localhost:8080/api/v1/health` returns `200`.
 2. Confirm `http://localhost:8080/api/v1/auth/session` returns `{ "session": null }` before login.
 3. Start the frontend on `http://localhost:3000`.
-4. Verify backend `.env` contains `CLIENT_ORIGIN=http://localhost:3000` and `SESSION_SECURE_COOKIE=false` for local HTTP development.
+4. Verify backend `.env` contains `CLIENT_ORIGIN=http://localhost:3000`, `SESSION_SECURE_COOKIE=false`, and `SESSION_COOKIE_SAME_SITE=lax` for local HTTP development.
+5. Run `npm run smoke:local-auth` in `music-shop-be` to verify cookie login, session reuse, and logout.
 
 ## Scripts
 
@@ -211,6 +212,7 @@ docker run -p 3000:3000 music-shop-fe
 
 - The frontend requires a running backend with cookie-based auth and seeded PostgreSQL data
 - If protected routes show a backend-unavailable/session-check error, verify backend reachability first with `/api/v1/health`, then confirm `CLIENT_ORIGIN`, cookies, and `NEXT_PUBLIC_API_BASE_URL`.
+- Session bootstrap now follows locale-aware route segments (`/{locale}/login` and `/{locale}/app...`) instead of a hard-coded pathname regex, so route changes only need one helper update.
 - For a free remote deployment that keeps data after the local computer is off, see `../FREE_DEPLOYMENT.md`.
 - Product images can use absolute remote HTTPS URLs; this is the preferred free-friendly production approach over local runtime file storage.
 - Legacy demo-store code may still exist in the repo, but active routes use API-backed queries and mutations

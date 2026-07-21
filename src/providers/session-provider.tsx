@@ -6,6 +6,7 @@ import { createContext, useContext, useMemo } from "react";
 
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 import { queryKeys } from "@/lib/query-keys";
+import { shouldLoadSessionForPathname } from "@/lib/session-routes";
 import {
   login as loginRequest,
   logout as logoutRequest,
@@ -30,7 +31,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const shouldLoadSession =
-    isApiConfigured && /^\/[^/]+\/(?:app(?:\/|$)|login(?:\/|$))/.test(pathname);
+    isApiConfigured && shouldLoadSessionForPathname(pathname);
   const {
     data: session,
     error: sessionError,

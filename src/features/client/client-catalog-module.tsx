@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
+import { requiredTrimmedString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
@@ -29,7 +30,7 @@ import { Product } from "@/types/music";
 
 const checkoutSchema = z.object({
   qty: z.coerce.number().int().min(1),
-  notes: z.string().min(4),
+  notes: requiredTrimmedString(4),
 });
 
 export function ClientCatalogModule({ locale }: { locale: Locale }) {
