@@ -19,6 +19,8 @@ const CATEGORY_ASSET_PATHS: Record<string, string> = {
   flutes: "/assets/flute.png",
   guitar: "/assets/acoustic-guitar.png",
   guitars: "/assets/acoustic-guitar.png",
+  microphone: "/assets/shure-sm7b.jpg",
+  microphones: "/assets/shure-sm7b.jpg",
   keyboard: "/assets/grand-piano.png",
   keyboards: "/assets/grand-piano.png",
   "grand-piano": "/assets/grand-piano.png",
