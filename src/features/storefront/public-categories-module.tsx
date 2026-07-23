@@ -8,6 +8,7 @@ import { startTransition, useEffect, useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
+import { useSessionQuery } from "@/hooks/use-session-query";
 import { useStorefrontProductsQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
@@ -35,6 +36,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
     string | null
   >(null);
   const { data: appConfig } = useAppConfigQuery();
+  const { data: session } = useSessionQuery({ enabled: isApiConfigured });
   const { data: products, error, isPending } = useStorefrontProductsQuery();
 
   const categories = useMemo(() => {
@@ -245,6 +247,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
                   product={product}
                   currency={currency}
                   locale={locale}
+                  canAddToCart={Boolean(session)}
                 />
               ))}
             </div>

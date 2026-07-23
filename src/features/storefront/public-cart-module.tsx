@@ -72,20 +72,22 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
             {items.map((item) => (
               <Card key={item.productId} className="storefront-product-card">
                 <CardContent className="grid gap-4 p-5 md:grid-cols-[160px_minmax(0,1fr)]">
-                  {item.primaryImage ? (
-                    <Image
-                      src={item.primaryImage}
-                      alt={item.name}
-                      width={320}
-                      height={240}
-                      className="storefront-product-image"
-                    />
-                  ) : (
-                    <div className="storefront-product-image storefront-product-image-placeholder">
-                      {t("storefront.imageUnavailable")}
-                    </div>
-                  )}
-                  <div className="grid gap-4">
+                  <div className="storefront-product-media">
+                    {item.primaryImage ? (
+                      <Image
+                        src={item.primaryImage}
+                        alt={item.name}
+                        width={320}
+                        height={240}
+                        className="storefront-product-image"
+                      />
+                    ) : (
+                      <div className="storefront-product-image storefront-product-image-placeholder">
+                        {t("storefront.imageUnavailable")}
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid min-w-0 gap-4">
                     <div className="grid gap-1">
                       <strong>{item.name}</strong>
                       <span className="muted">{item.brand}</span>

@@ -400,13 +400,15 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                       <TableRow key={product.id}>
                         <TableCell>
                           {previewImage ? (
-                            <Image
-                              src={previewImage}
-                              alt={product.name}
-                              width={96}
-                              height={72}
-                              className="product-thumb"
-                            />
+                            <div className="product-thumb-frame">
+                              <Image
+                                src={previewImage}
+                                alt={product.name}
+                                width={96}
+                                height={72}
+                                className="product-thumb"
+                              />
+                            </div>
                           ) : null}
                         </TableCell>
                         <TableCell>

@@ -1760,9 +1760,22 @@ tbody tr:hover {
   display: block;
   width: 96px;
   height: 72px;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+.product-thumb-featured {
+  width: 100%;
+  height: 180px;
+}
+
+.product-thumb-frame {
+  display: grid;
+  width: 96px;
+  max-width: 100%;
+  overflow: hidden;
   border: 1px solid rgba(123, 145, 175, 0.14);
   border-radius: 16px;
-  object-fit: cover;
   background: linear-gradient(
     180deg,
     rgba(240, 245, 251, 0.92),
@@ -1770,10 +1783,8 @@ tbody tr:hover {
   );
 }
 
-.product-thumb-featured {
+.product-thumb-frame-featured {
   width: 100%;
-  height: 180px;
-  margin-bottom: 12px;
   border-radius: 20px;
 }
 
@@ -2448,7 +2459,9 @@ tbody tr:hover {
 .storefront-hero-image,
 .storefront-product-image,
 .storefront-product-detail-image {
+  display: block;
   width: 100%;
+  max-width: 100%;
   object-fit: cover;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.08);
@@ -2458,8 +2471,22 @@ tbody tr:hover {
   height: 320px;
 }
 
+.storefront-product-media {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  background: rgba(246, 249, 252, 0.82);
+}
+
 .storefront-product-image {
   height: 220px;
+}
+
+.storefront-product-media-detail {
+  min-height: 100%;
 }
 
 .storefront-product-detail-image {
@@ -2723,6 +2750,10 @@ tbody tr:hover {
   gap: 16px;
 }
 
+.storefront-product-card .p-5 > * {
+  min-width: 0;
+}
+
 .storefront-product-copy {
   display: grid;
   gap: 8px;
@@ -2792,6 +2823,7 @@ tbody tr:hover {
 }
 
 .storefront-product-gallery {
+  min-width: 0;
   min-height: 100%;
 }
 
@@ -2886,6 +2918,10 @@ tbody tr:hover {
   .storefront-product-image,
   .storefront-product-detail-image {
     height: auto;
+    min-height: 0;
+  }
+
+  .storefront-product-media-detail {
     min-height: 0;
   }
 

@@ -128,13 +128,15 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
               <Card key={product.id} className="overflow-hidden">
                 <CardContent className="space-y-4 p-5">
                   {previewImage ? (
-                    <Image
-                      src={previewImage}
-                      alt={product.name}
-                      width={720}
-                      height={180}
-                      className="product-thumb product-thumb-featured"
-                    />
+                    <div className="product-thumb-frame product-thumb-frame-featured">
+                      <Image
+                        src={previewImage}
+                        alt={product.name}
+                        width={720}
+                        height={180}
+                        className="product-thumb product-thumb-featured"
+                      />
+                    </div>
                   ) : null}
                   <div className="space-y-2">
                     <div className="heading-row">

@@ -16,10 +16,12 @@ export function StorefrontProductCard({
   product,
   currency,
   locale,
+  canAddToCart,
 }: {
   product: StorefrontProduct;
   currency: string;
   locale: Locale;
+  canAddToCart: boolean;
 }) {
   const t = useTranslations();
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
@@ -32,19 +34,21 @@ export function StorefrontProductCard({
   return (
     <Card className="storefront-product-card">
       <CardContent className="p-5">
-        {product.primaryImage ? (
-          <Image
-            src={product.primaryImage}
-            alt={product.name}
-            width={720}
-            height={320}
-            className="storefront-product-image"
-          />
-        ) : (
-          <div className="storefront-product-image storefront-product-image-placeholder">
-            {t("storefront.imageUnavailable")}
-          </div>
-        )}
+        <div className="storefront-product-media">
+          {product.primaryImage ? (
+            <Image
+              src={product.primaryImage}
+              alt={product.name}
+              width={720}
+              height={320}
+              className="storefront-product-image"
+            />
+          ) : (
+            <div className="storefront-product-image storefront-product-image-placeholder">
+              {t("storefront.imageUnavailable")}
+            </div>
+          )}
+        </div>
         <div className="storefront-product-topline">
           <Badge variant="secondary">{product.category.name}</Badge>
           <span className="muted">{product.brand}</span>
@@ -63,7 +67,7 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={product.stockQty < 1}
+              disabled={!canAddToCart || product.stockQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0
