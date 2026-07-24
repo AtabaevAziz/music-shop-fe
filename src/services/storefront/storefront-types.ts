@@ -4,6 +4,14 @@ export type StorefrontCategory = {
   id: string;
   name: string;
   slug: string;
+  image?: string;
+};
+
+export type ApiStorefrontCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
 };
 
 export type StorefrontProduct = {
@@ -34,7 +42,7 @@ export type ApiStorefrontProduct = {
   images: string[];
   primaryImage: string | null;
   condition: Condition;
-  category: StorefrontCategory;
+  category: ApiStorefrontCategory;
   brand: string;
 };
 

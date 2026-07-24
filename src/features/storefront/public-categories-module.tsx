@@ -12,7 +12,6 @@ import { useSessionQuery } from "@/hooks/use-session-query";
 import { useStorefrontProductsQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
-import { resolveCategoryAssetPath } from "@/lib/media";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
 
 import { StorefrontProductCard } from "./storefront-product-card";
@@ -21,6 +20,7 @@ type CategoryGroup = {
   id: string;
   name: string;
   slug: string;
+  image?: string;
   products: StorefrontProduct[];
   previewImage?: string;
 };
@@ -60,7 +60,7 @@ export function PublicCategoriesModule({ locale }: { locale: Locale }) {
       .map((category) => ({
         ...category,
         previewImage:
-          resolveCategoryAssetPath(category.slug) ??
+          category.image ??
           category.products.find(
             (product) => product.primaryImage ?? product.images[0],
           )?.primaryImage ??

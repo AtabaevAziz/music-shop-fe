@@ -22,6 +22,7 @@ type CategoryDraft = {
   name: string;
   slug?: string;
   parentId: string;
+  image: string;
   status: Category["status"];
   description: string;
   productCount: string;
@@ -32,14 +33,19 @@ function validateCategoryDraft(
   t: ReturnType<typeof useTranslations>,
 ) {
   const name = draft.name.trim();
+  const image = draft.image.trim();
   const description = draft.description.trim();
 
-  if (name.length < 2 || description.length < 4) {
+  if (name.length < 2 || description.length < 4 || image.length === 0) {
     return t("labels.validationFailed");
   }
 
   if (!CATEGORY_NAME_ALPHANUMERIC_PATTERN.test(name)) {
     return t("labels.categoryNameRequiresLettersOrNumbers");
+  }
+
+  if (!image.startsWith("/") && !/^https?:\/\//.test(image)) {
+    return t("labels.validationFailed");
   }
 
   return null;
@@ -70,6 +76,7 @@ export function CategoriesModule() {
           draft.parentId && draft.parentId !== ROOT_CATEGORY_VALUE
             ? draft.parentId
             : undefined,
+        image: draft.image.trim(),
         status: draft.status,
         description,
       };
@@ -101,6 +108,7 @@ export function CategoriesModule() {
         name: "",
         slug: "",
         parentId: ROOT_CATEGORY_VALUE,
+        image: "",
         status: "active",
         description: "",
         productCount: "0",
@@ -111,12 +119,13 @@ export function CategoriesModule() {
         name: category.name,
         slug: category.slug,
         parentId: category.parentId ?? ROOT_CATEGORY_VALUE,
+        image: category.image,
         status: category.status,
         description: category.description,
         productCount: String(categoryProductCountMap[category.id] ?? 0),
       })}
       getSearchText={(category) =>
-        `${category.name} ${category.slug} ${category.description}`.toLowerCase()
+        `${category.name} ${category.slug} ${category.image} ${category.description}`.toLowerCase()
       }
       fields={[
         { name: "name", label: t("labels.name") },
@@ -131,6 +140,10 @@ export function CategoriesModule() {
           name: "slug",
           label: t("labels.slug"),
           inForm: false,
+        },
+        {
+          name: "image",
+          label: t("labels.imagePath"),
         },
         {
           name: "parentId",

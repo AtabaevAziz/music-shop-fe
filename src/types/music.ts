@@ -22,6 +22,7 @@ export type Category = {
   name: string;
   slug: string;
   parentId?: string;
+  image: string;
   status: "active" | "inactive";
   description: string;
   productCount?: number;
