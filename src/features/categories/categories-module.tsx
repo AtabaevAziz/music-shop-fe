@@ -16,6 +16,8 @@ import { Category } from "@/types/music";
 
 const ROOT_CATEGORY_VALUE = "__root__";
 const CATEGORY_NAME_ALPHANUMERIC_PATTERN = /[\p{L}\p{N}]/u;
+const CATEGORY_IMAGE_PATH_PATTERN =
+  /^(?:https?:\/\/|\/|assets\/|public\/assets\/)/i;
 
 type CategoryDraft = {
   id?: string;
@@ -44,7 +46,7 @@ function validateCategoryDraft(
     return t("labels.categoryNameRequiresLettersOrNumbers");
   }
 
-  if (!image.startsWith("/") && !/^https?:\/\//.test(image)) {
+  if (!CATEGORY_IMAGE_PATH_PATTERN.test(image)) {
     return t("labels.validationFailed");
   }
 
