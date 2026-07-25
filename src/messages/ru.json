@@ -50,7 +50,6 @@
     "dashboard": "Главная",
     "catalog": "Каталог",
     "categories": "Категории",
-    "brands": "Бренды",
     "inventory": "Склад",
     "orders": "Заказы",
     "repairs": "Ремонт",
@@ -60,18 +59,14 @@
     "employees": "Сотрудники",
     "finance": "Финансы",
     "settings": "Настройки",
-    "media": "Медиа",
     "openMenu": "Открыть меню",
-    "logout": "Выйти",
-    "resetDemo": "Сбросить демо"
+    "logout": "Выйти"
   },
   "auth": {
     "title": "Вход для клиента и администратора",
     "text": "Сначала изучите витрину и каталог, затем войдите, чтобы оформить заказ, отследить ремонт или управлять магазином.",
     "modulesLabel": "Разделы",
     "modulesValue": "Главная, каталог, склад, заказы, клиенты и ремонт",
-    "demoLabel": "Демо-режим",
-    "demoValue": "Состояние хранится на клиенте и сохраняется локально",
     "enterAs": "Вход в аккаунт",
     "loginLabel": "Логин",
     "loginPlaceholder": "Введите логин или email",
@@ -166,7 +161,6 @@
   "section": {
     "catalogSubtitle": "Товары и категории в едином каталоге, а бренд ищется прямо в товарах.",
     "categoriesSubtitle": "Структурированная товарная таксономия для музыкального каталога.",
-    "brandsSubtitle": "Справочник брендов, вендоров и производителей.",
     "ordersSubtitle": "Обработка заказов и продвижение по этапам выполнения.",
     "repairsSubtitle": "Приём заявок на ремонт, статусы сервиса и готовность к выдаче.",
     "customersSubtitle": "Клиентские записи с видимостью для заказов и продаж.",
@@ -178,7 +172,6 @@
     "employeesSubtitle": "Внутренние учётные записи администраторов для защищённого доступа.",
     "financeSubtitle": "Контроль выручки и маржи для внутренних операций",
     "settingsSubtitle": "Настройки, влияющие на ценообразование и складское поведение.",
-    "mediaSubtitle": "Пути к изображениям товаров и управление основным изображением.",
     "inventorySubtitle": "Остатки, риск пополнения и последние движения по складу"
   },
   "labels": {
@@ -303,9 +296,7 @@
     "runtimeConfigUnavailableText": "Фронтенд не смог загрузить навигацию или матрицу прав с бэкенда."
   },
   "flash": {
-    "demoResetDone": "Демо-данные восстановлены.",
     "categorySaved": "Категория сохранена",
-    "brandSaved": "Бренд сохранён",
     "customerSaved": "Клиент сохранён",
     "employeeSaved": "Сотрудник сохранён",
     "productSaved": "Товар сохранён",
@@ -320,7 +311,6 @@
   },
   "activity": {
     "categorySaved": "Категория {name} сохранена",
-    "brandSaved": "Бренд {name} сохранён",
     "customerSaved": "Клиент {name} сохранён",
     "employeeSaved": "Сотрудник {name} сохранён",
     "productSaved": "Товар {name} сохранён",
@@ -330,7 +320,6 @@
     "clientOrderPlaced": "Заказ {orderId} оформлен клиентом {customerName}",
     "repairRequestSubmitted": "Заявка {repairId} на ремонт {instrumentName} отправлена",
     "businessSettingsUpdated": "Бизнес-настройки обновлены",
-    "mediaAdded": "Медиа добавлено к {productName}",
     "primaryImageChanged": "Основное изображение изменено для {productName}",
     "seedOrderReady": "Заказ {orderId} отмечен как готовый к выдаче",
     "seedReservedStock": "Остаток {productName} зарезервирован для заказа {orderId}",

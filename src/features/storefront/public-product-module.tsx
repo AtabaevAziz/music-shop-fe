@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStorefrontCartStore } from "@/features/storefront/storefront-cart-store";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
-import { useSessionQuery } from "@/hooks/use-session-query";
 import { useStorefrontProductQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
@@ -25,7 +24,6 @@ export function PublicProductModule({
   const t = useTranslations();
   const isApiConfigured = hasConfiguredApiBaseUrl();
   const { data: appConfig } = useAppConfigQuery();
-  const { data: session } = useSessionQuery({ enabled: isApiConfigured });
   const { data: product, isPending, error } = useStorefrontProductQuery(id);
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
@@ -128,7 +126,7 @@ export function PublicProductModule({
             <Button
               type="button"
               size="lg"
-              disabled={!session || product.stockQty < 1}
+              disabled={!hasHydrated || product.stockQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0

@@ -50,7 +50,6 @@
     "dashboard": "Home",
     "catalog": "Catalog",
     "categories": "Categories",
-    "brands": "Brands",
     "inventory": "Inventory",
     "orders": "Orders",
     "repairs": "Repairs",
@@ -60,18 +59,14 @@
     "employees": "Employees",
     "finance": "Finance",
     "settings": "Settings",
-    "media": "Media",
     "openMenu": "Open menu",
-    "logout": "Logout",
-    "resetDemo": "Reset demo"
+    "logout": "Logout"
   },
   "auth": {
     "title": "Client and admin access",
     "text": "Sign in after browsing the catalog to place orders, track repairs, and manage store operations.",
     "modulesLabel": "Modules",
     "modulesValue": "Home, Catalog, Inventory, Orders, Customers, and Repairs",
-    "demoLabel": "Demo mode",
-    "demoValue": "Frontend-only state with local persistence",
     "enterAs": "Sign in to your account",
     "loginLabel": "Login",
     "loginPlaceholder": "Enter your login or email",
@@ -166,7 +161,6 @@
   "section": {
     "catalogSubtitle": "Products and categories in one workspace, with brand search directly in products.",
     "categoriesSubtitle": "Structured product taxonomy for the music retail catalog.",
-    "brandsSubtitle": "Reusable vendor and manufacturer records.",
     "ordersSubtitle": "Internal order processing and fulfillment progression.",
     "repairsSubtitle": "Repair intake, service status visibility, and pickup readiness.",
     "customersSubtitle": "Internal customer records with order-facing visibility.",
@@ -178,7 +172,6 @@
     "employeesSubtitle": "Internal admin accounts for protected backoffice access.",
     "financeSubtitle": "Revenue and margin awareness for internal operations",
     "settingsSubtitle": "Settings-driven behavior for pricing and inventory control.",
-    "mediaSubtitle": "Attach product image paths and manage primary artwork.",
     "inventorySubtitle": "Current stock, replenishment risk, and recent warehouse movement visibility"
   },
   "labels": {
@@ -303,9 +296,7 @@
     "runtimeConfigUnavailableText": "The frontend could not load navigation or permission config from the backend."
   },
   "flash": {
-    "demoResetDone": "Demo data restored.",
     "categorySaved": "Category saved",
-    "brandSaved": "Brand saved",
     "customerSaved": "Customer saved",
     "employeeSaved": "Employee saved",
     "productSaved": "Product saved",
@@ -320,7 +311,6 @@
   },
   "activity": {
     "categorySaved": "Category {name} saved",
-    "brandSaved": "Brand {name} saved",
     "customerSaved": "Customer {name} saved",
     "employeeSaved": "Employee {name} saved",
     "productSaved": "Product {name} saved",
@@ -330,7 +320,6 @@
     "clientOrderPlaced": "Order {orderId} placed by {customerName}",
     "repairRequestSubmitted": "Repair request {repairId} submitted for {instrumentName}",
     "businessSettingsUpdated": "Business settings updated",
-    "mediaAdded": "Media added to {productName}",
     "primaryImageChanged": "Primary image changed for {productName}",
     "seedOrderReady": "Order {orderId} marked ready for pickup",
     "seedReservedStock": "{productName} stock reserved for order {orderId}",

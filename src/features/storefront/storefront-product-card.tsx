@@ -16,12 +16,10 @@ export function StorefrontProductCard({
   product,
   currency,
   locale,
-  canAddToCart,
 }: {
   product: StorefrontProduct;
   currency: string;
   locale: Locale;
-  canAddToCart: boolean;
 }) {
   const t = useTranslations();
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
@@ -67,7 +65,7 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={!canAddToCart || product.stockQty < 1}
+              disabled={!hasHydrated || product.stockQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0

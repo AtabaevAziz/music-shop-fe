@@ -107,14 +107,14 @@ Route behavior depends on session role:
 
 - Admin users currently see dashboard, catalog, inventory, orders, customers, employees, finance, and settings
 - Client users see a client portal on the same protected route shell, including client orders and repairs
-- `catalog` already groups products, categories, brands, and media inside tabbed UI
+- `catalog` groups products and categories inside tabbed UI, with product media handled in the product editor
 - `repairs` is currently mounted as a client-facing route
 
 ## Main Modules
 
 - Auth: locale-aware sign-in with admin and client access
 - Dashboard: revenue snapshot, low stock, order pipeline, featured products, recent activity
-- Catalog: products, categories, brands, pricing, stock, specs, and product media
+- Catalog: products, categories, pricing, stock, specs, brand filtering, and product media
 - Inventory: stock adjustments, low-stock awareness, movement history
 - Orders: order queue, totals, payment state, status transitions
 - Customers: customer records tied to operational workflows
@@ -130,7 +130,8 @@ music-shop-fe/
 ├── src/
 │   ├── app/
 │   │   ├── [locale]/
-│   │   │   ├── (protected)/     # Auth-protected admin/client routes
+│   │   │   ├── app/             # Auth-protected admin/client routes
+│   │   │   ├── cart/            # Public storefront cart and checkout flow
 │   │   │   └── login/           # Locale-aware sign-in page
 │   │   ├── globals.css          # Global theme, layout, and UI tokens
 │   │   ├── layout.tsx           # Root HTML shell and font setup
@@ -142,7 +143,6 @@ music-shop-fe/
 │   │   └── ui/                  # shadcn-derived UI primitives
 │   ├── features/
 │   │   ├── auth/
-│   │   ├── brands/
 │   │   ├── catalog/
 │   │   ├── categories/
 │   │   ├── client/
@@ -151,9 +151,9 @@ music-shop-fe/
 │   │   ├── employees/
 │   │   ├── finance/
 │   │   ├── inventory/
-│   │   ├── media/
 │   │   ├── orders/
 │   │   ├── settings/
+│   │   ├── storefront/
 │   │   └── shared/
 │   ├── i18n.ts                  # Locale configuration
 │   ├── lib/                     # Utilities and translation helpers
@@ -161,6 +161,9 @@ music-shop-fe/
 │   │   ├── en.json
 │   │   ├── ru.json
 │   │   └── uz.json
+│   ├── providers/               # Query, session, theme, runtime-config bootstrap
+│   ├── services/                # Typed API clients and mappers
+│   ├── shared/                  # Shared CRUD shell and module building blocks
 │   └── types/
 │       └── music.ts
 ├── public/
@@ -177,7 +180,7 @@ music-shop-fe/
 The active frontend integration is defined by the current API-backed services and runtime config layer:
 
 - session-aware auth for admins and clients
-- CRUD for categories, brands, customers, employees, and products
+- CRUD for categories, customers, employees, products, and product media attachments
 - stock adjustments and inventory movement history
 - order creation and order status transitions
 - repair request creation and repair status tracking
@@ -215,4 +218,4 @@ docker run -p 3000:3000 music-shop-fe
 - Session bootstrap now follows locale-aware route segments (`/{locale}/login` and `/{locale}/app...`) instead of a hard-coded pathname regex, so route changes only need one helper update.
 - For a free remote deployment that keeps data after the local computer is off, see `../FREE_DEPLOYMENT.md`.
 - Product images can use absolute remote HTTPS URLs; this is the preferred free-friendly production approach over local runtime file storage.
-- Legacy demo-store code may still exist in the repo, but active routes use API-backed queries and mutations
+- Storefront cart and checkout are public flows backed by API product data and local cart persistence

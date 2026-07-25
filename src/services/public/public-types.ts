@@ -23,12 +23,12 @@ export type CreatePublicRepairRequest = {
 };
 
 export type ApiPublicOrder = Order;
-export type ApiPublicRepairRequest = RepairRequest;
+export type ApiPublicRepair = RepairRequest;
 
 export type ApiPublicOrderResponse = {
   order: ApiPublicOrder;
 };
 
 export type ApiPublicRepairResponse = {
-  repairRequest: ApiPublicRepairRequest;
+  repairRequest: ApiPublicRepair;
 };

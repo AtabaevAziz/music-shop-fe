@@ -50,7 +50,6 @@
     "dashboard": "Bosh sahifa",
     "catalog": "Katalog",
     "categories": "Kategoriyalar",
-    "brands": "Brendlar",
     "inventory": "Ombor",
     "orders": "Buyurtmalar",
     "repairs": "Ta'mirlash",
@@ -60,18 +59,14 @@
     "employees": "Xodimlar",
     "finance": "Moliya",
     "settings": "Sozlamalar",
-    "media": "Media",
     "openMenu": "Menyuni ochish",
-    "logout": "Chiqish",
-    "resetDemo": "Demo holatini tiklash"
+    "logout": "Chiqish"
   },
   "auth": {
     "title": "Mijoz va administrator uchun kirish",
     "text": "Avval vitrina va katalogni ko'ring, so'ng buyurtma berish, ta'mirlashni kuzatish yoki do'konni boshqarish uchun kiring.",
     "modulesLabel": "Bo'limlar",
     "modulesValue": "Bosh sahifa, katalog, ombor, buyurtmalar, mijozlar va ta'mirlash",
-    "demoLabel": "Demo rejimi",
-    "demoValue": "Holat klient tomonida saqlanadi va localda eslab qolinadi",
     "enterAs": "Akkauntga kirish",
     "loginLabel": "Login",
     "loginPlaceholder": "Login yoki emailni kiriting",
@@ -166,7 +161,6 @@
   "section": {
     "catalogSubtitle": "Mahsulot va kategoriyalar bitta joyda, brend esa mahsulotlar ichida qidiriladi.",
     "categoriesSubtitle": "Musiqa retail katalogi uchun tuzilgan mahsulot taksonomiyasi.",
-    "brandsSubtitle": "Yetkazib beruvchi va ishlab chiqaruvchilar bo'yicha qayta ishlatiladigan yozuvlar.",
     "ordersSubtitle": "Ichki buyurtmalarni qayta ishlash va bajarish bosqichlari.",
     "repairsSubtitle": "Ta'mirlash qabul qilish, servis holatlari va olib ketishga tayyorlik.",
     "customersSubtitle": "Buyurtmalar bilan bog'langan ichki mijoz yozuvlari.",
@@ -178,7 +172,6 @@
     "employeesSubtitle": "Himoyalangan kirish uchun ichki administrator akkauntlari.",
     "financeSubtitle": "Ichki operatsiyalar uchun tushum va marja nazorati",
     "settingsSubtitle": "Narxlash va ombor xatti-harakatiga ta'sir qiluvchi sozlamalar.",
-    "mediaSubtitle": "Mahsulot rasmlari yo'llarini biriktirish va asosiy rasmni boshqarish.",
     "inventorySubtitle": "Joriy qoldiq, to'ldirish riski va ombordagi so'nggi harakatlar ko'rinishi"
   },
   "labels": {
@@ -303,9 +296,7 @@
     "runtimeConfigUnavailableText": "Frontend backenddan navigatsiya yoki ruxsat konfiguratsiyasini yuklay olmadi."
   },
   "flash": {
-    "demoResetDone": "Demo ma'lumotlari tiklandi.",
     "categorySaved": "Kategoriya saqlandi",
-    "brandSaved": "Brend saqlandi",
     "customerSaved": "Mijoz saqlandi",
     "employeeSaved": "Xodim saqlandi",
     "productSaved": "Mahsulot saqlandi",
@@ -320,7 +311,6 @@
   },
   "activity": {
     "categorySaved": "Kategoriya {name} saqlandi",
-    "brandSaved": "Brend {name} saqlandi",
     "customerSaved": "Mijoz {name} saqlandi",
     "employeeSaved": "Xodim {name} saqlandi",
     "productSaved": "Mahsulot {name} saqlandi",
@@ -330,7 +320,6 @@
     "clientOrderPlaced": "{orderId} buyurtmasi {customerName} tomonidan rasmiylashtirildi",
     "repairRequestSubmitted": "{instrumentName} uchun {repairId} ta'mirlash so'rovi yuborildi",
     "businessSettingsUpdated": "Biznes sozlamalari yangilandi",
-    "mediaAdded": "{productName} ga media qo'shildi",
     "primaryImageChanged": "{productName} uchun asosiy rasm o'zgartirildi",
     "seedOrderReady": "{orderId} buyurtmasi olib ketishga tayyor deb belgilandi",
     "seedReservedStock": "{productName} qoldig'i {orderId} buyurtmasi uchun band qilindi",
