@@ -3,7 +3,6 @@ type TranslateFn = (key: string, values?: TranslationValues) => string;
 
 const entityTypeToNavKey: Record<string, string> = {
   categories: "categories",
-  brands: "brands",
   customers: "customers",
   employees: "employees",
   products: "catalog",
@@ -26,11 +25,12 @@ export function formatTranslatedMessage(
   }
 
   if (key === "activity.entityRemoved") {
+    const entityType = String(params.entityType ?? "");
+    const navKey = entityTypeToNavKey[entityType];
+
     return t(key, {
       ...params,
-      entityType: t(
-        `nav.${entityTypeToNavKey[String(params.entityType ?? "")]}`,
-      ),
+      entityType: navKey ? t(`nav.${navKey}`) : entityType,
     });
   }
 
