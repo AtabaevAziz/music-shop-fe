@@ -600,9 +600,15 @@ p {
 }
 
 .theme-toggle.theme-toggle-navbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
   min-height: 46px;
   border: 1px solid rgba(109, 132, 164, 0.18);
-  border-radius: 14px;
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48);
@@ -617,7 +623,15 @@ p {
 }
 
 .theme-toggle.theme-toggle-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
   border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   backdrop-filter: blur(10px);
@@ -914,6 +928,12 @@ p {
   );
   box-shadow: 0 16px 36px rgba(21, 38, 63, 0.08);
   align-content: start;
+}
+
+.auth-form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .auth-field-group {
@@ -2065,6 +2085,7 @@ tbody tr:hover {
     gap: 14px;
     padding: 18px;
   }
+
 }
 
 @media (max-height: 760px) {
@@ -2173,8 +2194,8 @@ tbody tr:hover {
     width: 100%;
   }
 
-  .theme-toggle-hero {
-    width: 100%;
+  .auth-form-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero-panel h1 {
@@ -2234,20 +2255,6 @@ tbody tr:hover {
   td {
     padding: 14px 12px;
   }
-}
-
-.auth-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-}
-
-.auth-inline-link {
-  border: 0;
-  background: transparent;
-  color: var(--brand-strong);
-  font-weight: 600;
 }
 
 .storefront-shell {
@@ -2317,20 +2324,22 @@ tbody tr:hover {
   font-size: 0.9rem;
 }
 
-.storefront-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 22px;
-  color: var(--text-soft);
-  font-weight: 600;
-}
-
 .storefront-actions {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
+.storefront-auth-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.storefront-register-button,
 .storefront-login-button {
   min-height: 42px;
 }
@@ -2890,10 +2899,19 @@ tbody tr:hover {
     padding: 14px;
   }
 
-  .storefront-nav,
   .storefront-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .storefront-auth-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .storefront-register-button,
+  .storefront-login-button {
+    flex: 1 1 0;
   }
 
   .storefront-hero,

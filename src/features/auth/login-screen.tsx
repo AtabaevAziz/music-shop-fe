@@ -38,12 +38,17 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const { data: appConfig } = useAppConfigQuery();
   const { data: authConfig, isPending: isAuthConfigPending } =
     useAuthConfigQuery();
-  const { isAuthenticating, login, ready, session } = useAuthSession();
+  const { isAuthenticating, login, register, ready, session } =
+    useAuthSession();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isManualEntryEnabled, setIsManualEntryEnabled] = useState(false);
   const [loginValue, setLoginValue] = useState("");
+  const [registerName, setRegisterName] = useState("");
+  const [registerPhone, setRegisterPhone] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const mode = searchParams.get("mode") === "register" ? "register" : "login";
   const next = searchParams.get("next");
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const destination = next || `/${locale}/app`;
@@ -51,29 +56,39 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const hasPasswordProvider = authConfig
     ? authConfig.providers.some((provider) => provider.type === "password")
     : true;
+  const isClientLoginEnabled = authConfig ? authConfig.allowClientLogin : true;
   const isLoginEnabled = authConfig
     ? authConfig.allowClientLogin || authConfig.allowAdminLogin
     : true;
-  const isSubmitDisabled =
+  const isLoginSubmitDisabled =
     !isApiConfigured ||
     isAuthenticating ||
     isAuthConfigPending ||
     !hasPasswordProvider ||
     !isLoginEnabled;
+  const isRegisterSubmitDisabled =
+    !isApiConfigured ||
+    isAuthenticating ||
+    isAuthConfigPending ||
+    !hasPasswordProvider ||
+    !isClientLoginEnabled;
 
-  const authNotice = !isApiConfigured
-    ? null
-    : authConfig
-      ? !hasPasswordProvider
+  const authNotice =
+    !isApiConfigured || !authConfig
+      ? null
+      : !hasPasswordProvider
         ? t("auth.passwordLoginUnavailable")
-        : !isLoginEnabled
-          ? t("auth.loginUnavailable")
-          : !authConfig.allowClientLogin
+        : mode === "register"
+          ? !isClientLoginEnabled
             ? t("auth.clientLoginDisabled")
-            : !authConfig.allowAdminLogin
-              ? t("auth.adminLoginDisabled")
-              : null
-      : null;
+            : null
+          : !isLoginEnabled
+            ? t("auth.loginUnavailable")
+            : !authConfig.allowClientLogin
+              ? t("auth.clientLoginDisabled")
+              : !authConfig.allowAdminLogin
+                ? t("auth.adminLoginDisabled")
+                : null;
 
   useEffect(() => {
     if (ready && session) {
@@ -84,7 +99,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (isSubmitDisabled) {
+    if (isLoginSubmitDisabled) {
       return;
     }
 
@@ -104,6 +119,40 @@ export function LoginScreen({ locale }: { locale: Locale }) {
       );
     }
   };
+
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isRegisterSubmitDisabled) {
+      return;
+    }
+
+    setError(null);
+    try {
+      await register({
+        name: registerName.trim(),
+        phone: registerPhone.trim(),
+        email: registerEmail.trim().toLowerCase(),
+        password: passwordValue,
+      });
+      router.push(destination);
+    } catch (error) {
+      setError(
+        error instanceof ApiClientError &&
+          error.status === 409 &&
+          error.field === "email"
+          ? t("auth.emailInUse")
+          : error instanceof Error
+            ? error.message
+            : t("common.unexpectedError"),
+      );
+    }
+  };
+
+  const activeHeading =
+    mode === "register" ? t("auth.createAccountTitle") : t("auth.enterAs");
+  const activeSubmitLabel =
+    mode === "register" ? t("auth.registerAction") : t("auth.signInAction");
 
   return (
     <div className="auth-page">
@@ -130,13 +179,14 @@ export function LoginScreen({ locale }: { locale: Locale }) {
                     <DropdownMenuItem
                       key={itemLocale}
                       disabled={itemLocale === locale}
-                      onSelect={() =>
+                      onSelect={() => {
+                        const nextQuery = searchParams.toString();
                         router.push(
                           `/${itemLocale}${pathname.slice(3)}${
-                            next ? `?next=${encodeURIComponent(next)}` : ""
+                            nextQuery ? `?${nextQuery}` : ""
                           }`,
-                        )
-                      }
+                        );
+                      }}
                     >
                       {t(localeLabelKeyMap[itemLocale])}
                     </DropdownMenuItem>
@@ -156,47 +206,123 @@ export function LoginScreen({ locale }: { locale: Locale }) {
           </div>
         </section>
         <section>
-          <h2>{t("auth.enterAs")}</h2>
+          <h2>{activeHeading}</h2>
           <form
             className="auth-signin-panel"
             autoComplete="off"
             onFocusCapture={() => setIsManualEntryEnabled(true)}
             onPointerDownCapture={() => setIsManualEntryEnabled(true)}
-            onSubmit={handleSignIn}
+            onSubmit={mode === "register" ? handleRegister : handleSignIn}
           >
-            <div className="auth-field-group">
-              <Label htmlFor="login">{t("auth.loginLabel")}</Label>
-              <Input
-                id="login"
-                name="signin_identifier"
-                className="auth-input"
-                autoComplete="off"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                placeholder={t("auth.loginPlaceholder")}
-                readOnly={!isManualEntryEnabled}
-                value={loginValue}
-                required
-                disabled={isAuthenticating || !isApiConfigured}
-                onChange={(event) => {
-                  if (error) {
-                    setError(null);
-                  }
-                  setLoginValue(event.target.value);
-                }}
-              />
-            </div>
+            {mode === "register" ? (
+              <>
+                <div className="auth-form-grid">
+                  <div className="auth-field-group">
+                    <Label htmlFor="name">{t("auth.nameLabel")}</Label>
+                    <Input
+                      id="name"
+                      name="signup_name"
+                      className="auth-input"
+                      autoComplete="name"
+                      placeholder={t("auth.namePlaceholder")}
+                      readOnly={!isManualEntryEnabled}
+                      value={registerName}
+                      required
+                      disabled={isAuthenticating || !isApiConfigured}
+                      onChange={(event) => {
+                        if (error) {
+                          setError(null);
+                        }
+                        setRegisterName(event.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="auth-field-group">
+                    <Label htmlFor="phone">{t("auth.phoneLabel")}</Label>
+                    <Input
+                      id="phone"
+                      name="signup_phone"
+                      className="auth-input"
+                      autoComplete="tel"
+                      placeholder={t("auth.phonePlaceholder")}
+                      readOnly={!isManualEntryEnabled}
+                      value={registerPhone}
+                      required
+                      disabled={isAuthenticating || !isApiConfigured}
+                      onChange={(event) => {
+                        if (error) {
+                          setError(null);
+                        }
+                        setRegisterPhone(event.target.value);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="auth-field-group">
+                  <Label htmlFor="email">{t("auth.emailLabel")}</Label>
+                  <Input
+                    id="email"
+                    name="signup_email"
+                    className="auth-input"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    placeholder={t("auth.emailPlaceholder")}
+                    readOnly={!isManualEntryEnabled}
+                    value={registerEmail}
+                    required
+                    disabled={isAuthenticating || !isApiConfigured}
+                    onChange={(event) => {
+                      if (error) {
+                        setError(null);
+                      }
+                      setRegisterEmail(event.target.value);
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="auth-field-group">
+                <Label htmlFor="login">{t("auth.loginLabel")}</Label>
+                <Input
+                  id="login"
+                  name="signin_identifier"
+                  className="auth-input"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder={t("auth.loginPlaceholder")}
+                  readOnly={!isManualEntryEnabled}
+                  value={loginValue}
+                  required
+                  disabled={isAuthenticating || !isApiConfigured}
+                  onChange={(event) => {
+                    if (error) {
+                      setError(null);
+                    }
+                    setLoginValue(event.target.value);
+                  }}
+                />
+              </div>
+            )}
             <div className="auth-field-group">
               <Label htmlFor="password">{t("auth.passwordLabel")}</Label>
               <div className="auth-password-field">
                 <Input
                   id="password"
-                  name="signin_secret"
+                  name={mode === "register" ? "signup_secret" : "signin_secret"}
                   className="auth-input auth-input-with-toggle"
                   type={isPasswordVisible ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder={t("auth.passwordPlaceholder")}
+                  autoComplete={
+                    mode === "register" ? "new-password" : "current-password"
+                  }
+                  placeholder={
+                    mode === "register"
+                      ? t("auth.registerPasswordPlaceholder")
+                      : t("auth.passwordPlaceholder")
+                  }
                   readOnly={!isManualEntryEnabled}
                   value={passwordValue}
                   required
@@ -248,26 +374,14 @@ export function LoginScreen({ locale }: { locale: Locale }) {
             <Button
               className="auth-submit"
               type="submit"
-              disabled={isSubmitDisabled}
+              disabled={
+                mode === "register"
+                  ? isRegisterSubmitDisabled
+                  : isLoginSubmitDisabled
+              }
             >
-              {t("auth.signInAction")}
+              {activeSubmitLabel}
             </Button>
-            <div className="auth-footer-links">
-              <button
-                type="button"
-                className="auth-inline-link"
-                onClick={() => router.push(`/${locale}`)}
-              >
-                {t("storefront.backToStorefront")}
-              </button>
-              <button
-                type="button"
-                className="auth-inline-link"
-                onClick={() => router.push(`/${locale}/catalog`)}
-              >
-                {t("storefront.goToCatalog")}
-              </button>
-            </div>
           </form>
         </section>
       </div>

@@ -5,9 +5,20 @@ export type LoginRequest = {
   password: string;
 };
 
+export type RegisterRequest = {
+  name: string;
+  phone: string;
+  email: string;
+  password: string;
+};
+
 export type ApiSession = Session;
 
 export type ApiLoginResponse = {
+  session: ApiSession;
+};
+
+export type ApiRegisterResponse = {
   session: ApiSession;
 };
 

@@ -9,6 +9,7 @@ import { queryKeys } from "@/lib/query-keys";
 import { shouldLoadSessionForPathname } from "@/lib/session-routes";
 import {
   login as loginRequest,
+  register as registerRequest,
   logout as logoutRequest,
 } from "@/services/auth";
 import { getSession } from "@/services/auth";
@@ -20,6 +21,12 @@ type SessionContextValue = {
   sessionError: Error | null;
   isAuthenticating: boolean;
   login: (login: string, password: string) => Promise<Session>;
+  register: (input: {
+    name: string;
+    phone: string;
+    email: string;
+    password: string;
+  }) => Promise<Session>;
   logout: () => Promise<void>;
   refetchSession: () => Promise<Session | null>;
 };
@@ -56,6 +63,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const { isPending: isRegisterPending, mutateAsync: register } = useMutation({
+    mutationFn: registerRequest,
+    onSuccess: async (session) => {
+      queryClient.setQueryData(queryKeys.session, session);
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] !== "session",
+      });
+    },
+  });
+
   const { isPending: isLogoutPending, mutateAsync: logout } = useMutation({
     mutationFn: logoutRequest,
     onSettled: async () => {
@@ -74,9 +91,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         shouldLoadSession && sessionError instanceof Error
           ? sessionError
           : null,
-      isAuthenticating: isLoginPending || isLogoutPending || isSessionFetching,
+      isAuthenticating:
+        isLoginPending ||
+        isRegisterPending ||
+        isLogoutPending ||
+        isSessionFetching,
       login: async (loginValue, password) =>
         login({ login: loginValue, password }),
+      register: async (input) => register(input),
       logout: async () => {
         await logout();
       },
@@ -91,10 +113,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       isLoginPending,
+      isRegisterPending,
       isLogoutPending,
       isSessionFetching,
       isSessionPending,
       login,
+      register,
       logout,
       shouldLoadSession,
       refetchSession,

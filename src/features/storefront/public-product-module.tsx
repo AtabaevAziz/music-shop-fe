@@ -13,6 +13,7 @@ import { useStorefrontProductQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 import { formatMoney } from "@/lib/utils";
+import { useAuthSession } from "@/providers/session-provider";
 
 export function PublicProductModule({
   id,
@@ -23,6 +24,7 @@ export function PublicProductModule({
 }) {
   const t = useTranslations();
   const isApiConfigured = hasConfiguredApiBaseUrl();
+  const { session } = useAuthSession();
   const { data: appConfig } = useAppConfigQuery();
   const { data: product, isPending, error } = useStorefrontProductQuery(id);
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
@@ -31,6 +33,7 @@ export function PublicProductModule({
     (state) => state.items.find((item) => item.productId === id)?.qty ?? 0,
   );
   const currency = appConfig?.defaultCurrency ?? "UZS";
+  const isGuest = !session;
 
   if (!isApiConfigured) {
     return (
@@ -126,24 +129,34 @@ export function PublicProductModule({
             <Button
               type="button"
               size="lg"
-              disabled={!hasHydrated || product.stockQty < 1}
+              disabled={isGuest || !hasHydrated || product.stockQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0
                 ? `${t("labels.addToCart")} (${quantityInCart})`
                 : t("labels.addToCart")}
             </Button>
+            {session ? (
+              <Button asChild variant="outline" size="lg">
+                <Link href={`/${locale}/cart`}>{t("storefront.viewCart")}</Link>
+              </Button>
+            ) : null}
             <Button asChild variant="outline" size="lg">
-              <Link href={`/${locale}/cart`}>{t("storefront.viewCart")}</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href={`/${locale}/login?next=/${locale}/app/catalog`}>
-                {t("storefront.clientPortalCta")}
+              <Link
+                href={
+                  session
+                    ? `/${locale}/app`
+                    : `/${locale}/login?next=/${locale}/app`
+                }
+              >
+                {session
+                  ? t("storefront.clientPortalCta")
+                  : t("storefront.productPrimaryCta")}
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href={`/${locale}/catalog`}>
-                {t("storefront.backToCatalog")}
+              <Link href={`/${locale}`}>
+                {t("storefront.backToStorefront")}
               </Link>
             </Button>
           </div>

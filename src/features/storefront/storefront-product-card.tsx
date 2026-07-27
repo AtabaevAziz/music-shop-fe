@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useStorefrontCartStore } from "@/features/storefront/storefront-cart-store";
 import { Locale } from "@/i18n";
 import { formatMoney } from "@/lib/utils";
+import { useAuthSession } from "@/providers/session-provider";
 import type { StorefrontProduct } from "@/services/storefront/storefront-types";
 
 export function StorefrontProductCard({
@@ -22,12 +23,14 @@ export function StorefrontProductCard({
   locale: Locale;
 }) {
   const t = useTranslations();
+  const { session } = useAuthSession();
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
   const quantityInCart = useStorefrontCartStore(
     (state) =>
       state.items.find((item) => item.productId === product.id)?.qty ?? 0,
   );
+  const isGuest = !session;
 
   return (
     <Card className="storefront-product-card">
@@ -65,7 +68,7 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={!hasHydrated || product.stockQty < 1}
+              disabled={isGuest || !hasHydrated || product.stockQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0
