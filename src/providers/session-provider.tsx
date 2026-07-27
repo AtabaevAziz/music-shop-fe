@@ -9,8 +9,8 @@ import { queryKeys } from "@/lib/query-keys";
 import { shouldLoadSessionForPathname } from "@/lib/session-routes";
 import {
   login as loginRequest,
-  register as registerRequest,
   logout as logoutRequest,
+  register as registerRequest,
 } from "@/services/auth";
 import { getSession } from "@/services/auth";
 import type { Session } from "@/types/music";

@@ -1,8 +1,8 @@
 import { api } from "@/lib/api-client";
 import { fromApiSession } from "@/services/auth/auth-mapper";
 import type {
-  ApiRegisterResponse,
   ApiLoginResponse,
+  ApiRegisterResponse,
   ApiSessionResponse,
   LoginRequest,
   RegisterRequest,

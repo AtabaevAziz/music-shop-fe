@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-sans",
-});
 
 export const metadata: Metadata = {
   title: "Music Shop Online",
@@ -23,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className={inter.variable} suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <body>
         <Providers>
           {children}
