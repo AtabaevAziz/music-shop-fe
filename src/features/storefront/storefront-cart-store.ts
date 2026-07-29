@@ -13,6 +13,7 @@ export type StorefrontCartItem = {
   price: number;
   qty: number;
   stockQty: number;
+  availableQty: number;
   primaryImage?: string;
 };
 
@@ -42,7 +43,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
           const existingItem = state.items.find(
             (item) => item.productId === product.id,
           );
-          const nextQty = Math.max(1, Math.min(product.stockQty, qty));
+          const nextQty = Math.max(1, Math.min(product.availableQty, qty));
 
           if (!existingItem) {
             return {
@@ -55,6 +56,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   price: product.price,
                   qty: nextQty,
                   stockQty: product.stockQty,
+                  availableQty: product.availableQty,
                   primaryImage: normalizeCartItemImage(product.primaryImage),
                 },
               ],
@@ -70,8 +72,9 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                     brand: product.brand,
                     price: product.price,
                     stockQty: product.stockQty,
+                    availableQty: product.availableQty,
                     primaryImage: normalizeCartItemImage(product.primaryImage),
-                    qty: Math.min(item.qty + nextQty, product.stockQty),
+                    qty: Math.min(item.qty + nextQty, product.availableQty),
                   }
                 : item,
             ),
@@ -95,7 +98,8 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
             return [
               {
                 ...item,
-                qty: Math.max(1, Math.min(qty, item.stockQty)),
+                qty: Math.max(1, Math.min(qty, item.availableQty)),
+                availableQty: item.availableQty,
               },
             ];
           }),
@@ -110,7 +114,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
             items: state.items.flatMap((item) => {
               const product = productMap.get(item.productId);
 
-              if (!product || product.stockQty < 1) {
+              if (!product || product.availableQty < 1) {
                 return [];
               }
 
@@ -121,8 +125,9 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   brand: product.brand,
                   price: product.price,
                   stockQty: product.stockQty,
+                  availableQty: product.availableQty,
                   primaryImage: normalizeCartItemImage(product.primaryImage),
-                  qty: Math.max(1, Math.min(item.qty, product.stockQty)),
+                  qty: Math.max(1, Math.min(item.qty, product.availableQty)),
                 },
               ];
             }),

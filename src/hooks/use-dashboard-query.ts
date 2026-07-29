@@ -34,27 +34,20 @@ export function useDashboardQuery() {
       ]);
 
       const revenue = orders
-        .filter((order) => order.paymentStatus !== "refunded")
-        .reduce(
-          (sum, order) =>
-            sum +
-            order.items.reduce(
-              (itemsSum, item) => itemsSum + item.qty * item.unitPrice,
-              0,
-            ),
-          0,
-        );
+        .filter(
+          (order) =>
+            !["refunded", "cancelled", "failed"].includes(order.paymentStatus),
+        )
+        .reduce((sum, order) => sum + order.total, 0);
       const lowStock = products.filter(
         (product) =>
           product.stockQty <=
           (product.minStockQty ?? settings.lowStockThreshold),
       );
       const activeOrders = orders.filter(
-        (order) => !["completed", "cancelled"].includes(order.status),
+        (order) => !["delivered", "cancelled", "returned"].includes(order.status),
       );
-      const completedSales = orders.filter(
-        (order) => order.status === "completed",
-      ).length;
+      const completedSales = orders.filter((order) => order.status === "delivered").length;
       const featuredProducts = products.slice(0, 3);
       const latestOrders = [...orders]
         .sort(

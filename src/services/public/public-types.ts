@@ -1,6 +1,11 @@
 import type { Order, OrderItem, RepairRequest } from "@/types/music";
 
-export type PublicOrderPaymentMethod = "cash" | "card" | "transfer";
+export type PublicOrderPaymentMethod = "cash" | "online";
+export type PublicOrderDeliveryMethod =
+  | "pickup"
+  | "courier"
+  | "delivery_company"
+  | "post";
 
 export type CreatePublicOrderRequest = {
   customerName: string;
@@ -8,6 +13,8 @@ export type CreatePublicOrderRequest = {
   email?: string;
   address: string;
   paymentMethod: PublicOrderPaymentMethod;
+  deliveryMethod: PublicOrderDeliveryMethod;
+  deliveryCompany?: string;
   comment?: string;
   items: OrderItem[];
 };

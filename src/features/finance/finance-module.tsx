@@ -30,15 +30,12 @@ export function FinanceModule({ locale }: { locale: Locale }) {
   }
 
   const rows = data.orders.map((order) => {
-    const total = order.items.reduce(
-      (sum, item) => sum + item.qty * item.unitPrice,
-      0,
-    );
+    const total = order.total;
     const cost = order.items.reduce((sum, item) => {
       const product = data.products.find(
         (entry) => entry.id === item.productId,
       );
-      return sum + (product?.costPrice ?? 0) * item.qty;
+      return sum + (product?.costPrice ?? 0) * item.quantity;
     }, 0);
     return { order, total, margin: total - cost };
   });
@@ -93,7 +90,7 @@ export function FinanceModule({ locale }: { locale: Locale }) {
             <TableBody>
               {rows.map(({ order, total, margin }) => (
                 <TableRow key={order.id}>
-                  <TableCell>{order.id}</TableCell>
+                  <TableCell>{order.orderNumber}</TableCell>
                   <TableCell>
                     {formatMoney(total, data.settings.currency, locale)}
                   </TableCell>

@@ -30,17 +30,14 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
       />
       <div className="list-clean">
         {data.orders.map((order) => {
-          const total = order.items.reduce(
-            (sum, item) => sum + item.qty * item.unitPrice,
-            0,
-          );
+          const total = order.total;
 
           return (
             <Card key={order.id}>
               <CardContent className="space-y-4 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <strong>{order.id}</strong>
+                    <strong>{order.orderNumber}</strong>
                     <div className="muted">
                       {new Date(order.updatedAt).toLocaleString(
                         getIntlLocale(locale),
@@ -54,6 +51,8 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                           ? "success"
                           : order.paymentStatus === "pending"
                             ? "warning"
+                            : order.paymentStatus === "failed"
+                              ? "destructive"
                             : "secondary"
                       }
                     >
@@ -61,13 +60,13 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                     </Badge>
                     <Badge
                       variant={
-                        order.status === "completed"
+                        order.status === "delivered"
                           ? "success"
                           : order.status === "cancelled"
                             ? "destructive"
-                            : order.status === "ready_for_pickup"
+                            : order.status === "packed" || order.status === "shipped"
                               ? "warning"
-                              : "secondary"
+                            : "secondary"
                       }
                     >
                       {dynamicLabel(t, order.status)}
@@ -86,11 +85,12 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                         className="heading-row"
                       >
                         <span>
-                          {product?.name ?? item.productId} x {item.qty}
+                          {product?.name ?? item.productName ?? item.productId} x{" "}
+                          {item.quantity}
                         </span>
                         <span>
                           {formatMoney(
-                            item.qty * item.unitPrice,
+                            item.totalPrice,
                             data.currency,
                             locale,
                           )}
@@ -100,9 +100,16 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                   })}
                 </div>
                 <div className="heading-row">
-                  <div className="muted">{order.notes}</div>
+                  <div className="muted">
+                    {order.delivery?.trackingNumber ?? order.notes}
+                  </div>
                   <strong>{formatMoney(total, data.currency, locale)}</strong>
                 </div>
+                {order.delivery ? (
+                  <div className="muted">
+                    {dynamicLabel(t, order.delivery.status)}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           );

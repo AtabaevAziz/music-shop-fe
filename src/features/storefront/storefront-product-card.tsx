@@ -68,7 +68,7 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={isGuest || !hasHydrated || product.stockQty < 1}
+              disabled={isGuest || !hasHydrated || product.availableQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0

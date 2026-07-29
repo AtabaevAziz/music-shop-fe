@@ -71,13 +71,15 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
               <Card key={order.id}>
                 <CardContent className="space-y-3 p-5">
                   <div className="heading-row">
-                    <strong>{order.id}</strong>
+                    <strong>{order.orderNumber}</strong>
                     <Badge
                       variant={
-                        order.status === "completed"
+                        order.status === "delivered"
                           ? "success"
                           : order.status === "cancelled"
                             ? "destructive"
+                            : order.status === "packed" || order.status === "shipped"
+                              ? "warning"
                             : "secondary"
                       }
                     >
@@ -89,7 +91,7 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                       getIntlLocale(locale),
                     )}
                   </div>
-                  <div>{order.notes}</div>
+                  <div>{order.delivery?.address ?? order.notes}</div>
                 </CardContent>
               </Card>
             ))}

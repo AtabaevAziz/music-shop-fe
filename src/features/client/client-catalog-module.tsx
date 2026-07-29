@@ -89,9 +89,14 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
           {
             productId: purchaseTarget.id,
             qty: parsed.data.qty,
+            quantity: parsed.data.qty,
             unitPrice: purchaseTarget.price,
+            totalPrice: purchaseTarget.price * parsed.data.qty,
           },
         ],
+        address: "Client portal pickup",
+        paymentMethod: "cash",
+        deliveryMethod: "pickup",
         notes: parsed.data.notes,
       });
       setFormError("");
@@ -142,9 +147,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                     <div className="heading-row">
                       <strong>{product.name}</strong>
                       <Badge
-                        variant={product.stockQty <= 1 ? "warning" : "success"}
+                        variant={
+                          product.availableQty <= 1 ? "warning" : "success"
+                        }
                       >
-                        {t("labels.stock")}: {product.stockQty}
+                        {t("labels.stock")}: {product.availableQty}
                       </Badge>
                     </div>
                     <div className="muted">{product.shortDescription}</div>
@@ -159,7 +166,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                   </div>
                   <Button
                     type="button"
-                    disabled={product.stockQty < 1}
+                    disabled={product.availableQty < 1}
                     onClick={() => {
                       setFormError("");
                       setQty("1");
@@ -214,7 +221,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                 id="client-order-qty"
                 type="number"
                 min="1"
-                max={String(purchaseTarget?.stockQty ?? 1)}
+                max={String(purchaseTarget?.availableQty ?? 1)}
                 value={qty}
                 onChange={(event) => setQty(event.target.value)}
               />

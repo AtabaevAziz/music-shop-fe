@@ -17,9 +17,12 @@ export type ApiStorefrontCategory = {
 export type StorefrontProduct = {
   id: string;
   name: string;
+  slug?: string;
   sku: string;
   price: number;
   stockQty: number;
+  reservedQty: number;
+  availableQty: number;
   shortDescription: string;
   description: string;
   specs: Record<string, string>;
@@ -33,9 +36,12 @@ export type StorefrontProduct = {
 export type ApiStorefrontProduct = {
   id: string;
   name: string;
+  slug?: string;
   sku: string;
   price: number;
   stockQty: number;
+  reservedQty: number;
+  availableQty: number;
   shortDescription: string;
   description: string;
   specs: Record<string, string>;

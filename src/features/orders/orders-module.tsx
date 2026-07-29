@@ -106,19 +106,20 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   .slice(0, 2)
                   .map(
                     (item) =>
-                      productMap[item.productId]?.name ?? item.productId,
+                      productMap[item.productId]?.name ??
+                      item.productName ??
+                      item.productId,
                   )
                   .join(", ");
-                const total = order.items.reduce(
-                  (sum, item) => sum + item.qty * item.unitPrice,
-                  0,
-                );
+                const total = order.total;
 
                 return (
                   <TableRow key={order.id}>
-                    <TableCell>{order.id}</TableCell>
+                    <TableCell>{order.orderNumber}</TableCell>
                     <TableCell>
-                      {customerMap[order.customerId] ?? order.customerId}
+                      {order.customer.name ??
+                        customerMap[order.customerId] ??
+                        order.customerId}
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
@@ -139,10 +140,13 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <TableCell>
                       <Badge
                         variant={
-                          order.status === "completed"
+                          order.status === "delivered"
                             ? "success"
                             : order.status === "cancelled"
                               ? "destructive"
+                              : order.status === "packed" ||
+                                  order.status === "shipped"
+                                ? "warning"
                               : "secondary"
                         }
                       >
@@ -170,7 +174,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
       <section className="table-card">
         <PageHeader
           title={t("common.details")}
-          subtitle={selectedOrder ? selectedOrder.id : t("common.noData")}
+          subtitle={
+            selectedOrder ? selectedOrder.orderNumber : t("common.noData")
+          }
         />
         {actionError ? <div className="error">{actionError}</div> : null}
         {selectedOrder ? (
@@ -180,10 +186,13 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                 <div className="heading-row">
                   <Badge
                     variant={
-                      selectedOrder.status === "completed"
+                      selectedOrder.status === "delivered"
                         ? "success"
                         : selectedOrder.status === "cancelled"
                           ? "destructive"
+                          : selectedOrder.status === "packed" ||
+                              selectedOrder.status === "shipped"
+                            ? "warning"
                           : "secondary"
                     }
                   >
@@ -200,7 +209,8 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">{t("labels.customer")}</div>
                       <strong>
-                        {customerMap[selectedOrder.customerId] ??
+                        {selectedOrder.customer.name ??
+                          customerMap[selectedOrder.customerId] ??
                           selectedOrder.customerId}
                       </strong>
                     </CardContent>
@@ -208,16 +218,29 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <Card>
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">{t("labels.total")}</div>
-                      <strong>
-                        {formatMoney(
-                          selectedOrder.items.reduce(
-                            (sum, item) => sum + item.qty * item.unitPrice,
-                            0,
-                          ),
-                          data.settings.currency,
-                          locale,
-                        )}
-                      </strong>
+                      <strong>{formatMoney(selectedOrder.total, data.settings.currency, locale)}</strong>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="detail-grid">
+                  <Card>
+                    <CardContent className="space-y-2 p-5">
+                      <div className="muted">{t("labels.paymentMethod")}</div>
+                      <strong>{dynamicLabel(t, selectedOrder.paymentMethod)}</strong>
+                      <div className="muted">
+                        {dynamicLabel(t, selectedOrder.paymentStatus)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="space-y-2 p-5">
+                      <div className="muted">{t("labels.deliveryMethod")}</div>
+                      <strong>{dynamicLabel(t, selectedOrder.deliveryMethod)}</strong>
+                      <div className="muted">
+                        {selectedOrder.delivery
+                          ? dynamicLabel(t, selectedOrder.delivery.status)
+                          : t("common.noData")}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
@@ -228,14 +251,16 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       <Card key={`${selectedOrder.id}-${item.productId}`}>
                         <CardContent className="space-y-2 p-4">
                           <strong>
-                            {productMap[item.productId]?.name ?? item.productId}
+                            {productMap[item.productId]?.name ??
+                              item.productName ??
+                              item.productId}
                           </strong>
                           <div className="muted">
-                            {t("labels.qty")}: {item.qty}
+                            {t("labels.qty")}: {item.quantity}
                           </div>
                           <div className="muted">
                             {formatMoney(
-                              item.unitPrice,
+                              item.totalPrice,
                               data.settings.currency,
                               locale,
                             )}
@@ -245,7 +270,24 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     ))}
                   </div>
                 </div>
-                {selectedOrder.notes ? <p>{selectedOrder.notes}</p> : null}
+                {selectedOrder.delivery?.trackingNumber ? (
+                  <p>{selectedOrder.delivery.trackingNumber}</p>
+                ) : selectedOrder.notes ? (
+                  <p>{selectedOrder.notes}</p>
+                ) : null}
+                {selectedOrder.packaging ? (
+                  <Card>
+                    <CardContent className="space-y-2 p-5">
+                      <div className="muted">Packaging</div>
+                      <strong>{dynamicLabel(t, selectedOrder.packaging.status)}</strong>
+                      <div className="muted">
+                        {selectedOrder.packaging.fragile
+                          ? "Fragile"
+                          : t("common.noData")}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null}
                 <div className="space-y-3">
                   <strong>{t("common.status")}</strong>
                   <div className="flex flex-wrap gap-2">

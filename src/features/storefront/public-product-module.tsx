@@ -107,7 +107,7 @@ export function PublicProductModule({
             <div>
               <span>{t("labels.availability")}</span>
               <strong>
-                {product.stockQty > 0
+                {product.availableQty > 0
                   ? t("labels.inStock")
                   : t("labels.outOfStock")}
               </strong>
@@ -124,12 +124,16 @@ export function PublicProductModule({
               <span>{t("labels.category")}</span>
               <strong>{product.category.name}</strong>
             </div>
+            <div>
+              <span>{t("labels.stock")}</span>
+              <strong>{product.availableQty}</strong>
+            </div>
           </div>
           <div className="storefront-cta-row">
             <Button
               type="button"
               size="lg"
-              disabled={isGuest || !hasHydrated || product.stockQty < 1}
+              disabled={isGuest || !hasHydrated || product.availableQty < 1}
               onClick={() => addProduct(product)}
             >
               {hasHydrated && quantityInCart > 0

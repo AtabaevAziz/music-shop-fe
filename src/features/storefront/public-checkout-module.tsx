@@ -49,7 +49,9 @@ const checkoutSchema = z.object({
   phone: requiredTrimmedString(6),
   email: optionalTrimmedEmail(),
   address: requiredTrimmedString(4),
-  paymentMethod: z.enum(["cash", "card", "transfer"]),
+  paymentMethod: z.enum(["cash", "online"]),
+  deliveryMethod: z.enum(["pickup", "courier", "delivery_company", "post"]),
+  deliveryCompany: optionalTrimmedString(),
   comment: optionalTrimmedString(),
 });
 
@@ -73,6 +75,8 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
       email: "",
       address: "",
       paymentMethod: "cash",
+      deliveryMethod: "pickup",
+      deliveryCompany: "",
       comment: "",
     },
   });
@@ -80,7 +84,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
     mutationFn: createPublicOrder,
     onSuccess: (order) => {
       clearCart();
-      setPlacedOrderId(order.id);
+      setPlacedOrderId(order.orderNumber);
       form.reset();
     },
   });
@@ -104,10 +108,14 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
       email: values.email,
       address: normalizeRequiredString(values.address),
       paymentMethod: values.paymentMethod,
+      deliveryMethod: values.deliveryMethod,
+      deliveryCompany: normalizeOptionalString(values.deliveryCompany),
       comment: normalizeOptionalString(values.comment),
       items: items.map((item) => ({
         productId: item.productId,
         qty: item.qty,
+        quantity: item.qty,
+        totalPrice: item.qty * item.price,
         unitPrice: item.price,
       })),
     });
@@ -253,14 +261,60 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
                           <SelectItem value="cash">
                             {t("labels.paymentCash")}
                           </SelectItem>
-                          <SelectItem value="card">
-                            {t("labels.paymentCard")}
-                          </SelectItem>
-                          <SelectItem value="transfer">
-                            {t("labels.paymentTransfer")}
+                          <SelectItem value="online">
+                            {t("labels.paymentOnline")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="deliveryMethod"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("labels.deliveryMethod")}</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="pickup">
+                            {t("dynamic.pickup")}
+                          </SelectItem>
+                          <SelectItem value="courier">
+                            {t("dynamic.courier")}
+                          </SelectItem>
+                          <SelectItem value="delivery_company">
+                            {t("dynamic.delivery_company")}
+                          </SelectItem>
+                          <SelectItem value="post">
+                            {t("dynamic.post")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="deliveryCompany"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("labels.deliveryCompany")}</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

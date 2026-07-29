@@ -308,7 +308,7 @@ export function CustomersModule() {
                           key={order.id}
                           className="flex items-center justify-between gap-3"
                         >
-                          <span>{order.id}</span>
+                          <span>{order.orderNumber}</span>
                           <span className="muted">
                             {new Date(order.createdAt).toLocaleDateString(
                               getIntlLocale(locale as "en" | "ru" | "uz"),

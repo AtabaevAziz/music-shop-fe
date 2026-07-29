@@ -128,17 +128,11 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.latestOrders.map((order) => {
-                    const total = order.items.reduce(
-                      (sum, item) => sum + item.qty * item.unitPrice,
-                      0,
-                    );
-
-                    return (
+                  {data.latestOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell>
                           <div className="space-y-1">
-                            <strong>{order.id}</strong>
+                            <strong>{order.orderNumber}</strong>
                             <div className="muted">
                               {new Date(order.createdAt).toLocaleDateString(
                                 getIntlLocale(locale),
@@ -153,7 +147,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                           <div className="space-y-1">
                             <div>
                               {formatMoney(
-                                total,
+                                order.total,
                                 data.settings.currency,
                                 locale,
                               )}
@@ -164,8 +158,7 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                           </div>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
+                  ))}
                 </TableBody>
               </Table>
             </div>

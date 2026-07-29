@@ -25,7 +25,7 @@ export function useClientHomeQuery() {
         ]);
 
       const activeOrders = orders.filter(
-        (order) => !["completed", "cancelled"].includes(order.status),
+        (order) => !["delivered", "cancelled", "returned"].includes(order.status),
       );
       const activeProducts = products.filter(
         (product) => product.status === "active",
@@ -34,17 +34,9 @@ export function useClientHomeQuery() {
         (request) => !["completed", "cancelled"].includes(request.status),
       );
       const readyCount =
-        orders.filter((order) => order.status === "ready_for_pickup").length +
+        orders.filter((order) => order.status === "packed").length +
         repairRequests.filter((request) => request.status === "ready").length;
-      const spent = orders.reduce(
-        (sum, order) =>
-          sum +
-          order.items.reduce(
-            (itemsSum, item) => itemsSum + item.qty * item.unitPrice,
-            0,
-          ),
-        0,
-      );
+      const spent = orders.reduce((sum, order) => sum + order.total, 0);
 
       return {
         customer,

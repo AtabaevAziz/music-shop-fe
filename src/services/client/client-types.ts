@@ -20,7 +20,11 @@ export type ApiClientMeResponse = {
 
 export type CreateClientOrderRequest = {
   items: OrderItem[];
-  notes: string;
+  address: string;
+  paymentMethod: "cash" | "online";
+  deliveryMethod: "pickup" | "courier" | "delivery_company" | "post";
+  deliveryCompany?: string;
+  notes?: string;
 };
 
 export type CreateClientRepairRequest = {
