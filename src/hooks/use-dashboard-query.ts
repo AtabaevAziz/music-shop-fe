@@ -45,9 +45,12 @@ export function useDashboardQuery() {
           (product.minStockQty ?? settings.lowStockThreshold),
       );
       const activeOrders = orders.filter(
-        (order) => !["delivered", "cancelled", "returned"].includes(order.status),
+        (order) =>
+          !["delivered", "cancelled", "returned"].includes(order.status),
       );
-      const completedSales = orders.filter((order) => order.status === "delivered").length;
+      const completedSales = orders.filter(
+        (order) => order.status === "delivered",
+      ).length;
       const featuredProducts = products.slice(0, 3);
       const latestOrders = [...orders]
         .sort(

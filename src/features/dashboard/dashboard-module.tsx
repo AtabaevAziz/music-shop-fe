@@ -129,35 +129,35 @@ export function DashboardModule({ locale }: { locale: Locale }) {
                 </TableHeader>
                 <TableBody>
                   {data.latestOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <strong>{order.orderNumber}</strong>
-                            <div className="muted">
-                              {new Date(order.createdAt).toLocaleDateString(
-                                getIntlLocale(locale),
-                              )}
-                            </div>
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <strong>{order.orderNumber}</strong>
+                          <div className="muted">
+                            {new Date(order.createdAt).toLocaleDateString(
+                              getIntlLocale(locale),
+                            )}
                           </div>
-                        </TableCell>
-                        <TableCell>
-                          {customerMap[order.customerId] ?? order.customerId}
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div>
-                              {formatMoney(
-                                order.total,
-                                data.settings.currency,
-                                locale,
-                              )}
-                            </div>
-                            <Badge variant="secondary">
-                              {dynamicLabel(t, order.status)}
-                            </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {customerMap[order.customerId] ?? order.customerId}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div>
+                            {formatMoney(
+                              order.total,
+                              data.settings.currency,
+                              locale,
+                            )}
                           </div>
-                        </TableCell>
-                      </TableRow>
+                          <Badge variant="secondary">
+                            {dynamicLabel(t, order.status)}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
                 </TableBody>
               </Table>

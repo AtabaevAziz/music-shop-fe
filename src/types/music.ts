@@ -6,11 +6,7 @@ export type PaymentStatus =
   | "failed"
   | "cancelled"
   | "refunded";
-export type DeliveryMethod =
-  | "pickup"
-  | "courier"
-  | "delivery_company"
-  | "post";
+export type DeliveryMethod = "pickup" | "courier" | "delivery_company" | "post";
 export type DeliveryStatus =
   | "not_ready"
   | "ready_for_shipment"

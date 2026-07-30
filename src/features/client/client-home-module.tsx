@@ -78,9 +78,10 @@ export function ClientHomeModule({ locale }: { locale: Locale }) {
                           ? "success"
                           : order.status === "cancelled"
                             ? "destructive"
-                            : order.status === "packed" || order.status === "shipped"
+                            : order.status === "packed" ||
+                                order.status === "shipped"
                               ? "warning"
-                            : "secondary"
+                              : "secondary"
                       }
                     >
                       {dynamicLabel(t, order.status)}

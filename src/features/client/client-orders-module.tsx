@@ -53,7 +53,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                             ? "warning"
                             : order.paymentStatus === "failed"
                               ? "destructive"
-                            : "secondary"
+                              : "secondary"
                       }
                     >
                       {dynamicLabel(t, order.paymentStatus)}
@@ -64,9 +64,10 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                           ? "success"
                           : order.status === "cancelled"
                             ? "destructive"
-                            : order.status === "packed" || order.status === "shipped"
+                            : order.status === "packed" ||
+                                order.status === "shipped"
                               ? "warning"
-                            : "secondary"
+                              : "secondary"
                       }
                     >
                       {dynamicLabel(t, order.status)}
@@ -85,15 +86,11 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                         className="heading-row"
                       >
                         <span>
-                          {product?.name ?? item.productName ?? item.productId} x{" "}
-                          {item.quantity}
+                          {product?.name ?? item.productName ?? item.productId}{" "}
+                          x {item.quantity}
                         </span>
                         <span>
-                          {formatMoney(
-                            item.totalPrice,
-                            data.currency,
-                            locale,
-                          )}
+                          {formatMoney(item.totalPrice, data.currency, locale)}
                         </span>
                       </div>
                     );

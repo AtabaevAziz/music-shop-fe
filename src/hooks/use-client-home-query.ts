@@ -25,7 +25,8 @@ export function useClientHomeQuery() {
         ]);
 
       const activeOrders = orders.filter(
-        (order) => !["delivered", "cancelled", "returned"].includes(order.status),
+        (order) =>
+          !["delivered", "cancelled", "returned"].includes(order.status),
       );
       const activeProducts = products.filter(
         (product) => product.status === "active",

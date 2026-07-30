@@ -147,7 +147,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                               : order.status === "packed" ||
                                   order.status === "shipped"
                                 ? "warning"
-                              : "secondary"
+                                : "secondary"
                         }
                       >
                         {dynamicLabel(t, order.status)}
@@ -193,7 +193,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                           : selectedOrder.status === "packed" ||
                               selectedOrder.status === "shipped"
                             ? "warning"
-                          : "secondary"
+                            : "secondary"
                     }
                   >
                     {dynamicLabel(t, selectedOrder.status)}
@@ -218,7 +218,13 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <Card>
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">{t("labels.total")}</div>
-                      <strong>{formatMoney(selectedOrder.total, data.settings.currency, locale)}</strong>
+                      <strong>
+                        {formatMoney(
+                          selectedOrder.total,
+                          data.settings.currency,
+                          locale,
+                        )}
+                      </strong>
                     </CardContent>
                   </Card>
                 </div>
@@ -226,7 +232,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <Card>
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">{t("labels.paymentMethod")}</div>
-                      <strong>{dynamicLabel(t, selectedOrder.paymentMethod)}</strong>
+                      <strong>
+                        {dynamicLabel(t, selectedOrder.paymentMethod)}
+                      </strong>
                       <div className="muted">
                         {dynamicLabel(t, selectedOrder.paymentStatus)}
                       </div>
@@ -235,7 +243,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <Card>
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">{t("labels.deliveryMethod")}</div>
-                      <strong>{dynamicLabel(t, selectedOrder.deliveryMethod)}</strong>
+                      <strong>
+                        {dynamicLabel(t, selectedOrder.deliveryMethod)}
+                      </strong>
                       <div className="muted">
                         {selectedOrder.delivery
                           ? dynamicLabel(t, selectedOrder.delivery.status)
@@ -279,7 +289,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <Card>
                     <CardContent className="space-y-2 p-5">
                       <div className="muted">Packaging</div>
-                      <strong>{dynamicLabel(t, selectedOrder.packaging.status)}</strong>
+                      <strong>
+                        {dynamicLabel(t, selectedOrder.packaging.status)}
+                      </strong>
                       <div className="muted">
                         {selectedOrder.packaging.fragile
                           ? "Fragile"
