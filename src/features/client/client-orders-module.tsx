@@ -102,9 +102,30 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                   </div>
                   <strong>{formatMoney(total, data.currency, locale)}</strong>
                 </div>
+                <div className="muted">{order.address.formatted}</div>
                 {order.delivery ? (
                   <div className="muted">
                     {dynamicLabel(t, order.delivery.status)}
+                  </div>
+                ) : null}
+                {order.statusHistory.length > 0 ? (
+                  <div className="space-y-2">
+                    <strong>{t("labels.statusHistory")}</strong>
+                    <div className="space-y-2">
+                      {order.statusHistory.slice(-3).reverse().map((entry) => (
+                        <div
+                          key={`${order.id}-${entry.changedAt}-${entry.newStatus}`}
+                          className="heading-row text-sm"
+                        >
+                          <span>{dynamicLabel(t, entry.newStatus)}</span>
+                          <span className="muted">
+                            {new Date(entry.changedAt).toLocaleString(
+                              getIntlLocale(locale),
+                            )}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
               </CardContent>

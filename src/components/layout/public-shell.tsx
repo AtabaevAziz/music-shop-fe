@@ -71,6 +71,11 @@ export function PublicShell({
             </DropdownMenuContent>
           </DropdownMenu>
           <ThemeToggle />
+          <Button asChild variant="outline">
+            <Link href={`/${locale}/orders`}>
+              {t("storefront.trackOrderLink")}
+            </Link>
+          </Button>
           <div className="storefront-auth-actions">
             <Button
               asChild

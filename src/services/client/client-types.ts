@@ -1,7 +1,6 @@
 import type {
   Customer,
   Order,
-  OrderItem,
   Product,
   RepairRequest,
 } from "@/types/music";
@@ -18,13 +17,28 @@ export type ApiClientMeResponse = {
   customer: ApiClientCustomer | null;
 };
 
+export type CreateClientOrderItemRequest = {
+  productId: string;
+  quantity: number;
+};
+
 export type CreateClientOrderRequest = {
-  items: OrderItem[];
-  address: string;
+  items: CreateClientOrderItemRequest[];
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email?: string;
+  country: string;
+  region: string;
+  city: string;
+  street: string;
+  house: string;
+  apartment?: string;
+  postalCode: string;
   paymentMethod: "cash" | "online";
   deliveryMethod: "pickup" | "courier" | "delivery_company" | "post";
   deliveryCompany?: string;
-  notes?: string;
+  comment?: string;
 };
 
 export type CreateClientRepairRequest = {

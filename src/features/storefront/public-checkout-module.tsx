@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -41,14 +42,23 @@ import {
   optionalTrimmedString,
   requiredTrimmedString,
 } from "@/lib/form-utils";
+import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
 import { createPublicOrder } from "@/services/public";
+import type { Order } from "@/types/music";
 
 const checkoutSchema = z.object({
-  customerName: requiredTrimmedString(2),
+  firstName: requiredTrimmedString(2),
+  lastName: requiredTrimmedString(2),
   phone: requiredTrimmedString(6),
   email: optionalTrimmedEmail(),
-  address: requiredTrimmedString(4),
+  country: requiredTrimmedString(2),
+  region: requiredTrimmedString(2),
+  city: requiredTrimmedString(2),
+  street: requiredTrimmedString(2),
+  house: requiredTrimmedString(1),
+  apartment: optionalTrimmedString(),
+  postalCode: requiredTrimmedString(3),
   paymentMethod: z.enum(["cash", "online"]),
   deliveryMethod: z.enum(["pickup", "courier", "delivery_company", "post"]),
   deliveryCompany: optionalTrimmedString(),
@@ -56,6 +66,11 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+type FieldSpec = {
+  name: keyof CheckoutFormValues;
+  label: string;
+};
 
 export function PublicCheckoutModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -66,14 +81,21 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
   const currency = appConfig?.defaultCurrency ?? "UZS";
   const totalItems = getStorefrontCartItemsCount(items);
   const total = getStorefrontCartTotal(items);
-  const [placedOrderId, setPlacedOrderId] = useState<string | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
-      customerName: "",
+      firstName: "",
+      lastName: "",
       phone: "",
       email: "",
-      address: "",
+      country: "",
+      region: "",
+      city: "",
+      street: "",
+      house: "",
+      apartment: "",
+      postalCode: "",
       paymentMethod: "cash",
       deliveryMethod: "pickup",
       deliveryCompany: "",
@@ -84,10 +106,26 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
     mutationFn: createPublicOrder,
     onSuccess: (order) => {
       clearCart();
-      setPlacedOrderId(order.orderNumber);
+      setPlacedOrder(order);
       form.reset();
     },
   });
+
+  const identityFields: FieldSpec[] = [
+    { name: "firstName", label: t("labels.firstName") },
+    { name: "lastName", label: t("labels.lastName") },
+    { name: "phone", label: t("labels.phone") },
+    { name: "email", label: t("labels.emailOptional") },
+  ];
+  const addressFields: FieldSpec[] = [
+    { name: "country", label: t("labels.country") },
+    { name: "region", label: t("labels.region") },
+    { name: "city", label: t("labels.city") },
+    { name: "street", label: t("labels.street") },
+    { name: "house", label: t("labels.house") },
+    { name: "apartment", label: t("labels.apartment") },
+    { name: "postalCode", label: t("labels.postalCode") },
+  ];
 
   if (!hasHydrated) {
     return (
@@ -103,40 +141,81 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
 
   async function submit(values: CheckoutFormValues) {
     await orderMutation.mutateAsync({
-      customerName: normalizeRequiredString(values.customerName),
+      firstName: normalizeRequiredString(values.firstName),
+      lastName: normalizeRequiredString(values.lastName),
       phone: normalizeRequiredString(values.phone),
       email: values.email,
-      address: normalizeRequiredString(values.address),
+      country: normalizeRequiredString(values.country),
+      region: normalizeRequiredString(values.region),
+      city: normalizeRequiredString(values.city),
+      street: normalizeRequiredString(values.street),
+      house: normalizeRequiredString(values.house),
+      apartment: normalizeOptionalString(values.apartment),
+      postalCode: normalizeRequiredString(values.postalCode),
       paymentMethod: values.paymentMethod,
       deliveryMethod: values.deliveryMethod,
       deliveryCompany: normalizeOptionalString(values.deliveryCompany),
       comment: normalizeOptionalString(values.comment),
       items: items.map((item) => ({
         productId: item.productId,
-        qty: item.qty,
         quantity: item.qty,
-        totalPrice: item.qty * item.price,
-        unitPrice: item.price,
       })),
     });
   }
 
-  if (placedOrderId) {
+  if (placedOrder) {
     return (
       <div className="storefront-flow">
         <Card className="storefront-empty-card">
           <CardContent className="grid gap-4 p-6 text-center">
             <strong>{t("storefront.orderPlacedTitle")}</strong>
             <p className="muted">
-              {t("storefront.orderPlacedText", { orderId: placedOrderId })}
+              {t("storefront.orderPlacedText", {
+                orderId: placedOrder.orderNumber,
+              })}
             </p>
+            <div className="grid gap-2 text-left">
+              <div>
+                <strong>{placedOrder.customer.name}</strong>
+              </div>
+              <div className="muted">{placedOrder.address.formatted}</div>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">
+                  {dynamicLabel(t, placedOrder.status)}
+                </Badge>
+                <Badge
+                  variant={
+                    placedOrder.paymentStatus === "paid"
+                      ? "success"
+                      : placedOrder.paymentStatus === "failed" ||
+                          placedOrder.paymentStatus === "cancelled" ||
+                          placedOrder.paymentStatus === "refunded"
+                        ? "destructive"
+                        : "warning"
+                  }
+                >
+                  {dynamicLabel(t, placedOrder.paymentStatus)}
+                </Badge>
+                <Badge variant="outline">
+                  {dynamicLabel(t, placedOrder.deliveryMethod)}
+                </Badge>
+              </div>
+              <div className="muted">
+                {formatMoney(placedOrder.total, currency, locale)}
+              </div>
+            </div>
             <div className="flex flex-wrap justify-center gap-3">
               <Button asChild>
+                <Link href={`/${locale}/orders`}>
+                  {t("storefront.trackOrderLink")}
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
                 <Link href={`/${locale}/catalog`}>
                   {t("storefront.continueShopping")}
                 </Link>
               </Button>
-              <Button asChild variant="outline">
+              <Button asChild variant="ghost">
                 <Link href={`/${locale}/contacts`}>
                   {t("storefront.contactsPageTitle")}
                 </Link>
@@ -186,125 +265,105 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
             <Form {...form}>
               <form className="grid gap-4" onSubmit={form.handleSubmit(submit)}>
                 <div className="grid gap-4 md:grid-cols-2">
+                  {identityFields.map((fieldSpec) => (
+                    <FormField
+                      key={fieldSpec.name}
+                      control={form.control}
+                      name={fieldSpec.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{fieldSpec.label}</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type={fieldSpec.name === "email" ? "email" : "text"}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {addressFields.map((fieldSpec) => (
+                    <FormField
+                      key={fieldSpec.name}
+                      control={form.control}
+                      name={fieldSpec.name}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{fieldSpec.label}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="customerName"
+                    name="paymentMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("labels.name")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <FormLabel>{t("labels.paymentMethod")}</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="cash">
+                              {t("labels.paymentCash")}
+                            </SelectItem>
+                            <SelectItem value="online">
+                              {t("labels.paymentOnline")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
-                    name="phone"
+                    name="deliveryMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("labels.phone")}</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <FormLabel>{t("labels.deliveryMethod")}</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pickup">
+                              {t("dynamic.pickup")}
+                            </SelectItem>
+                            <SelectItem value="courier">
+                              {t("dynamic.courier")}
+                            </SelectItem>
+                            <SelectItem value="delivery_company">
+                              {t("dynamic.delivery_company")}
+                            </SelectItem>
+                            <SelectItem value="post">
+                              {t("dynamic.post")}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("labels.emailOptional")}</FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("labels.address")}</FormLabel>
-                      <FormControl>
-                        <Textarea {...field} rows={3} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="paymentMethod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("labels.paymentMethod")}</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="cash">
-                            {t("labels.paymentCash")}
-                          </SelectItem>
-                          <SelectItem value="online">
-                            {t("labels.paymentOnline")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="deliveryMethod"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t("labels.deliveryMethod")}</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pickup">
-                            {t("dynamic.pickup")}
-                          </SelectItem>
-                          <SelectItem value="courier">
-                            {t("dynamic.courier")}
-                          </SelectItem>
-                          <SelectItem value="delivery_company">
-                            {t("dynamic.delivery_company")}
-                          </SelectItem>
-                          <SelectItem value="post">
-                            {t("dynamic.post")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
                 <FormField
                   control={form.control}

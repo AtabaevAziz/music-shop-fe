@@ -5,8 +5,10 @@ import {
 } from "@/services/orders/orders-mapper";
 import type {
   ApiOrder,
+  ApiOrderPaymentStatusResponse,
   ApiOrderResponse,
   ApiOrderStatusResponse,
+  ChangeOrderPaymentRequest,
   ChangeOrderStatusRequest,
   OrdersListQuery,
 } from "@/services/orders/orders-types";
@@ -36,4 +38,15 @@ export async function changeOrderStatus(
     input,
   );
   return fromApiOrderStatusUpdate(response.order);
+}
+
+export async function changeOrderPaymentStatus(
+  orderId: string,
+  input: ChangeOrderPaymentRequest,
+) {
+  const response = await api.post<ApiOrderPaymentStatusResponse>(
+    `orders/${orderId}/payment-status`,
+    input,
+  );
+  return fromApiOrder(response.order);
 }

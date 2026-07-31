@@ -13,6 +13,25 @@ export type ApiOrderStatusUpdate = Pick<Order, "id" | "status" | "updatedAt">;
 
 export type ChangeOrderStatusRequest = {
   status: OrderStatus;
+  comment?: string;
+  carrier?: string;
+  trackingNumber?: string;
+  fragile?: boolean;
+  packageType?: string;
+  weightGrams?: number;
+  lengthCm?: number;
+  widthCm?: number;
+  heightCm?: number;
+  serialNumbers?: string;
+  warehouseIssueType?: string;
+  packagingComment?: string;
+};
+
+export type ChangeOrderPaymentRequest = {
+  paymentStatus: PaymentStatus;
+  transactionId?: string;
+  provider?: string;
+  comment?: string;
 };
 
 export type ApiOrderResponse = {
@@ -21,4 +40,8 @@ export type ApiOrderResponse = {
 
 export type ApiOrderStatusResponse = {
   order: ApiOrderStatusUpdate;
+};
+
+export type ApiOrderPaymentStatusResponse = {
+  order: ApiOrder;
 };

@@ -1,4 +1,4 @@
-import type { Order, OrderItem, RepairRequest } from "@/types/music";
+import type { Order, RepairRequest } from "@/types/music";
 
 export type PublicOrderPaymentMethod = "cash" | "online";
 export type PublicOrderDeliveryMethod =
@@ -7,16 +7,28 @@ export type PublicOrderDeliveryMethod =
   | "delivery_company"
   | "post";
 
+export type CreateOrderItemRequest = {
+  productId: string;
+  quantity: number;
+};
+
 export type CreatePublicOrderRequest = {
-  customerName: string;
+  firstName: string;
+  lastName: string;
   phone: string;
   email?: string;
-  address: string;
+  country: string;
+  region: string;
+  city: string;
+  street: string;
+  house: string;
+  apartment?: string;
+  postalCode: string;
   paymentMethod: PublicOrderPaymentMethod;
   deliveryMethod: PublicOrderDeliveryMethod;
   deliveryCompany?: string;
   comment?: string;
-  items: OrderItem[];
+  items: CreateOrderItemRequest[];
 };
 
 export type CreatePublicRepairRequest = {
@@ -31,6 +43,12 @@ export type CreatePublicRepairRequest = {
 
 export type ApiPublicOrder = Order;
 export type ApiPublicRepair = RepairRequest;
+
+export type GetPublicOrderRequest = {
+  orderNumber: string;
+  phone?: string;
+  email?: string;
+};
 
 export type ApiPublicOrderResponse = {
   order: ApiPublicOrder;

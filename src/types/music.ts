@@ -2,6 +2,7 @@ export type Role = "admin" | "client";
 export type PaymentMethod = "cash" | "online";
 export type PaymentStatus =
   | "pending"
+  | "processing"
   | "paid"
   | "failed"
   | "cancelled"
@@ -15,18 +16,26 @@ export type DeliveryStatus =
   | "delivered"
   | "delivery_failed"
   | "returned";
-export type PackagingStatus = "not_started" | "in_progress" | "packed";
+export type PackagingStatus =
+  | "not_started"
+  | "in_progress"
+  | "packed"
+  | "ready_for_shipment";
 export type OrderStatus =
   | "new"
-  | "awaiting_payment"
-  | "paid"
   | "confirmed"
-  | "processing"
+  | "sent_to_warehouse"
+  | "picking"
+  | "picked"
+  | "packing"
   | "packed"
+  | "ready_for_shipment"
   | "shipped"
   | "delivered"
-  | "cancelled";
-export type OrderTerminalStatus = OrderStatus | "returned";
+  | "cancelled"
+  | "stock_problem"
+  | "returned";
+export type OrderTerminalStatus = OrderStatus;
 export type RepairStatus =
   | "new"
   | "diagnostics"
@@ -90,15 +99,29 @@ export type OrderItem = {
   totalPrice: number;
 };
 
+export type OrderAddress = {
+  country: string;
+  region: string;
+  city: string;
+  street: string;
+  house: string;
+  apartment?: string | null;
+  postalCode: string;
+  formatted: string;
+};
+
 export type Order = {
   id: string;
   orderNumber: string;
   customerId: string;
   customer: {
+    firstName: string;
+    lastName: string;
     name: string;
     phone: string;
     email?: string | null;
   };
+  address: OrderAddress;
   items: OrderItem[];
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
@@ -115,6 +138,7 @@ export type Order = {
     method: DeliveryMethod;
     company?: string | null;
     address: string;
+    addressSnapshot: OrderAddress;
     trackingNumber?: string | null;
     shippingCost: number;
     status: DeliveryStatus;
@@ -127,9 +151,18 @@ export type Order = {
     packageType?: string | null;
     dimensions?: string | null;
     weightGrams?: number | null;
+    lengthCm?: number | null;
+    widthCm?: number | null;
+    heightCm?: number | null;
     comment?: string | null;
+    serialNumbers?: string | null;
+    warehouseIssueType?: string | null;
     packedAt?: string | null;
     employeeId?: string | null;
+  } | null;
+  warehouseIssue?: {
+    type: string;
+    comment?: string | null;
   } | null;
   status: OrderStatus;
   subtotal: number;
