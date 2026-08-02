@@ -18,14 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminOrdersQuery } from "@/hooks/use-orders-query";
 import { Locale } from "@/i18n";
@@ -37,7 +29,12 @@ import type {
   ChangeOrderPaymentRequest,
   ChangeOrderStatusRequest,
 } from "@/services/orders/orders-types";
-import type { Order, OrderStatus, PaymentStatus } from "@/types/music";
+import type {
+  Order,
+  OrderStage,
+  OrderStatus,
+  PaymentStatus,
+} from "@/types/music";
 
 type WorkflowFormState = {
   comment: string;
@@ -68,6 +65,16 @@ const paymentStatusOptions: PaymentStatus[] = [
   "failed",
   "cancelled",
   "refunded",
+];
+
+const stageOrder: OrderStage[] = [
+  "intake",
+  "payment",
+  "warehouse",
+  "packing",
+  "shipment",
+  "exception",
+  "completed",
 ];
 
 function getOrderStatusVariant(status: OrderStatus) {
@@ -104,6 +111,19 @@ function getPaymentStatusVariant(status: PaymentStatus) {
   return "secondary" as const;
 }
 
+function getStageVariant(stage: OrderStage) {
+  if (stage === "completed") {
+    return "success" as const;
+  }
+  if (stage === "exception") {
+    return "destructive" as const;
+  }
+  if (stage === "shipment" || stage === "packing") {
+    return "warning" as const;
+  }
+  return "secondary" as const;
+}
+
 function trimOrUndefined(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
@@ -123,10 +143,13 @@ function buildStatusPayload(
   status: OrderStatus,
   formState: WorkflowFormState,
 ): ChangeOrderStatusRequest {
+  const carrier = trimOrUndefined(formState.carrier);
+
   return {
     status,
     comment: trimOrUndefined(formState.comment),
-    carrier: trimOrUndefined(formState.carrier),
+    carrier,
+    deliveryCompany: carrier,
     trackingNumber: trimOrUndefined(formState.trackingNumber),
     fragile: formState.fragile,
     packageType: trimOrUndefined(formState.packageType),
@@ -138,6 +161,71 @@ function buildStatusPayload(
     warehouseIssueType: trimOrUndefined(formState.warehouseIssueType),
     packagingComment: trimOrUndefined(formState.packagingComment),
   };
+}
+
+function getStageLabelKey(stage: OrderStage) {
+  switch (stage) {
+    case "intake":
+      return "labels.stageIntake";
+    case "payment":
+      return "labels.stagePayment";
+    case "warehouse":
+      return "labels.stageWarehouse";
+    case "packing":
+      return "labels.stagePacking";
+    case "shipment":
+      return "labels.stageShipment";
+    case "exception":
+      return "labels.stageException";
+    case "completed":
+      return "labels.stageCompleted";
+    default:
+      return "labels.operationsStage";
+  }
+}
+
+function getStageDescriptionKey(stage: OrderStage) {
+  switch (stage) {
+    case "intake":
+      return "labels.stageIntakeDescription";
+    case "payment":
+      return "labels.stagePaymentDescription";
+    case "warehouse":
+      return "labels.stageWarehouseDescription";
+    case "packing":
+      return "labels.stagePackingDescription";
+    case "shipment":
+      return "labels.stageShipmentDescription";
+    case "exception":
+      return "labels.stageExceptionDescription";
+    case "completed":
+      return "labels.stageCompletedDescription";
+    default:
+      return "labels.workflowControlsSubtitle";
+  }
+}
+
+function getTimelineVariant(
+  type: Order["timeline"][number]["type"],
+  status: string,
+) {
+  if (type === "payment") {
+    return getPaymentStatusVariant(status as PaymentStatus);
+  }
+
+  if (type === "status") {
+    return getOrderStatusVariant(status as OrderStatus);
+  }
+
+  if (status === "delivered") {
+    return "success" as const;
+  }
+
+  if (status === "delivery_failed" || status === "returned") {
+    return "destructive" as const;
+  }
+
+  return "warning" as const;
 }
 
 export function OrdersModule({ locale }: { locale: Locale }) {
@@ -231,13 +319,20 @@ export function OrdersModule({ locale }: { locale: Locale }) {
     });
   }, [data?.orders, paymentFilter, search, statusFilter]);
 
+  const stageBuckets = useMemo(
+    () =>
+      stageOrder.map((stage) => ({
+        stage,
+        orders: filteredOrders.filter((order) => order.stage === stage),
+      })),
+    [filteredOrders],
+  );
+
   const selectedOrder =
     filteredOrders.find((order) => order.id === selectedOrderId) ??
     filteredOrders[0] ??
     null;
-  const allowedTransitions = selectedOrder
-    ? (data?.orderWorkflow?.transitions[selectedOrder.status] ?? [])
-    : [];
+  const allowedTransitions = selectedOrder?.availableTransitions ?? [];
 
   useEffect(() => {
     if (!selectedOrderId && filteredOrders[0]?.id) {
@@ -275,7 +370,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
           ? selectedOrder.warehouseIssue.type
           : "",
       packagingComment:
-        selectedOrder.packaging?.comment ?? selectedOrder.warehouseIssue?.comment ?? "",
+        selectedOrder.packaging?.comment ??
+        selectedOrder.warehouseIssue?.comment ??
+        "",
       fragile: selectedOrder.packaging?.fragile ?? false,
     });
     setPaymentForm({
@@ -296,17 +393,17 @@ export function OrdersModule({ locale }: { locale: Locale }) {
     );
   }
 
-  const activeOrders = data.orders.filter(
-    (order) => !["delivered", "cancelled", "returned"].includes(order.status),
+  const intakeCount = filteredOrders.filter((order) =>
+    ["intake", "payment"].includes(order.stage),
   ).length;
-  const stockProblemOrders = data.orders.filter(
-    (order) => order.status === "stock_problem",
+  const warehouseCount = filteredOrders.filter(
+    (order) => order.stage === "warehouse" || order.stage === "packing",
   ).length;
-  const readyForShipmentOrders = data.orders.filter(
-    (order) => order.status === "ready_for_shipment",
+  const shipmentCount = filteredOrders.filter(
+    (order) => order.stage === "shipment",
   ).length;
-  const paidOrders = data.orders.filter(
-    (order) => order.paymentStatus === "paid",
+  const exceptionCount = filteredOrders.filter(
+    (order) => order.stage === "exception",
   ).length;
 
   return (
@@ -319,36 +416,36 @@ export function OrdersModule({ locale }: { locale: Locale }) {
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card>
             <CardContent className="space-y-2 p-5">
-              <div className="muted">{t("labels.activeOrders")}</div>
-              <div className="text-2xl font-semibold">{activeOrders}</div>
+              <div className="muted">{t("labels.stageIntake")}</div>
+              <div className="text-2xl font-semibold">{intakeCount}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-2 p-5">
-              <div className="muted">{t("labels.paidOrders")}</div>
-              <div className="text-2xl font-semibold">{paidOrders}</div>
+              <div className="muted">{t("labels.stageWarehouse")}</div>
+              <div className="text-2xl font-semibold">{warehouseCount}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-2 p-5">
-              <div className="muted">{t("labels.readyForShipment")}</div>
-              <div className="text-2xl font-semibold">{readyForShipmentOrders}</div>
+              <div className="muted">{t("labels.stageShipment")}</div>
+              <div className="text-2xl font-semibold">{shipmentCount}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="space-y-2 p-5">
-              <div className="muted">{t("labels.stockProblems")}</div>
-              <div className="text-2xl font-semibold">{stockProblemOrders}</div>
+              <div className="muted">{t("labels.stageException")}</div>
+              <div className="text-2xl font-semibold">{exceptionCount}</div>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(420px,0.9fr)]">
         <section className="table-card space-y-4">
           <PageHeader
-            title={t("labels.orderPipeline")}
-            subtitle={t("labels.workflowControlsSubtitle")}
+            title={t("labels.orderOperationsBoard")}
+            subtitle={t("labels.orderOperationsSubtitle")}
           />
           <div className="grid gap-3 md:grid-cols-3">
             <AppField label={t("common.search")}>
@@ -399,71 +496,75 @@ export function OrdersModule({ locale }: { locale: Locale }) {
               </Select>
             </AppField>
           </div>
-          <div className="responsive-table">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("labels.orderNumber")}</TableHead>
-                  <TableHead>{t("labels.orderDate")}</TableHead>
-                  <TableHead>{t("labels.customer")}</TableHead>
-                  <TableHead>{t("labels.qty")}</TableHead>
-                  <TableHead>{t("labels.total")}</TableHead>
-                  <TableHead>{t("labels.paymentState")}</TableHead>
-                  <TableHead>{t("labels.deliveryMethod")}</TableHead>
-                  <TableHead>{t("labels.orderStatus")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow
-                    key={order.id}
-                    className={
-                      selectedOrder?.id === order.id ? "bg-muted/40" : undefined
-                    }
-                    onClick={() => setSelectedOrderId(order.id)}
-                  >
-                    <TableCell>
-                      <div className="space-y-1">
-                        <strong>{order.orderNumber}</strong>
-                        <div className="muted">{order.customer.phone}</div>
+
+          <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+            {stageBuckets.map(({ stage, orders }) => (
+              <Card key={stage}>
+                <CardContent className="space-y-4 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <strong>{t(getStageLabelKey(stage))}</strong>
+                      <div className="muted">
+                        {t(getStageDescriptionKey(stage))}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString(
-                        getIntlLocale(locale),
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div>{order.customer.name}</div>
-                        <div className="muted">{order.customer.email ?? "-"}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {order.items.reduce((sum, item) => sum + item.quantity, 0)}
-                    </TableCell>
-                    <TableCell>
-                      {formatMoney(order.total, data.settings.currency, locale)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getPaymentStatusVariant(order.paymentStatus)}>
-                        {dynamicLabel(t, order.paymentStatus)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{dynamicLabel(t, order.deliveryMethod)}</TableCell>
-                    <TableCell>
-                      <Badge variant={getOrderStatusVariant(order.status)}>
-                        {dynamicLabel(t, order.status)}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                    <Badge variant={getStageVariant(stage)}>{orders.length}</Badge>
+                  </div>
+                  <div className="space-y-3">
+                    {orders.map((order) => (
+                      <button
+                        key={order.id}
+                        type="button"
+                        className={`w-full rounded-lg border px-3 py-3 text-left transition ${
+                          selectedOrder?.id === order.id
+                            ? "border-primary bg-muted/50"
+                            : "border-border hover:bg-muted/30"
+                        }`}
+                        onClick={() => setSelectedOrderId(order.id)}
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <strong>{order.orderNumber}</strong>
+                            <div className="muted">{order.customer.name}</div>
+                          </div>
+                          <Badge variant={getOrderStatusVariant(order.status)}>
+                            {dynamicLabel(t, order.status)}
+                          </Badge>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <Badge
+                            variant={getPaymentStatusVariant(order.paymentStatus)}
+                          >
+                            {dynamicLabel(t, order.paymentStatus)}
+                          </Badge>
+                          {order.deliveryStatus ? (
+                            <Badge variant="outline">
+                              {dynamicLabel(t, order.deliveryStatus)}
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <div className="mt-3 heading-row text-sm">
+                          <span>
+                            {order.items.reduce(
+                              (sum, item) => sum + item.quantity,
+                              0,
+                            )}{" "}
+                            {t("labels.qty")}
+                          </span>
+                          <strong>
+                            {formatMoney(order.total, data.settings.currency, locale)}
+                          </strong>
+                        </div>
+                      </button>
+                    ))}
+                    {orders.length === 0 ? (
+                      <div className="empty-state text-sm">{t("common.noData")}</div>
+                    ) : null}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          {filteredOrders.length === 0 ? (
-            <div className="empty-state">{t("common.noData")}</div>
-          ) : null}
         </section>
 
         <section className="table-card space-y-4">
@@ -483,6 +584,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       <div className="muted">{selectedOrder.address.formatted}</div>
                     </div>
                     <div className="flex flex-wrap gap-2">
+                      <Badge variant={getStageVariant(selectedOrder.stage)}>
+                        {t(getStageLabelKey(selectedOrder.stage))}
+                      </Badge>
                       <Badge variant={getOrderStatusVariant(selectedOrder.status)}>
                         {dynamicLabel(t, selectedOrder.status)}
                       </Badge>
@@ -491,11 +595,6 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       >
                         {dynamicLabel(t, selectedOrder.paymentStatus)}
                       </Badge>
-                      {selectedOrder.deliveryStatus ? (
-                        <Badge variant="outline">
-                          {dynamicLabel(t, selectedOrder.deliveryStatus)}
-                        </Badge>
-                      ) : null}
                     </div>
                   </div>
 
@@ -587,15 +686,61 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       <p>{selectedOrder.notes}</p>
                     </div>
                   ) : null}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="space-y-4 p-5">
+                  <PageHeader
+                    title={t("labels.orderOperationsTitle")}
+                    subtitle={t(getStageDescriptionKey(selectedOrder.stage))}
+                  />
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <Card>
+                      <CardContent className="space-y-2 p-4">
+                        <div className="muted">{t("labels.operationsStage")}</div>
+                        <Badge variant={getStageVariant(selectedOrder.stage)}>
+                          {t(getStageLabelKey(selectedOrder.stage))}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="space-y-2 p-4">
+                        <div className="muted">
+                          {t("labels.availableActions")}
+                        </div>
+                        <div>{allowedTransitions.length}</div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="space-y-2 p-4">
+                        <div className="muted">{t("labels.trackingNumber")}</div>
+                        <div>
+                          {selectedOrder.delivery?.trackingNumber ??
+                            t("common.noData")}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="space-y-2 p-4">
+                        <div className="muted">{t("labels.packageType")}</div>
+                        <div>
+                          {selectedOrder.packaging?.packageType ??
+                            t("common.noData")}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   {selectedOrder.packaging ? (
                     <div className="grid gap-3 md:grid-cols-2">
                       <Card>
                         <CardContent className="space-y-2 p-4">
-                          <div className="muted">{t("labels.packageType")}</div>
+                          <div className="muted">{t("labels.packageMetrics")}</div>
                           <div>
-                            {selectedOrder.packaging.packageType ??
-                              t("common.noData")}
+                            {selectedOrder.packaging.weightGrams
+                              ? `${selectedOrder.packaging.weightGrams} g`
+                              : t("common.noData")}
                           </div>
                           <div className="muted">
                             {selectedOrder.packaging.dimensions ??
@@ -918,24 +1063,22 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     subtitle={t("labels.orderStatusTimeline")}
                   />
                   <div className="space-y-3">
-                    {selectedOrder.statusHistory.map((entry) => (
+                    {[...selectedOrder.timeline].reverse().map((entry) => (
                       <div
-                        key={`${entry.changedAt}-${entry.newStatus}`}
+                        key={`${entry.type}-${entry.happenedAt}-${entry.status}`}
                         className="rounded-lg border border-border px-3 py-3"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant={getOrderStatusVariant(entry.newStatus)}>
-                              {dynamicLabel(t, entry.newStatus)}
+                            <Badge
+                              variant={getTimelineVariant(entry.type, entry.status)}
+                            >
+                              {dynamicLabel(t, entry.status)}
                             </Badge>
-                            {entry.oldStatus ? (
-                              <span className="muted">
-                                {dynamicLabel(t, entry.oldStatus)} →
-                              </span>
-                            ) : null}
+                            <span className="muted">{entry.type}</span>
                           </div>
                           <div className="muted">
-                            {new Date(entry.changedAt).toLocaleString(
+                            {new Date(entry.happenedAt).toLocaleString(
                               getIntlLocale(locale),
                             )}
                           </div>

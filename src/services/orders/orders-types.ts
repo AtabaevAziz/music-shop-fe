@@ -1,4 +1,8 @@
-import type { Order, OrderStatus, PaymentStatus } from "@/types/music";
+import type {
+  Order,
+  OrderStatus,
+  PaymentStatus,
+} from "@/types/music";
 
 export type OrdersListQuery = {
   status?: OrderStatus;
@@ -15,6 +19,7 @@ export type ChangeOrderStatusRequest = {
   status: OrderStatus;
   comment?: string;
   carrier?: string;
+  deliveryCompany?: string;
   trackingNumber?: string;
   fragile?: boolean;
   packageType?: string;

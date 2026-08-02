@@ -13,7 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
-import { requiredTrimmedString } from "@/lib/form-utils";
+import {
+  optionalTrimmedUrl,
+  requiredTrimmedString,
+} from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";
@@ -24,6 +27,7 @@ const repairSchema = z.object({
   brand: requiredTrimmedString(2),
   issue: requiredTrimmedString(8),
   notes: requiredTrimmedString(4),
+  photoUrl: optionalTrimmedUrl(),
 });
 
 type RepairDraft = {
@@ -31,6 +35,7 @@ type RepairDraft = {
   brand: string;
   issue: string;
   notes: string;
+  photoUrl: string;
 };
 
 const initialDraft: RepairDraft = {
@@ -38,6 +43,7 @@ const initialDraft: RepairDraft = {
   brand: "",
   issue: "",
   notes: "",
+  photoUrl: "",
 };
 
 export function ClientRepairsModule({ locale }: { locale: Locale }) {
@@ -153,6 +159,21 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
               }
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="repair-photo-url">
+              {t("labels.photoUrlOptional")}
+            </label>
+            <Input
+              id="repair-photo-url"
+              value={draft.photoUrl}
+              onChange={(event) =>
+                setDraft((current) => ({
+                  ...current,
+                  photoUrl: event.target.value,
+                }))
+              }
+            />
+          </div>
           <Button
             type="button"
             disabled={createMutation.isPending}
@@ -197,6 +218,16 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
                 </div>
                 <div>{request.issue}</div>
                 <div className="muted">{request.notes}</div>
+                {request.photoUrl ? (
+                  <a
+                    href={request.photoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    {t("labels.openPhoto")}
+                  </a>
+                ) : null}
                 <div className="muted">
                   {new Date(request.updatedAt).toLocaleString(
                     getIntlLocale(locale),

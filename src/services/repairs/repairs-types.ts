@@ -14,6 +14,7 @@ export type CreateRepairRequest = {
   brand: string;
   issue: string;
   notes: string;
+  photoUrl?: string;
   status?: RepairStatus;
   estimatedCost?: number;
   assignedMasterName?: string;

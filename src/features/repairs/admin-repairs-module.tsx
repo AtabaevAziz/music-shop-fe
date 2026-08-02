@@ -40,6 +40,7 @@ import { useAdminRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
 import {
   normalizeOptionalString,
+  optionalTrimmedUrl,
   requiredTrimmedString,
 } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
@@ -67,6 +68,7 @@ const repairSchema = z.object({
   estimatedCost: z.string().optional(),
   assignedMasterName: z.string().optional(),
   receivedAt: z.string().optional(),
+  photoUrl: optionalTrimmedUrl(),
 });
 
 type RepairDraft = {
@@ -80,6 +82,7 @@ type RepairDraft = {
   estimatedCost: string;
   assignedMasterName: string;
   receivedAt: string;
+  photoUrl: string;
 };
 
 const initialDraft: RepairDraft = {
@@ -92,6 +95,7 @@ const initialDraft: RepairDraft = {
   estimatedCost: "",
   assignedMasterName: "",
   receivedAt: "",
+  photoUrl: "",
 };
 
 export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
@@ -131,6 +135,7 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
           : undefined,
         assignedMasterName: normalizeOptionalString(parsed.assignedMasterName),
         receivedAt: normalizeOptionalString(parsed.receivedAt),
+        photoUrl: normalizeOptionalString(parsed.photoUrl),
       };
 
       if (value.id) {
@@ -264,6 +269,7 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                               0,
                               10,
                             ) ?? "",
+                          photoUrl: request.photoUrl ?? "",
                         });
                         setFormError("");
                         setIsEditorOpen(true);
@@ -395,6 +401,17 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                 }
               />
             </AppField>
+            <AppField label={t("labels.photoUrlOptional")}>
+              <Input
+                value={draft.photoUrl}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    photoUrl: event.target.value,
+                  }))
+                }
+              />
+            </AppField>
             <AppField label={t("labels.repairIssue")} className="md:col-span-2">
               <Textarea
                 rows={4}
@@ -419,6 +436,18 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                 }
               />
             </AppField>
+            {draft.photoUrl ? (
+              <div className="md:col-span-2">
+                <a
+                  href={draft.photoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-primary underline-offset-4 hover:underline"
+                >
+                  {t("labels.openPhoto")}
+                </a>
+              </div>
+            ) : null}
             <DialogFooter className="md:col-span-2">
               <Button type="submit" disabled={saveMutation.isPending}>
                 {saveMutation.isPending ? t("common.saving") : t("common.save")}

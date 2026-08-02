@@ -9,6 +9,28 @@ import { useClientOrdersQuery } from "@/hooks/use-orders-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
+import type { OrderStage } from "@/types/music";
+
+function getStageLabelKey(stage: OrderStage) {
+  switch (stage) {
+    case "intake":
+      return "labels.stageIntake";
+    case "payment":
+      return "labels.stagePayment";
+    case "warehouse":
+      return "labels.stageWarehouse";
+    case "packing":
+      return "labels.stagePacking";
+    case "shipment":
+      return "labels.stageShipment";
+    case "exception":
+      return "labels.stageException";
+    case "completed":
+      return "labels.stageCompleted";
+    default:
+      return "labels.operationsStage";
+  }
+}
 
 export function ClientOrdersModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -45,6 +67,20 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <Badge
+                      variant={
+                        order.stage === "completed"
+                          ? "success"
+                          : order.stage === "exception"
+                            ? "destructive"
+                            : order.stage === "shipment" ||
+                                order.stage === "packing"
+                              ? "warning"
+                              : "secondary"
+                      }
+                    >
+                      {t(getStageLabelKey(order.stage))}
+                    </Badge>
                     <Badge
                       variant={
                         order.paymentStatus === "paid"
@@ -108,18 +144,18 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                     {dynamicLabel(t, order.delivery.status)}
                   </div>
                 ) : null}
-                {order.statusHistory.length > 0 ? (
+                {order.timeline.length > 0 ? (
                   <div className="space-y-2">
                     <strong>{t("labels.statusHistory")}</strong>
                     <div className="space-y-2">
-                      {order.statusHistory.slice(-3).reverse().map((entry) => (
+                      {order.timeline.slice(-4).reverse().map((entry) => (
                         <div
-                          key={`${order.id}-${entry.changedAt}-${entry.newStatus}`}
+                          key={`${order.id}-${entry.type}-${entry.happenedAt}-${entry.status}`}
                           className="heading-row text-sm"
                         >
-                          <span>{dynamicLabel(t, entry.newStatus)}</span>
+                          <span>{dynamicLabel(t, entry.status)}</span>
                           <span className="muted">
-                            {new Date(entry.changedAt).toLocaleString(
+                            {new Date(entry.happenedAt).toLocaleString(
                               getIntlLocale(locale),
                             )}
                           </span>

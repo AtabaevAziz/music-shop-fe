@@ -21,6 +21,14 @@ export type PackagingStatus =
   | "in_progress"
   | "packed"
   | "ready_for_shipment";
+export type OrderStage =
+  | "intake"
+  | "payment"
+  | "warehouse"
+  | "packing"
+  | "shipment"
+  | "completed"
+  | "exception";
 export type OrderStatus =
   | "new"
   | "confirmed"
@@ -114,6 +122,8 @@ export type Order = {
   id: string;
   orderNumber: string;
   customerId: string;
+  stage: OrderStage;
+  availableTransitions: OrderStatus[];
   customer: {
     firstName: string;
     lastName: string;
@@ -177,6 +187,14 @@ export type Order = {
     comment?: string | null;
     changedAt: string;
   }>;
+  timeline: Array<{
+    type: "status" | "payment" | "delivery";
+    status: string;
+    happenedAt: string;
+    comment?: string | null;
+    actorType?: "system" | "employee" | "customer" | null;
+    actorId?: string | null;
+  }>;
   paymentRedirectUrl?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -190,6 +208,7 @@ export type RepairRequest = {
   issue: string;
   status: RepairStatus;
   notes: string;
+  photoUrl?: string;
   estimatedCost?: number;
   assignedMasterName?: string;
   receivedAt?: string;

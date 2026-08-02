@@ -46,6 +46,7 @@ export type CreateClientRepairRequest = {
   brand: string;
   issue: string;
   notes: string;
+  photoUrl?: string;
 };
 
 export type ApiClientOrderResponse = {

@@ -16,7 +16,7 @@ import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
 import { getPublicOrder } from "@/services/public";
-import type { Order } from "@/types/music";
+import type { Order, OrderStage } from "@/types/music";
 
 type LookupFormState = {
   orderNumber: string;
@@ -39,6 +39,54 @@ function getStatusVariant(status: Order["status"]) {
     return "warning" as const;
   }
   return "secondary" as const;
+}
+
+function getTimelineVariant(
+  type: Order["timeline"][number]["type"],
+  status: string,
+) {
+  if (type === "payment") {
+    if (status === "paid") {
+      return "success" as const;
+    }
+    if (status === "failed" || status === "cancelled" || status === "refunded") {
+      return "destructive" as const;
+    }
+    return "warning" as const;
+  }
+
+  if (type === "delivery") {
+    if (status === "delivered") {
+      return "success" as const;
+    }
+    if (status === "delivery_failed" || status === "returned") {
+      return "destructive" as const;
+    }
+    return "warning" as const;
+  }
+
+  return getStatusVariant(status as Order["status"]);
+}
+
+function getStageLabelKey(stage: OrderStage) {
+  switch (stage) {
+    case "intake":
+      return "labels.stageIntake";
+    case "payment":
+      return "labels.stagePayment";
+    case "warehouse":
+      return "labels.stageWarehouse";
+    case "packing":
+      return "labels.stagePacking";
+    case "shipment":
+      return "labels.stageShipment";
+    case "exception":
+      return "labels.stageException";
+    case "completed":
+      return "labels.stageCompleted";
+    default:
+      return "labels.operationsStage";
+  }
 }
 
 export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
@@ -161,6 +209,19 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                   <div className="muted">{order.address.formatted}</div>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <Badge
+                    variant={
+                      order.stage === "completed"
+                        ? "success"
+                        : order.stage === "exception"
+                          ? "destructive"
+                          : order.stage === "shipment" || order.stage === "packing"
+                            ? "warning"
+                            : "secondary"
+                    }
+                  >
+                    {t(getStageLabelKey(order.stage))}
+                  </Badge>
                   <Badge variant={getStatusVariant(order.status)}>
                     {dynamicLabel(t, order.status)}
                   </Badge>
@@ -226,17 +287,17 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
               <div className="space-y-2">
                 <strong>{t("labels.statusHistory")}</strong>
                 <div className="space-y-3">
-                  {order.statusHistory.map((entry) => (
+                  {[...order.timeline].reverse().map((entry) => (
                     <div
-                      key={`${entry.changedAt}-${entry.newStatus}`}
+                      key={`${entry.type}-${entry.happenedAt}-${entry.status}`}
                       className="rounded-lg border border-border px-3 py-3"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Badge variant={getStatusVariant(entry.newStatus)}>
-                          {dynamicLabel(t, entry.newStatus)}
+                        <Badge variant={getTimelineVariant(entry.type, entry.status)}>
+                          {dynamicLabel(t, entry.status)}
                         </Badge>
                         <div className="muted">
-                          {new Date(entry.changedAt).toLocaleString(
+                          {new Date(entry.happenedAt).toLocaleString(
                             getIntlLocale(locale),
                           )}
                         </div>
