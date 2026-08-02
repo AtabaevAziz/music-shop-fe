@@ -148,19 +148,22 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
                   <div className="space-y-2">
                     <strong>{t("labels.statusHistory")}</strong>
                     <div className="space-y-2">
-                      {order.timeline.slice(-4).reverse().map((entry) => (
-                        <div
-                          key={`${order.id}-${entry.type}-${entry.happenedAt}-${entry.status}`}
-                          className="heading-row text-sm"
-                        >
-                          <span>{dynamicLabel(t, entry.status)}</span>
-                          <span className="muted">
-                            {new Date(entry.happenedAt).toLocaleString(
-                              getIntlLocale(locale),
-                            )}
-                          </span>
-                        </div>
-                      ))}
+                      {order.timeline
+                        .slice(-4)
+                        .reverse()
+                        .map((entry) => (
+                          <div
+                            key={`${order.id}-${entry.type}-${entry.happenedAt}-${entry.status}`}
+                            className="heading-row text-sm"
+                          >
+                            <span>{dynamicLabel(t, entry.status)}</span>
+                            <span className="muted">
+                              {new Date(entry.happenedAt).toLocaleString(
+                                getIntlLocale(locale),
+                              )}
+                            </span>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 ) : null}

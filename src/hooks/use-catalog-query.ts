@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import { getCategories, getProducts } from "@/services/catalog";
-import { getClientProducts } from "@/services/client";
+import { getClientMe, getClientProducts } from "@/services/client";
 import { getAppConfig, getDictionaries } from "@/services/config";
 import { getSettings } from "@/services/settings";
 
@@ -33,12 +33,14 @@ export function useClientCatalogQuery() {
   return useQuery({
     queryKey: queryKeys.clientCatalog,
     queryFn: async () => {
-      const [products, appConfig] = await Promise.all([
+      const [products, customer, appConfig] = await Promise.all([
         getClientProducts(),
+        getClientMe(),
         getAppConfig(),
       ]);
 
       return {
+        customer,
         products,
         currency: appConfig.defaultCurrency,
       };

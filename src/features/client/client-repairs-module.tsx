@@ -13,10 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
-import {
-  optionalTrimmedUrl,
-  requiredTrimmedString,
-} from "@/lib/form-utils";
+import { optionalTrimmedUrl, requiredTrimmedString } from "@/lib/form-utils";
 import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { getIntlLocale } from "@/lib/utils";

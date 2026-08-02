@@ -26,12 +26,36 @@ import { invalidateAppQueries } from "@/lib/query-utils";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
 import { createClientOrder } from "@/services/client";
-import { Product } from "@/types/music";
+import { Customer, Product } from "@/types/music";
 
 const checkoutSchema = z.object({
   qty: z.coerce.number().int().min(1),
   notes: requiredTrimmedString(4),
 });
+
+function getClientPickupOrderDetails(customer: Customer | null) {
+  if (!customer) {
+    return null;
+  }
+
+  const normalizedName = (customer.fullName ?? customer.name).trim();
+  const nameParts = normalizedName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] ?? "Client";
+  const lastName = nameParts.slice(1).join(" ") || firstName;
+
+  return {
+    firstName,
+    lastName,
+    phone: customer.phone,
+    email: customer.email || undefined,
+    country: "UZ",
+    region: "Pickup",
+    city: "Pickup",
+    street: "Client pickup",
+    house: "1",
+    postalCode: "000",
+  };
+}
 
 export function ClientCatalogModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
@@ -72,32 +96,37 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
     );
   }
 
+  const { currency, customer } = data;
+
   async function submitOrder() {
     const parsed = checkoutSchema.safeParse({
       qty,
       notes,
     });
+    const customerDetails = getClientPickupOrderDetails(customer);
 
-    if (!purchaseTarget || !parsed.success) {
+    if (
+      !purchaseTarget ||
+      !parsed.success ||
+      !customerDetails ||
+      parsed.data.qty > purchaseTarget.availableQty
+    ) {
       setFormError(t("labels.validationFailed"));
       return;
     }
 
     try {
       await orderMutation.mutateAsync({
+        ...customerDetails,
         items: [
           {
             productId: purchaseTarget.id,
-            qty: parsed.data.qty,
             quantity: parsed.data.qty,
-            unitPrice: purchaseTarget.price,
-            totalPrice: purchaseTarget.price * parsed.data.qty,
           },
         ],
-        address: "Client portal pickup",
         paymentMethod: "cash",
         deliveryMethod: "pickup",
-        notes: parsed.data.notes,
+        comment: parsed.data.notes,
       });
       setFormError("");
       setPurchaseTarget(null);
@@ -160,7 +189,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                         {dynamicLabel(t, product.condition)}
                       </Badge>
                       <span>
-                        {formatMoney(product.price, data.currency, locale)}
+                        {formatMoney(product.price, currency, locale)}
                       </span>
                     </div>
                   </div>

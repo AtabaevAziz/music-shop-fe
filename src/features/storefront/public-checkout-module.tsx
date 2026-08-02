@@ -276,7 +276,9 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
                           <FormControl>
                             <Input
                               {...field}
-                              type={fieldSpec.name === "email" ? "email" : "text"}
+                              type={
+                                fieldSpec.name === "email" ? "email" : "text"
+                              }
                             />
                           </FormControl>
                           <FormMessage />
@@ -312,7 +314,10 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("labels.paymentMethod")}</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
@@ -338,7 +343,10 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t("labels.deliveryMethod")}</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />

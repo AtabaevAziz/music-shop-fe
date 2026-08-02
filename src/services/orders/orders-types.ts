@@ -1,8 +1,4 @@
-import type {
-  Order,
-  OrderStatus,
-  PaymentStatus,
-} from "@/types/music";
+import type { Order, OrderStatus, PaymentStatus } from "@/types/music";
 
 export type OrdersListQuery = {
   status?: OrderStatus;

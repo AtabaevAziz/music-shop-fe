@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Locale } from "@/i18n";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
+import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney, getIntlLocale } from "@/lib/utils";
 import { getPublicOrder } from "@/services/public";
@@ -49,7 +49,11 @@ function getTimelineVariant(
     if (status === "paid") {
       return "success" as const;
     }
-    if (status === "failed" || status === "cancelled" || status === "refunded") {
+    if (
+      status === "failed" ||
+      status === "cancelled" ||
+      status === "refunded"
+    ) {
       return "destructive" as const;
     }
     return "warning" as const;
@@ -215,7 +219,8 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                         ? "success"
                         : order.stage === "exception"
                           ? "destructive"
-                          : order.stage === "shipment" || order.stage === "packing"
+                          : order.stage === "shipment" ||
+                              order.stage === "packing"
                             ? "warning"
                             : "secondary"
                     }
@@ -259,7 +264,9 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                 <Card>
                   <CardContent className="space-y-2 p-4">
                     <div className="muted">{t("labels.trackingNumber")}</div>
-                    <div>{order.delivery?.trackingNumber ?? t("common.noData")}</div>
+                    <div>
+                      {order.delivery?.trackingNumber ?? t("common.noData")}
+                    </div>
                     <div className="muted">
                       {order.delivery?.company ?? t("common.noData")}
                     </div>
@@ -278,7 +285,9 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                       <span>
                         {item.productName} x {item.quantity}
                       </span>
-                      <span>{formatMoney(item.totalPrice, currency, locale)}</span>
+                      <span>
+                        {formatMoney(item.totalPrice, currency, locale)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -293,7 +302,9 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                       className="rounded-lg border border-border px-3 py-3"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <Badge variant={getTimelineVariant(entry.type, entry.status)}>
+                        <Badge
+                          variant={getTimelineVariant(entry.type, entry.status)}
+                        >
                           {dynamicLabel(t, entry.status)}
                         </Badge>
                         <div className="muted">
@@ -302,7 +313,7 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                           )}
                         </div>
                       </div>
-                      <div className="mt-2 muted">
+                      <div className="muted mt-2">
                         {entry.comment ?? t("common.noData")}
                       </div>
                     </div>

@@ -508,7 +508,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                         {t(getStageDescriptionKey(stage))}
                       </div>
                     </div>
-                    <Badge variant={getStageVariant(stage)}>{orders.length}</Badge>
+                    <Badge variant={getStageVariant(stage)}>
+                      {orders.length}
+                    </Badge>
                   </div>
                   <div className="space-y-3">
                     {orders.map((order) => (
@@ -533,7 +535,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                         </div>
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <Badge
-                            variant={getPaymentStatusVariant(order.paymentStatus)}
+                            variant={getPaymentStatusVariant(
+                              order.paymentStatus,
+                            )}
                           >
                             {dynamicLabel(t, order.paymentStatus)}
                           </Badge>
@@ -543,7 +547,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                             </Badge>
                           ) : null}
                         </div>
-                        <div className="mt-3 heading-row text-sm">
+                        <div className="heading-row mt-3 text-sm">
                           <span>
                             {order.items.reduce(
                               (sum, item) => sum + item.quantity,
@@ -552,13 +556,19 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                             {t("labels.qty")}
                           </span>
                           <strong>
-                            {formatMoney(order.total, data.settings.currency, locale)}
+                            {formatMoney(
+                              order.total,
+                              data.settings.currency,
+                              locale,
+                            )}
                           </strong>
                         </div>
                       </button>
                     ))}
                     {orders.length === 0 ? (
-                      <div className="empty-state text-sm">{t("common.noData")}</div>
+                      <div className="empty-state text-sm">
+                        {t("common.noData")}
+                      </div>
                     ) : null}
                   </div>
                 </CardContent>
@@ -581,17 +591,23 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
                       <strong>{selectedOrder.customer.name}</strong>
-                      <div className="muted">{selectedOrder.address.formatted}</div>
+                      <div className="muted">
+                        {selectedOrder.address.formatted}
+                      </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant={getStageVariant(selectedOrder.stage)}>
                         {t(getStageLabelKey(selectedOrder.stage))}
                       </Badge>
-                      <Badge variant={getOrderStatusVariant(selectedOrder.status)}>
+                      <Badge
+                        variant={getOrderStatusVariant(selectedOrder.status)}
+                      >
                         {dynamicLabel(t, selectedOrder.status)}
                       </Badge>
                       <Badge
-                        variant={getPaymentStatusVariant(selectedOrder.paymentStatus)}
+                        variant={getPaymentStatusVariant(
+                          selectedOrder.paymentStatus,
+                        )}
                       >
                         {dynamicLabel(t, selectedOrder.paymentStatus)}
                       </Badge>
@@ -637,7 +653,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <Card>
                       <CardContent className="space-y-2 p-4">
                         <div className="muted">{t("labels.paymentMethod")}</div>
-                        <div>{dynamicLabel(t, selectedOrder.paymentMethod)}</div>
+                        <div>
+                          {dynamicLabel(t, selectedOrder.paymentMethod)}
+                        </div>
                         <div className="muted">
                           {selectedOrder.payment?.transactionId ??
                             t("common.noData")}
@@ -646,8 +664,12 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     </Card>
                     <Card>
                       <CardContent className="space-y-2 p-4">
-                        <div className="muted">{t("labels.deliveryMethod")}</div>
-                        <div>{dynamicLabel(t, selectedOrder.deliveryMethod)}</div>
+                        <div className="muted">
+                          {t("labels.deliveryMethod")}
+                        </div>
+                        <div>
+                          {dynamicLabel(t, selectedOrder.deliveryMethod)}
+                        </div>
                         <div className="muted">
                           {selectedOrder.delivery?.company ??
                             selectedOrder.delivery?.trackingNumber ??
@@ -698,7 +720,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   <div className="grid gap-3 md:grid-cols-2">
                     <Card>
                       <CardContent className="space-y-2 p-4">
-                        <div className="muted">{t("labels.operationsStage")}</div>
+                        <div className="muted">
+                          {t("labels.operationsStage")}
+                        </div>
                         <Badge variant={getStageVariant(selectedOrder.stage)}>
                           {t(getStageLabelKey(selectedOrder.stage))}
                         </Badge>
@@ -714,7 +738,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     </Card>
                     <Card>
                       <CardContent className="space-y-2 p-4">
-                        <div className="muted">{t("labels.trackingNumber")}</div>
+                        <div className="muted">
+                          {t("labels.trackingNumber")}
+                        </div>
                         <div>
                           {selectedOrder.delivery?.trackingNumber ??
                             t("common.noData")}
@@ -736,7 +762,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <div className="grid gap-3 md:grid-cols-2">
                       <Card>
                         <CardContent className="space-y-2 p-4">
-                          <div className="muted">{t("labels.packageMetrics")}</div>
+                          <div className="muted">
+                            {t("labels.packageMetrics")}
+                          </div>
                           <div>
                             {selectedOrder.packaging.weightGrams
                               ? `${selectedOrder.packaging.weightGrams} g`
@@ -750,7 +778,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                       </Card>
                       <Card>
                         <CardContent className="space-y-2 p-4">
-                          <div className="muted">{t("labels.serialNumbers")}</div>
+                          <div className="muted">
+                            {t("labels.serialNumbers")}
+                          </div>
                           <div>
                             {selectedOrder.packaging.serialNumbers ??
                               t("common.noData")}
@@ -768,7 +798,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                   {selectedOrder.warehouseIssue ? (
                     <Card>
                       <CardContent className="space-y-2 p-4">
-                        <div className="muted">{t("labels.warehouseIssue")}</div>
+                        <div className="muted">
+                          {t("labels.warehouseIssue")}
+                        </div>
                         <div>{selectedOrder.warehouseIssue.type}</div>
                         <div className="muted">
                           {selectedOrder.warehouseIssue.comment ??
@@ -786,7 +818,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     title={t("labels.workflowControlsTitle")}
                     subtitle={t("labels.workflowControlsSubtitle")}
                   />
-                  {actionError ? <div className="error">{actionError}</div> : null}
+                  {actionError ? (
+                    <div className="error">{actionError}</div>
+                  ) : null}
                   <div className="grid gap-3 md:grid-cols-2">
                     <AppField label={t("labels.carrier")}>
                       <Input
@@ -967,7 +1001,9 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     title={t("labels.paymentState")}
                     subtitle={dynamicLabel(t, selectedOrder.paymentStatus)}
                   />
-                  {paymentError ? <div className="error">{paymentError}</div> : null}
+                  {paymentError ? (
+                    <div className="error">{paymentError}</div>
+                  ) : null}
                   <div className="grid gap-3 md:grid-cols-2">
                     <AppField label={t("labels.paymentState")}>
                       <Select
@@ -1071,7 +1107,10 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <Badge
-                              variant={getTimelineVariant(entry.type, entry.status)}
+                              variant={getTimelineVariant(
+                                entry.type,
+                                entry.status,
+                              )}
                             >
                               {dynamicLabel(t, entry.status)}
                             </Badge>
@@ -1083,7 +1122,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                             )}
                           </div>
                         </div>
-                        <div className="mt-2 muted">
+                        <div className="muted mt-2">
                           {entry.comment ?? t("common.noData")}
                         </div>
                       </div>
