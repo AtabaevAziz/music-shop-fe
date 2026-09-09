@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
+// noinspection JSUnusedGlobalSymbols
 export const metadata: Metadata = {
   title: "Music Shop Online",
   description:
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html suppressHydrationWarning>

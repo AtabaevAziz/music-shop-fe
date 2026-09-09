@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
   Languages,
   LayoutDashboard,
   LogOut,
@@ -177,8 +177,14 @@ export function AppShell({
     setIsSidebarCollapsed(
       window.localStorage.getItem(sidebarStorageKey) === "true",
     );
-    const mediaQuery = window.matchMedia("(max-width: 1023px)");
-    const updateViewport = () => setIsMobileViewport(mediaQuery.matches);
+    const mediaQuery = window.matchMedia("(max-width: 1099px)");
+    const updateViewport = () => {
+      const isMobile = mediaQuery.matches;
+      setIsMobileViewport(isMobile);
+      if (!isMobile) {
+        setIsNavOpen(false);
+      }
+    };
     updateViewport();
     mediaQuery.addEventListener("change", updateViewport);
     return () => mediaQuery.removeEventListener("change", updateViewport);
@@ -261,6 +267,7 @@ export function AppShell({
             size="icon"
             type="button"
             onClick={toggleSidebar}
+            aria-expanded={!isSidebarCollapsed}
             aria-label={
               isSidebarCollapsed
                 ? t("nav.expandSidebar")
@@ -273,9 +280,9 @@ export function AppShell({
             }
           >
             {isSidebarCollapsed ? (
-              <ChevronRight size={18} />
+              <PanelLeftOpen size={18} />
             ) : (
-              <ChevronLeft size={18} />
+              <PanelLeftClose size={18} />
             )}
           </Button>
         )}
@@ -302,7 +309,10 @@ export function AppShell({
   );
 
   return (
-    <div className={cn("app-shell", isSidebarCollapsed && "sidebar-collapsed")}>
+    <div
+      className={cn("app-shell", isSidebarCollapsed && "sidebar-collapsed")}
+      data-sidebar-collapsed={isSidebarCollapsed}
+    >
       <aside className="sidebar">{navContent}</aside>
       <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
         <SheetContent
