@@ -1,7 +1,23 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
+import {
+  BarChart3,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Languages,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  Settings,
+  ShoppingCart,
+  UserRound,
+  Users,
+  Warehouse,
+  Wrench,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -23,6 +39,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   useAppConfigQuery,
   useNavigationQuery,
@@ -65,6 +87,20 @@ const routeSubtitleKeyMap: Record<string, string> = {
   settings: "section.settingsSubtitle",
 };
 
+const sidebarStorageKey = "music-shop-admin-sidebar-collapsed";
+
+const navigationIcons = {
+  dashboard: LayoutDashboard,
+  catalog: Package,
+  inventory: Warehouse,
+  orders: ShoppingCart,
+  customers: Users,
+  repairs: Wrench,
+  employees: Users,
+  finance: BarChart3,
+  settings: Settings,
+} as const;
+
 export function AppShell({
   locale,
   children,
@@ -94,6 +130,8 @@ export function AppShell({
     enabled: session?.role !== "client",
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const queryString = searchParams.toString();
   const currentLocaleLabel = t(localeLabelKeyMap[locale]);
   const supportedLocales = getConfiguredLocales(appConfig?.supportedLocales);
@@ -135,6 +173,24 @@ export function AppShell({
   useEffect(() => {
     setIsNavOpen(false);
   }, [pathname]);
+  useEffect(() => {
+    setIsSidebarCollapsed(
+      window.localStorage.getItem(sidebarStorageKey) === "true",
+    );
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    const updateViewport = () => setIsMobileViewport(mediaQuery.matches);
+    updateViewport();
+    mediaQuery.addEventListener("change", updateViewport);
+    return () => mediaQuery.removeEventListener("change", updateViewport);
+  }, []);
+
+  function toggleSidebar() {
+    setIsSidebarCollapsed((currentValue) => {
+      const nextValue = !currentValue;
+      window.localStorage.setItem(sidebarStorageKey, String(nextValue));
+      return nextValue;
+    });
+  }
 
   if (!session) {
     return null;
@@ -163,6 +219,34 @@ export function AppShell({
 
   const localizedRole = dynamicLabel(t, session.role);
 
+  function renderNavigationItem(item: (typeof localizedNavItems)[number]) {
+    const Icon =
+      navigationIcons[item.id as keyof typeof navigationIcons] ?? Package;
+    const link = (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={cn("nav-link", pathname === item.href && "active")}
+        onClick={() => setIsNavOpen(false)}
+        aria-label={item.label}
+      >
+        <Icon className="nav-link-icon" size={18} aria-hidden="true" />
+        <span className="nav-link-label">{item.label}</span>
+      </Link>
+    );
+
+    if (isMobileViewport || !isSidebarCollapsed) {
+      return link;
+    }
+
+    return (
+      <Tooltip key={item.href}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right">{item.label}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
   const navContent = (
     <>
       <div className="brand-mark">
@@ -170,19 +254,37 @@ export function AppShell({
         <strong className="sidebar-title">{t("meta.appName")}</strong>
         <p className="sidebar-copy muted">{t("meta.appSubtitle")}</p>
         <small className="sidebar-role">{localizedRole}</small>
+        {!isMobileViewport && (
+          <Button
+            className="sidebar-collapse-toggle"
+            variant="ghost"
+            size="icon"
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={
+              isSidebarCollapsed
+                ? t("nav.expandSidebar")
+                : t("nav.collapseSidebar")
+            }
+            title={
+              isSidebarCollapsed
+                ? t("nav.expandSidebar")
+                : t("nav.collapseSidebar")
+            }
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight size={18} />
+            ) : (
+              <ChevronLeft size={18} />
+            )}
+          </Button>
+        )}
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
-          {localizedNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn("nav-link", pathname === item.href && "active")}
-              onClick={() => setIsNavOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          <TooltipProvider delayDuration={120}>
+            {localizedNavItems.map(renderNavigationItem)}
+          </TooltipProvider>
         </nav>
       </div>
       <div className="surface sidebar-metric sidebar-footer">
@@ -200,10 +302,16 @@ export function AppShell({
   );
 
   return (
-    <div className="app-shell">
+    <div className={cn("app-shell", isSidebarCollapsed && "sidebar-collapsed")}>
       <aside className="sidebar">{navContent}</aside>
       <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
-        <SheetContent side="left" className="sidebar sidebar-mobile p-0">
+        <SheetContent
+          side="left"
+          className={cn(
+            "sidebar sidebar-mobile p-0",
+            isNavOpen && "sidebar-mobile-open",
+          )}
+        >
           <SheetHeader className="sr-only">
             <SheetTitle>{t("nav.openMenu")}</SheetTitle>
           </SheetHeader>

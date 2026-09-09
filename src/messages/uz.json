@@ -62,6 +62,8 @@
     "finance": "Moliya",
     "settings": "Sozlamalar",
     "openMenu": "Menyuni ochish",
+    "collapseSidebar": "Yondosh menyuni yigʻish",
+    "expandSidebar": "Yondosh menyuni yoyish",
     "logout": "Chiqish"
   },
   "auth": {

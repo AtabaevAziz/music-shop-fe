@@ -62,6 +62,8 @@
     "finance": "Финансы",
     "settings": "Настройки",
     "openMenu": "Открыть меню",
+    "collapseSidebar": "Свернуть боковое меню",
+    "expandSidebar": "Развернуть боковое меню",
     "logout": "Выйти"
   },
   "auth": {

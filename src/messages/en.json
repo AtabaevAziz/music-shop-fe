@@ -62,6 +62,8 @@
     "finance": "Finance",
     "settings": "Settings",
     "openMenu": "Open menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
     "logout": "Logout"
   },
   "auth": {
