@@ -13,11 +13,7 @@ export const metadata: Metadata = {
     "Shop instruments, studio gear, and service support from one localized music storefront.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html suppressHydrationWarning>
       <body>
