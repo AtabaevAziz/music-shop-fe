@@ -65,7 +65,9 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     isAuthenticating ||
     isAuthConfigPending ||
     !hasPasswordProvider ||
-    !isLoginEnabled;
+    !isLoginEnabled ||
+    !loginValue.trim() ||
+    passwordValue.length === 0;
   const isRegisterSubmitDisabled =
     !isApiConfigured ||
     isAuthenticating ||
@@ -99,7 +101,11 @@ export function LoginScreen({ locale }: { locale: Locale }) {
   const handleSignIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (isLoginSubmitDisabled) {
+    if (
+      isLoginSubmitDisabled ||
+      !loginValue.trim() ||
+      passwordValue.length === 0
+    ) {
       return;
     }
 
