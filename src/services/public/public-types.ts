@@ -9,6 +9,7 @@ export type PublicOrderDeliveryMethod =
 
 export type CreateOrderItemRequest = {
   productId: string;
+  variantId?: string;
   quantity: number;
 };
 

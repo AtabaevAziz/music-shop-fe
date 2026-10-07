@@ -38,6 +38,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
   const queryClient = useQueryClient();
   const { data, isPending } = useInventoryQuery();
   const [productId, setProductId] = useState("");
+  const [variantId, setVariantId] = useState("");
   const [delta, setDelta] = useState("1");
   const [reason, setReason] = useState(t("labels.manualCorrection"));
   const [formError, setFormError] = useState("");
@@ -54,6 +55,13 @@ export function InventoryModule({ locale }: { locale: Locale }) {
     }
   }, [data?.products, productId]);
 
+  useEffect(() => {
+    const product = data?.products.find((item) => item.id === productId);
+    if (!product?.variants?.some((variant) => variant.id === variantId)) {
+      setVariantId(product?.variants?.[0]?.id ?? "");
+    }
+  }, [data?.products, productId, variantId]);
+
   if (isPending || !data) {
     return (
       <section className="table-card">
@@ -65,6 +73,9 @@ export function InventoryModule({ locale }: { locale: Locale }) {
   const { products, inventoryMovements, settings } = data;
   const selectedProduct =
     products.find((product) => product.id === productId) ?? products[0];
+  const selectedVariant = selectedProduct?.variants?.find(
+    (variant) => variant.id === variantId,
+  );
   const lowStockProducts = products.filter(
     (product) =>
       product.stockQty <= (product.minStockQty ?? settings.lowStockThreshold),
@@ -184,19 +195,24 @@ export function InventoryModule({ locale }: { locale: Locale }) {
               <div className="inventory-selected-summary">
                 <Card>
                   <CardContent className="space-y-2 p-6">
-                    <strong>{selectedProduct.name}</strong>
-                    <div className="muted">{selectedProduct.sku}</div>
+                    <strong>
+                      {selectedProduct.name}
+                      {selectedVariant ? ` · ${selectedVariant.colorName}` : ""}
+                    </strong>
+                    <div className="muted">
+                      {selectedVariant?.sku ?? selectedProduct.sku}
+                    </div>
                     <div className="flex flex-wrap gap-2 pt-2">
                       <Badge
                         variant={
-                          selectedProduct.stockQty <=
+                          (selectedVariant?.stockQty ?? selectedProduct.stockQty) <=
                           (selectedProduct.minStockQty ??
                             settings.lowStockThreshold)
                             ? "warning"
                             : "success"
                         }
                       >
-                        {t("labels.currentStock")}: {selectedProduct.stockQty}
+                        {t("labels.currentStock")}: {selectedVariant?.stockQty ?? selectedProduct.stockQty}
                       </Badge>
                       <Badge variant="outline">
                         {t("labels.minStock")}:{" "}
@@ -219,6 +235,7 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                 try {
                   await adjustMutation.mutateAsync({
                     productId,
+                    variantId: variantId || undefined,
                     delta: Number(delta),
                     reason,
                   });
@@ -250,6 +267,26 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                   </SelectContent>
                 </Select>
               </AppField>
+              {selectedProduct.variants?.length ? (
+                <AppField label={t("labels.color")}>
+                  <Select
+                    value={variantId}
+                    disabled={adjustMutation.isPending}
+                    onValueChange={setVariantId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("labels.color")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedProduct.variants.map((variant) => (
+                        <SelectItem key={variant.id} value={variant.id}>
+                          {variant.colorName} · {variant.stockQty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </AppField>
+              ) : null}
               <AppField label={t("labels.delta")}>
                 <Input
                   type="number"

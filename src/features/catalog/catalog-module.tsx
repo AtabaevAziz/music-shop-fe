@@ -73,6 +73,7 @@ import {
   deleteProduct,
   updateProduct,
 } from "@/services/catalog";
+import type { ProductVariantRequest } from "@/services/products/products-types";
 import { ModuleSection } from "@/shared/components/module-shell";
 import { Condition, ProductStatus } from "@/types/music";
 
@@ -151,6 +152,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     status: "draft",
     condition: conditionValues[0] ?? "new",
     primaryImage: "",
+    variants: "[]",
   });
 
   const categoryMap = Object.fromEntries(
@@ -214,6 +216,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       status: settings.defaultProductStatus,
       condition: conditionValues[0] ?? "new",
       primaryImage: "",
+      variants: "[]",
     });
   }
 
@@ -249,6 +252,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       specs: Object.entries(product.specs)
         .map(([key, value]) => `${key}: ${value}`)
         .join("\n"),
+      variants: JSON.stringify(product.variants ?? [], null, 2),
     });
     setIsEditorOpen(true);
   }
@@ -279,6 +283,44 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     const primaryImage = images.includes(draft.primaryImage ?? "")
       ? draft.primaryImage
       : images[0];
+    let variants: ProductVariantRequest[] = [];
+    try {
+      const parsedVariants = JSON.parse(draft.variants ?? "[]") as unknown;
+      if (!Array.isArray(parsedVariants)) {
+        throw new Error("Variants must be an array.");
+      }
+      variants = parsedVariants.map((variant) => {
+        if (!variant || typeof variant !== "object") {
+          throw new Error("Each variant must be an object.");
+        }
+        const value = variant as Record<string, unknown>;
+        return {
+          colorKey: String(value.colorKey ?? ""),
+          colorName: String(value.colorName ?? ""),
+          sku: String(value.sku ?? ""),
+          barcode: value.barcode ? String(value.barcode) : undefined,
+          price: Number(value.price),
+          costPrice: Number(value.costPrice),
+          stockQty: Number(value.stockQty),
+          minStockQty:
+            value.minStockQty === undefined
+              ? undefined
+              : Number(value.minStockQty),
+          status: String(value.status ?? "draft") as ProductVariantRequest["status"],
+          images: Array.isArray(value.images)
+            ? value.images.map(String)
+            : [],
+          primaryImage: value.primaryImage
+            ? String(value.primaryImage)
+            : undefined,
+        };
+      });
+    } catch (error) {
+      setFormError(
+        error instanceof Error ? error.message : t("labels.validationFailed"),
+      );
+      return;
+    }
 
     try {
       await saveMutation.mutateAsync({
@@ -293,6 +335,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         price: Number(draft.price),
         costPrice: Number(draft.costPrice),
         stockQty: Number(draft.stockQty),
+        variants,
       });
       setFormError("");
       resetDraft();
@@ -385,6 +428,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                     <TableHead>{t("labels.product")}</TableHead>
                     <TableHead>{t("labels.category")}</TableHead>
                     <TableHead>{t("labels.brand")}</TableHead>
+                    <TableHead>{t("labels.variants")}</TableHead>
                     <TableHead>{t("labels.price")}</TableHead>
                     <TableHead>{t("labels.stock")}</TableHead>
                     <TableHead>{t("labels.availability")}</TableHead>
@@ -424,6 +468,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                         <TableCell>
                           {normalizeProductBrand(product.brand)}
                         </TableCell>
+                        <TableCell>{product.variants?.length ?? 0}</TableCell>
                         <TableCell>
                           {formatMoney(
                             product.price,
@@ -779,6 +824,22 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 })}
               </div>
             ) : null}
+            <AppField
+              label={t("labels.variantsJson")}
+              className="md:col-span-2"
+            >
+              <Textarea
+                value={draft.variants ?? "[]"}
+                disabled={isSaving}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    variants: event.target.value,
+                  }))
+                }
+                rows={10}
+              />
+            </AppField>
             <AppField
               label={t("labels.specsKeyValue")}
               className="md:col-span-2"

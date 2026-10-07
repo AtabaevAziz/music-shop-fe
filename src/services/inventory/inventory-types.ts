@@ -9,6 +9,7 @@ export type ApiInventoryMovement = InventoryMovement;
 
 export type AdjustInventoryRequest = {
   productId: string;
+  variantId?: string;
   delta: number;
   reason: string;
 };

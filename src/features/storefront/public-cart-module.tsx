@@ -110,6 +110,7 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                             setProductQty(
                               item.productId,
                               Number(event.target.value) || 1,
+                              item.variantId,
                             )
                           }
                         />
@@ -120,7 +121,7 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => removeProduct(item.productId)}
+                        onClick={() => removeProduct(item.productId, item.variantId)}
                       >
                         {t("storefront.removeFromCart")}
                       </Button>

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,10 +31,14 @@ export function PublicProductModule({
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
   const quantityInCart = useStorefrontCartStore(
-    (state) => state.items.find((item) => item.productId === id)?.qty ?? 0,
+    (state) =>
+      state.items
+        .filter((item) => item.productId === id)
+        .reduce((total, item) => total + item.qty, 0),
   );
   const currency = appConfig?.defaultCurrency ?? "UZS";
   const isGuest = !session;
+  const [selectedVariantId, setSelectedVariantId] = useState<string>();
 
   if (!isApiConfigured) {
     return (
@@ -73,14 +78,21 @@ export function PublicProductModule({
     );
   }
 
+  const selectedVariant =
+    product.variants.find((variant) => variant.id === selectedVariantId) ??
+    product.variants.find((variant) => variant.status === "active");
+  const displayImage = selectedVariant?.primaryImage ?? product.primaryImage;
+  const displayPrice = selectedVariant?.price ?? product.price;
+  const displayAvailableQty = selectedVariant?.availableQty ?? product.availableQty;
+
   return (
     <div className="storefront-flow">
       <section className="storefront-product-hero">
         <div className="storefront-product-gallery">
           <div className="storefront-product-media storefront-product-media-detail">
-            {product.primaryImage ? (
+            {displayImage ? (
               <Image
-                src={product.primaryImage}
+                src={displayImage}
                 alt={product.name}
                 width={960}
                 height={720}
@@ -101,13 +113,31 @@ export function PublicProductModule({
           <h1>{product.name}</h1>
           <p>{product.description}</p>
           <div className="storefront-product-price">
-            {formatMoney(product.price, currency, locale)}
+            {formatMoney(displayPrice, currency, locale)}
           </div>
+          {product.variants.length > 1 ? (
+            <div className="storefront-variant-picker">
+              <span className="muted">{t("labels.color")}</span>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map((variant) => (
+                  <Button
+                    key={variant.id}
+                    type="button"
+                    variant={variant.id === selectedVariant?.id ? "default" : "outline"}
+                    disabled={variant.status !== "active"}
+                    onClick={() => setSelectedVariantId(variant.id)}
+                  >
+                    {variant.colorName}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="storefront-spec-grid">
             <div>
               <span>{t("labels.availability")}</span>
               <strong>
-                {product.availableQty > 0
+                {displayAvailableQty > 0
                   ? t("labels.inStock")
                   : t("labels.outOfStock")}
               </strong>
@@ -126,15 +156,15 @@ export function PublicProductModule({
             </div>
             <div>
               <span>{t("labels.stock")}</span>
-              <strong>{product.availableQty}</strong>
+              <strong>{displayAvailableQty}</strong>
             </div>
           </div>
           <div className="storefront-cta-row">
             <Button
               type="button"
               size="lg"
-              disabled={isGuest || !hasHydrated || product.availableQty < 1}
-              onClick={() => addProduct(product)}
+              disabled={isGuest || !hasHydrated || displayAvailableQty < 1}
+              onClick={() => addProduct(product, 1, selectedVariant?.id)}
             >
               {hasHydrated && quantityInCart > 0
                 ? `${t("labels.addToCart")} (${quantityInCart})`

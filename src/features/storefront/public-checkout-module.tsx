@@ -158,6 +158,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
       comment: normalizeOptionalString(values.comment),
       items: items.map((item) => ({
         productId: item.productId,
+        variantId: item.variantId,
         quantity: item.qty,
       })),
     });

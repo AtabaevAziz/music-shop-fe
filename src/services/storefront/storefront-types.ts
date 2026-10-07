@@ -1,4 +1,4 @@
-import type { Condition } from "@/types/music";
+import type { Condition, ProductVariant } from "@/types/music";
 
 export type StorefrontCategory = {
   id: string;
@@ -31,6 +31,7 @@ export type StorefrontProduct = {
   condition: Condition;
   category: StorefrontCategory;
   brand: string;
+  variants: ProductVariant[];
 };
 
 export type ApiStorefrontProduct = {
@@ -50,6 +51,7 @@ export type ApiStorefrontProduct = {
   condition: Condition;
   category: ApiStorefrontCategory;
   brand: string;
+  variants: ProductVariant[];
 };
 
 export type ApiStorefrontProductListResponse = {

@@ -8,6 +8,8 @@ import type { StorefrontProduct } from "@/services/storefront/storefront-types";
 
 export type StorefrontCartItem = {
   productId: string;
+  variantId?: string;
+  variantName?: string;
   name: string;
   brand: string;
   price: number;
@@ -21,9 +23,9 @@ type StorefrontCartState = {
   hasHydrated: boolean;
   items: StorefrontCartItem[];
   setHasHydrated: (hasHydrated: boolean) => void;
-  addProduct: (product: StorefrontProduct, qty?: number) => void;
-  removeProduct: (productId: string) => void;
-  setProductQty: (productId: string, qty: number) => void;
+  addProduct: (product: StorefrontProduct, qty?: number, variantId?: string) => void;
+  removeProduct: (productId: string, variantId?: string) => void;
+  setProductQty: (productId: string, qty: number, variantId?: string) => void;
   syncProducts: (products: StorefrontProduct[]) => void;
   clearCart: () => void;
 };
@@ -38,12 +40,18 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
       hasHydrated: false,
       items: [],
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
-      addProduct: (product, qty = 1) =>
+      addProduct: (product, qty = 1, variantId) =>
         set((state) => {
+          const variant = product.variants.find((item) => item.id === variantId) ??
+            product.variants.find((item) => item.status === "active");
+          const effectiveVariantId = variant?.id;
+          const effectivePrice = variant?.price ?? product.price;
+          const effectiveStockQty = variant?.stockQty ?? product.stockQty;
+          const effectiveAvailableQty = variant?.availableQty ?? product.availableQty;
           const existingItem = state.items.find(
-            (item) => item.productId === product.id,
+            (item) => item.productId === product.id && item.variantId === effectiveVariantId,
           );
-          const nextQty = Math.max(1, Math.min(product.availableQty, qty));
+          const nextQty = Math.max(1, Math.min(effectiveAvailableQty, qty));
 
           if (!existingItem) {
             return {
@@ -51,13 +59,15 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                 ...state.items,
                 {
                   productId: product.id,
+                  variantId: effectiveVariantId,
+                  variantName: variant?.colorName,
                   name: product.name,
                   brand: product.brand,
-                  price: product.price,
+                  price: effectivePrice,
                   qty: nextQty,
-                  stockQty: product.stockQty,
-                  availableQty: product.availableQty,
-                  primaryImage: normalizeCartItemImage(product.primaryImage),
+                  stockQty: effectiveStockQty,
+                  availableQty: effectiveAvailableQty,
+                  primaryImage: normalizeCartItemImage(variant?.primaryImage ?? product.primaryImage),
                 },
               ],
             };
@@ -65,29 +75,32 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
 
           return {
             items: state.items.map((item) =>
-              item.productId === product.id
+              item.productId === product.id && item.variantId === effectiveVariantId
                 ? {
                     ...item,
+                    variantName: variant?.colorName,
                     name: product.name,
                     brand: product.brand,
-                    price: product.price,
-                    stockQty: product.stockQty,
-                    availableQty: product.availableQty,
-                    primaryImage: normalizeCartItemImage(product.primaryImage),
-                    qty: Math.min(item.qty + nextQty, product.availableQty),
+                    price: effectivePrice,
+                    stockQty: effectiveStockQty,
+                    availableQty: effectiveAvailableQty,
+                    primaryImage: normalizeCartItemImage(variant?.primaryImage ?? product.primaryImage),
+                    qty: Math.min(item.qty + nextQty, effectiveAvailableQty),
                   }
                 : item,
             ),
           };
         }),
-      removeProduct: (productId) =>
+      removeProduct: (productId, variantId) =>
         set((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
+          items: state.items.filter(
+            (item) => item.productId !== productId || item.variantId !== variantId,
+          ),
         })),
-      setProductQty: (productId, qty) =>
+      setProductQty: (productId, qty, variantId) =>
         set((state) => ({
           items: state.items.flatMap((item) => {
-            if (item.productId !== productId) {
+            if (item.productId !== productId || item.variantId !== variantId) {
               return [item];
             }
 
@@ -114,7 +127,18 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
             items: state.items.flatMap((item) => {
               const product = productMap.get(item.productId);
 
-              if (!product || product.availableQty < 1) {
+              if (!product) {
+                return [];
+              }
+
+              const variant = product.variants.find(
+                (candidate) => candidate.id === item.variantId,
+              );
+              const availableQty = variant?.availableQty ?? product.availableQty;
+              const stockQty = variant?.stockQty ?? product.stockQty;
+              const price = variant?.price ?? product.price;
+
+              if (availableQty < 1) {
                 return [];
               }
 
@@ -123,11 +147,14 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   ...item,
                   name: product.name,
                   brand: product.brand,
-                  price: product.price,
-                  stockQty: product.stockQty,
-                  availableQty: product.availableQty,
-                  primaryImage: normalizeCartItemImage(product.primaryImage),
-                  qty: Math.max(1, Math.min(item.qty, product.availableQty)),
+                  variantName: variant?.colorName ?? item.variantName,
+                  price,
+                  stockQty,
+                  availableQty,
+                  primaryImage: normalizeCartItemImage(
+                    variant?.primaryImage ?? product.primaryImage,
+                  ),
+                  qty: Math.max(1, Math.min(item.qty, availableQty)),
                 },
               ];
             }),

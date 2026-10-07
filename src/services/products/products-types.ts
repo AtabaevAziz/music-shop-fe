@@ -1,4 +1,9 @@
-import type { Product } from "@/types/music";
+import type { Product, ProductVariant } from "@/types/music";
+
+export type ProductVariantRequest = Omit<
+  ProductVariant,
+  "id" | "availableQty" | "reservedQty"
+>;
 
 export type ProductsListQuery = {
   status?: Product["status"];
@@ -26,6 +31,7 @@ export type CreateProductRequest = {
   images: string[];
   primaryImage?: string;
   condition: Product["condition"];
+  variants?: ProductVariantRequest[];
 };
 
 export type UpdateProductRequest = Partial<CreateProductRequest>;

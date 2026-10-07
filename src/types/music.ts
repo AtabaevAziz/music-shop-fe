@@ -88,11 +88,30 @@ export type Product = {
   minStockQty?: number;
   createdAt: string;
   updatedAt: string;
+  variants?: ProductVariant[];
+};
+
+export type ProductVariant = {
+  id: string;
+  colorKey: string;
+  colorName: string;
+  sku: string;
+  barcode?: string;
+  price: number;
+  costPrice: number;
+  stockQty: number;
+  reservedQty: number;
+  availableQty: number;
+  minStockQty?: number;
+  status: ProductStatus;
+  images: string[];
+  primaryImage?: string;
 };
 
 export type InventoryMovement = {
   id: string;
   productId: string;
+  variantId?: string | null;
   delta: number;
   reason: string;
   createdAt: string;
@@ -100,6 +119,8 @@ export type InventoryMovement = {
 
 export type OrderItem = {
   productId: string;
+  variantId?: string | null;
+  variantName?: string | null;
   qty: number;
   quantity: number;
   productName?: string;

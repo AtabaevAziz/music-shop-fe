@@ -21,5 +21,10 @@ export function fromApiStorefrontProduct(
     },
     images: resolveProductMediaPaths(product.images),
     primaryImage: resolveProductMediaPath(product.primaryImage),
+    variants: product.variants.map((variant) => ({
+      ...variant,
+      images: resolveProductMediaPaths(variant.images),
+      primaryImage: resolveProductMediaPath(variant.primaryImage),
+    })),
   };
 }

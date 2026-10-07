@@ -31,14 +31,18 @@ export function StorefrontProductCard({
       state.items.find((item) => item.productId === product.id)?.qty ?? 0,
   );
   const isGuest = !session;
+  const defaultVariant = product.variants.find((variant) => variant.status === "active");
+  const previewImage = defaultVariant?.primaryImage ?? product.primaryImage;
+  const availableQty = defaultVariant?.availableQty ?? product.availableQty;
+  const price = defaultVariant?.price ?? product.price;
 
   return (
     <Card className="storefront-product-card">
       <CardContent className="p-5">
         <div className="storefront-product-media">
-          {product.primaryImage ? (
+          {previewImage ? (
             <Image
-              src={product.primaryImage}
+              src={previewImage}
               alt={product.name}
               width={720}
               height={320}
@@ -59,7 +63,7 @@ export function StorefrontProductCard({
           <p>{product.shortDescription}</p>
         </div>
         <div className="storefront-product-footer">
-          <span>{formatMoney(product.price, currency, locale)}</span>
+          <span>{formatMoney(price, currency, locale)}</span>
           <div className="storefront-card-actions">
             <Button asChild variant="outline">
               <Link href={`/${locale}/products/${product.id}`}>
@@ -68,8 +72,8 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={isGuest || !hasHydrated || product.availableQty < 1}
-              onClick={() => addProduct(product)}
+              disabled={isGuest || !hasHydrated || availableQty < 1}
+              onClick={() => addProduct(product, 1, defaultVariant?.id)}
             >
               {hasHydrated && quantityInCart > 0
                 ? `${t("labels.addToCart")} (${quantityInCart})`
