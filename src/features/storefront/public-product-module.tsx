@@ -30,11 +30,10 @@ export function PublicProductModule({
   const { data: product, isPending, error } = useStorefrontProductQuery(id);
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
-  const quantityInCart = useStorefrontCartStore(
-    (state) =>
-      state.items
-        .filter((item) => item.productId === id)
-        .reduce((total, item) => total + item.qty, 0),
+  const quantityInCart = useStorefrontCartStore((state) =>
+    state.items
+      .filter((item) => item.productId === id)
+      .reduce((total, item) => total + item.qty, 0),
   );
   const currency = appConfig?.defaultCurrency ?? "UZS";
   const isGuest = !session;
@@ -83,7 +82,8 @@ export function PublicProductModule({
     product.variants.find((variant) => variant.status === "active");
   const displayImage = selectedVariant?.primaryImage ?? product.primaryImage;
   const displayPrice = selectedVariant?.price ?? product.price;
-  const displayAvailableQty = selectedVariant?.availableQty ?? product.availableQty;
+  const displayAvailableQty =
+    selectedVariant?.availableQty ?? product.availableQty;
 
   return (
     <div className="storefront-flow">
@@ -123,7 +123,9 @@ export function PublicProductModule({
                   <Button
                     key={variant.id}
                     type="button"
-                    variant={variant.id === selectedVariant?.id ? "default" : "outline"}
+                    variant={
+                      variant.id === selectedVariant?.id ? "default" : "outline"
+                    }
                     disabled={variant.status !== "active"}
                     onClick={() => setSelectedVariantId(variant.id)}
                   >

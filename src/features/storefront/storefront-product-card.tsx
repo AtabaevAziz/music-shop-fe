@@ -31,7 +31,9 @@ export function StorefrontProductCard({
       state.items.find((item) => item.productId === product.id)?.qty ?? 0,
   );
   const isGuest = !session;
-  const defaultVariant = product.variants.find((variant) => variant.status === "active");
+  const defaultVariant = product.variants.find(
+    (variant) => variant.status === "active",
+  );
   const previewImage = defaultVariant?.primaryImage ?? product.primaryImage;
   const availableQty = defaultVariant?.availableQty ?? product.availableQty;
   const price = defaultVariant?.price ?? product.price;

@@ -23,7 +23,11 @@ type StorefrontCartState = {
   hasHydrated: boolean;
   items: StorefrontCartItem[];
   setHasHydrated: (hasHydrated: boolean) => void;
-  addProduct: (product: StorefrontProduct, qty?: number, variantId?: string) => void;
+  addProduct: (
+    product: StorefrontProduct,
+    qty?: number,
+    variantId?: string,
+  ) => void;
   removeProduct: (productId: string, variantId?: string) => void;
   setProductQty: (productId: string, qty: number, variantId?: string) => void;
   syncProducts: (products: StorefrontProduct[]) => void;
@@ -42,14 +46,18 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
       setHasHydrated: (hasHydrated) => set({ hasHydrated }),
       addProduct: (product, qty = 1, variantId) =>
         set((state) => {
-          const variant = product.variants.find((item) => item.id === variantId) ??
+          const variant =
+            product.variants.find((item) => item.id === variantId) ??
             product.variants.find((item) => item.status === "active");
           const effectiveVariantId = variant?.id;
           const effectivePrice = variant?.price ?? product.price;
           const effectiveStockQty = variant?.stockQty ?? product.stockQty;
-          const effectiveAvailableQty = variant?.availableQty ?? product.availableQty;
+          const effectiveAvailableQty =
+            variant?.availableQty ?? product.availableQty;
           const existingItem = state.items.find(
-            (item) => item.productId === product.id && item.variantId === effectiveVariantId,
+            (item) =>
+              item.productId === product.id &&
+              item.variantId === effectiveVariantId,
           );
           const nextQty = Math.max(1, Math.min(effectiveAvailableQty, qty));
 
@@ -67,7 +75,9 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   qty: nextQty,
                   stockQty: effectiveStockQty,
                   availableQty: effectiveAvailableQty,
-                  primaryImage: normalizeCartItemImage(variant?.primaryImage ?? product.primaryImage),
+                  primaryImage: normalizeCartItemImage(
+                    variant?.primaryImage ?? product.primaryImage,
+                  ),
                 },
               ],
             };
@@ -75,7 +85,8 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
 
           return {
             items: state.items.map((item) =>
-              item.productId === product.id && item.variantId === effectiveVariantId
+              item.productId === product.id &&
+              item.variantId === effectiveVariantId
                 ? {
                     ...item,
                     variantName: variant?.colorName,
@@ -84,7 +95,9 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                     price: effectivePrice,
                     stockQty: effectiveStockQty,
                     availableQty: effectiveAvailableQty,
-                    primaryImage: normalizeCartItemImage(variant?.primaryImage ?? product.primaryImage),
+                    primaryImage: normalizeCartItemImage(
+                      variant?.primaryImage ?? product.primaryImage,
+                    ),
                     qty: Math.min(item.qty + nextQty, effectiveAvailableQty),
                   }
                 : item,
@@ -94,7 +107,8 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
       removeProduct: (productId, variantId) =>
         set((state) => ({
           items: state.items.filter(
-            (item) => item.productId !== productId || item.variantId !== variantId,
+            (item) =>
+              item.productId !== productId || item.variantId !== variantId,
           ),
         })),
       setProductQty: (productId, qty, variantId) =>
@@ -134,7 +148,8 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
               const variant = product.variants.find(
                 (candidate) => candidate.id === item.variantId,
               );
-              const availableQty = variant?.availableQty ?? product.availableQty;
+              const availableQty =
+                variant?.availableQty ?? product.availableQty;
               const stockQty = variant?.stockQty ?? product.stockQty;
               const price = variant?.price ?? product.price;
 

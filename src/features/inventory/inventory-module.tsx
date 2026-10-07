@@ -205,14 +205,16 @@ export function InventoryModule({ locale }: { locale: Locale }) {
                     <div className="flex flex-wrap gap-2 pt-2">
                       <Badge
                         variant={
-                          (selectedVariant?.stockQty ?? selectedProduct.stockQty) <=
+                          (selectedVariant?.stockQty ??
+                            selectedProduct.stockQty) <=
                           (selectedProduct.minStockQty ??
                             settings.lowStockThreshold)
                             ? "warning"
                             : "success"
                         }
                       >
-                        {t("labels.currentStock")}: {selectedVariant?.stockQty ?? selectedProduct.stockQty}
+                        {t("labels.currentStock")}:{" "}
+                        {selectedVariant?.stockQty ?? selectedProduct.stockQty}
                       </Badge>
                       <Badge variant="outline">
                         {t("labels.minStock")}:{" "}

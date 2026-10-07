@@ -306,10 +306,10 @@ export function CatalogModule({ locale }: { locale: Locale }) {
             value.minStockQty === undefined
               ? undefined
               : Number(value.minStockQty),
-          status: String(value.status ?? "draft") as ProductVariantRequest["status"],
-          images: Array.isArray(value.images)
-            ? value.images.map(String)
-            : [],
+          status: String(
+            value.status ?? "draft",
+          ) as ProductVariantRequest["status"],
+          images: Array.isArray(value.images) ? value.images.map(String) : [],
           primaryImage: value.primaryImage
             ? String(value.primaryImage)
             : undefined,

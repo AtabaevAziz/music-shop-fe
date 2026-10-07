@@ -121,7 +121,9 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => removeProduct(item.productId, item.variantId)}
+                        onClick={() =>
+                          removeProduct(item.productId, item.variantId)
+                        }
                       >
                         {t("storefront.removeFromCart")}
                       </Button>
