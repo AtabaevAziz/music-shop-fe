@@ -135,9 +135,10 @@
     "trackOrderLink": "Отследить заказ",
     "trackOrderAction": "Проверить заказ",
     "orderTrackingPageTitle": "Отслеживание заказа",
-    "orderTrackingPageText": "Введите номер заказа и подтвердите его телефоном или email, указанным при оформлении.",
-    "orderTrackingHint": "Достаточно одного верификатора: телефона или email.",
-    "orderTrackingVerifierRequired": "Укажите телефон или email, использованный в заказе.",
+    "orderTrackingPageText": "Введите номер заказа и секретный токен, который показывается после оформления.",
+    "orderTrackingHint": "Используйте токен из подтверждения заказа.",
+    "orderTrackingTokenRequired": "Введите токен отслеживания заказа.",
+    "orderTrackingTokenHint": "Сохраните этот токен: он нужен для повторного просмотра заказа.",
     "orderTrackingEmptyTitle": "Заказ ещё не выбран",
     "orderTrackingEmptyText": "Найдите заказ по номеру, чтобы увидеть актуальные статусы выполнения, оплаты и доставки.",
     "repairPageTitle": "Ремонт инструмента",
@@ -200,6 +201,7 @@
     "inventorySubtitle": "Остатки, риск пополнения и последние движения по складу"
   },
   "labels": {
+    "trackingToken": "Токен отслеживания",
     "revenue": "Выручка",
     "lowStock": "Низкий остаток",
     "activeOrders": "Активные заказы",

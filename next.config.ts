@@ -4,18 +4,21 @@ import { resolve } from "path";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
+const configuredImageHosts = (process.env.NEXT_PUBLIC_IMAGE_HOSTS ?? "")
+  .split(",")
+  .map((host) => host.trim())
+  .filter(Boolean);
+
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "**",
-      },
+      ...configuredImageHosts.flatMap((hostname) => [
+        { protocol: "https" as const, hostname },
+        ...(hostname === "localhost" || hostname === "127.0.0.1"
+          ? [{ protocol: "http" as const, hostname }]
+          : []),
+      ]),
     ],
   },
   experimental: {

@@ -22,8 +22,7 @@ export async function getPublicOrder(input: GetPublicOrderRequest) {
     `public/orders/${input.orderNumber}`,
     {
       params: {
-        phone: input.phone,
-        email: input.email,
+        token: input.token,
       },
     },
   );

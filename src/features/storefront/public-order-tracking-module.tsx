@@ -20,8 +20,7 @@ import type { Order, OrderStage } from "@/types/music";
 
 type LookupFormState = {
   orderNumber: string;
-  phone: string;
-  email: string;
+  token: string;
 };
 
 function getStatusVariant(status: Order["status"]) {
@@ -99,8 +98,7 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
   const currency = appConfig?.defaultCurrency ?? "UZS";
   const [lookup, setLookup] = useState<LookupFormState>({
     orderNumber: "",
-    phone: "",
-    email: "",
+    token: "",
   });
   const [lookupError, setLookupError] = useState("");
   const trackingMutation = useMutation({
@@ -138,16 +136,15 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                   return;
                 }
 
-                if (!lookup.phone.trim() && !lookup.email.trim()) {
-                  setLookupError(t("storefront.orderTrackingVerifierRequired"));
+                if (!lookup.token.trim()) {
+                  setLookupError(t("storefront.orderTrackingTokenRequired"));
                   return;
                 }
 
                 try {
                   await trackingMutation.mutateAsync({
                     orderNumber: lookup.orderNumber.trim(),
-                    phone: lookup.phone.trim() || undefined,
-                    email: lookup.email.trim() || undefined,
+                    token: lookup.token.trim(),
                   });
                 } catch (error) {
                   setLookupError(
@@ -170,25 +167,13 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                   }
                 />
               </AppField>
-              <AppField label={t("labels.phone")}>
+              <AppField label={t("labels.trackingToken")}>
                 <Input
-                  value={lookup.phone}
+                  value={lookup.token}
                   onChange={(event) =>
                     setLookup((current) => ({
                       ...current,
-                      phone: event.target.value,
-                    }))
-                  }
-                />
-              </AppField>
-              <AppField label={t("labels.emailOptional")}>
-                <Input
-                  type="email"
-                  value={lookup.email}
-                  onChange={(event) =>
-                    setLookup((current) => ({
-                      ...current,
-                      email: event.target.value,
+                      token: event.target.value,
                     }))
                   }
                 />

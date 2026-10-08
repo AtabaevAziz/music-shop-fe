@@ -135,9 +135,10 @@
     "trackOrderLink": "Track order",
     "trackOrderAction": "Check order",
     "orderTrackingPageTitle": "Track your order",
-    "orderTrackingPageText": "Enter the order number and verify it with the phone or email used at checkout.",
-    "orderTrackingHint": "You only need one verifier: phone or email.",
-    "orderTrackingVerifierRequired": "Enter the phone or email used for the order.",
+    "orderTrackingPageText": "Enter the order number and the secret token shown after checkout.",
+    "orderTrackingHint": "Use the token from your order confirmation.",
+    "orderTrackingTokenRequired": "Enter the order tracking token.",
+    "orderTrackingTokenHint": "Keep this token safe; it is required to view the order again.",
     "orderTrackingEmptyTitle": "No order selected yet",
     "orderTrackingEmptyText": "Search by order number to view the latest workflow, payment, and delivery status.",
     "repairPageTitle": "Instrument repair",
@@ -200,6 +201,7 @@
     "inventorySubtitle": "Current stock, replenishment risk, and recent warehouse movement visibility"
   },
   "labels": {
+    "trackingToken": "Tracking token",
     "revenue": "Revenue",
     "lowStock": "Low stock",
     "activeOrders": "Active orders",

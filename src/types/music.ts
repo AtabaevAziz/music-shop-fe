@@ -142,6 +142,7 @@ export type OrderAddress = {
 export type Order = {
   id: string;
   orderNumber: string;
+  trackingToken?: string;
   customerId: string;
   stage: OrderStage;
   availableTransitions: OrderStatus[];

@@ -47,8 +47,7 @@ export type ApiPublicRepair = RepairRequest;
 
 export type GetPublicOrderRequest = {
   orderNumber: string;
-  phone?: string;
-  email?: string;
+  token: string;
 };
 
 export type ApiPublicOrderResponse = {

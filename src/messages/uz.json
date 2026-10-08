@@ -135,9 +135,10 @@
     "trackOrderLink": "Buyurtmani kuzatish",
     "trackOrderAction": "Buyurtmani tekshirish",
     "orderTrackingPageTitle": "Buyurtmani kuzatish",
-    "orderTrackingPageText": "Buyurtma raqamini kiriting va uni rasmiylashtirishda ishlatilgan telefon yoki email bilan tasdiqlang.",
-    "orderTrackingHint": "Bitta verifikator yetarli: telefon yoki email.",
-    "orderTrackingVerifierRequired": "Buyurtmada ishlatilgan telefon yoki emailni kiriting.",
+    "orderTrackingPageText": "Buyurtma raqami va rasmiylashtirishdan keyin ko'rsatilgan maxfiy tokenni kiriting.",
+    "orderTrackingHint": "Buyurtma tasdiqnomasidagi tokenni ishlating.",
+    "orderTrackingTokenRequired": "Buyurtmani kuzatish tokenini kiriting.",
+    "orderTrackingTokenHint": "Tokenni saqlang: buyurtmani qayta ko'rish uchun kerak bo'ladi.",
     "orderTrackingEmptyTitle": "Hali buyurtma tanlanmagan",
     "orderTrackingEmptyText": "Jarayon, to'lov va yetkazib berishning oxirgi holatini ko'rish uchun buyurtmani raqami bo'yicha toping.",
     "repairPageTitle": "Asbobni ta'mirlash",
@@ -200,6 +201,7 @@
     "inventorySubtitle": "Joriy qoldiq, to'ldirish riski va ombordagi so'nggi harakatlar ko'rinishi"
   },
   "labels": {
+    "trackingToken": "Kuzatuv tokeni",
     "revenue": "Tushum",
     "lowStock": "Kam qoldiq",
     "activeOrders": "Faol buyurtmalar",

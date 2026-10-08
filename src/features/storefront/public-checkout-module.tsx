@@ -175,6 +175,17 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
                 orderId: placedOrder.orderNumber,
               })}
             </p>
+            {placedOrder.trackingToken ? (
+              <div className="rounded-md border p-3 text-left text-sm">
+                <strong>{t("labels.trackingToken")}</strong>
+                <div className="break-all font-mono text-xs">
+                  {placedOrder.trackingToken}
+                </div>
+                <div className="muted mt-1">
+                  {t("storefront.orderTrackingTokenHint")}
+                </div>
+              </div>
+            ) : null}
             <div className="grid gap-2 text-left">
               <div>
                 <strong>{placedOrder.customer.name}</strong>
