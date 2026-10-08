@@ -16,6 +16,7 @@
 .externalNativeBuild
 .cxx
 node_modules
+.env.local
 .next
 tsconfig.tsbuildinfo
 out
