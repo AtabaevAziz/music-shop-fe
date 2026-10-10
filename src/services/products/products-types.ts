@@ -20,6 +20,7 @@ export type CreateProductRequest = {
   barcode?: string;
   categoryId: string;
   brand: string;
+  repairable?: boolean;
   price: number;
   costPrice: number;
   stockQty: number;

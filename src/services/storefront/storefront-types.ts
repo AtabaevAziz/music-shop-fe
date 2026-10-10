@@ -31,6 +31,7 @@ export type StorefrontProduct = {
   condition: Condition;
   category: StorefrontCategory;
   brand: string;
+  repairable: boolean;
   variants: ProductVariant[];
 };
 
@@ -51,6 +52,7 @@ export type ApiStorefrontProduct = {
   condition: Condition;
   category: ApiStorefrontCategory;
   brand: string;
+  repairable: boolean;
   variants: ProductVariant[];
 };
 

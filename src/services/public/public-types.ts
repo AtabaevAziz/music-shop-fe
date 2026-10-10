@@ -33,6 +33,8 @@ export type CreatePublicOrderRequest = {
 };
 
 export type CreatePublicRepairRequest = {
+  productId?: string;
+  variantId?: string;
   customerName: string;
   phone: string;
   email?: string;

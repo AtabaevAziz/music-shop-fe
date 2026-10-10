@@ -18,6 +18,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientCatalogQuery } from "@/hooks/use-catalog-query";
 import { Locale } from "@/i18n";
@@ -63,6 +70,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
   const { data, isPending } = useClientCatalogQuery();
   const [query, setQuery] = useState("");
   const [purchaseTarget, setPurchaseTarget] = useState<Product | null>(null);
+  const [purchaseVariantId, setPurchaseVariantId] = useState("");
   const [qty, setQty] = useState("1");
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState("");
@@ -97,6 +105,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
   }
 
   const { currency, customer } = data;
+  const purchaseVariant = purchaseTarget?.variants?.find(
+    (variant) => variant.id === purchaseVariantId,
+  );
+  const purchaseAvailableQty =
+    purchaseVariant?.availableQty ?? purchaseTarget?.availableQty ?? 0;
 
   async function submitOrder() {
     const parsed = checkoutSchema.safeParse({
@@ -109,7 +122,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
       !purchaseTarget ||
       !parsed.success ||
       !customerDetails ||
-      parsed.data.qty > purchaseTarget.availableQty
+      parsed.data.qty > purchaseAvailableQty
     ) {
       setFormError(t("labels.validationFailed"));
       return;
@@ -121,6 +134,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
         items: [
           {
             productId: purchaseTarget.id,
+            variantId: purchaseVariantId || undefined,
             quantity: parsed.data.qty,
           },
         ],
@@ -202,6 +216,11 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                       setNotes(
                         `${t("labels.orderRequestPrefix")} ${product.name}`,
                       );
+                      setPurchaseVariantId(
+                        product.variants?.find(
+                          (variant) => variant.status === "active",
+                        )?.id ?? "",
+                      );
                       setPurchaseTarget(product);
                     }}
                   >
@@ -238,10 +257,38 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
               <div className="text-sm font-medium">{purchaseTarget?.name}</div>
               <div className="muted">
                 {purchaseTarget
-                  ? formatMoney(purchaseTarget.price, data.currency, locale)
+                  ? formatMoney(
+                      purchaseVariant?.price ?? purchaseTarget.price,
+                      data.currency,
+                      locale,
+                    )
                   : null}
               </div>
             </div>
+            {purchaseTarget && (purchaseTarget.variants ?? []).length > 1 ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  {t("labels.color")}
+                </label>
+                <Select
+                  value={purchaseVariantId}
+                  onValueChange={setPurchaseVariantId}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(purchaseTarget.variants ?? [])
+                      .filter((variant) => variant.status === "active")
+                      .map((variant) => (
+                        <SelectItem key={variant.id} value={variant.id}>
+                          {variant.colorName}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="client-order-qty">
                 {t("labels.qty")}
@@ -250,7 +297,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
                 id="client-order-qty"
                 type="number"
                 min="1"
-                max={String(purchaseTarget?.availableQty ?? 1)}
+                max={String(purchaseAvailableQty || 1)}
                 value={qty}
                 onChange={(event) => setQty(event.target.value)}
               />

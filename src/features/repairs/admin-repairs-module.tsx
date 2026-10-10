@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useCatalogQuery } from "@/hooks/use-catalog-query";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
 import { useAdminRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
@@ -60,6 +61,8 @@ const repairStatuses = [
 
 const repairSchema = z.object({
   customerId: z.string().min(1),
+  productId: z.string().optional(),
+  variantId: z.string().optional(),
   instrumentName: requiredTrimmedString(2),
   brand: requiredTrimmedString(2),
   issue: requiredTrimmedString(8),
@@ -74,6 +77,8 @@ const repairSchema = z.object({
 type RepairDraft = {
   id?: string;
   customerId: string;
+  productId: string;
+  variantId: string;
   instrumentName: string;
   brand: string;
   issue: string;
@@ -87,6 +92,8 @@ type RepairDraft = {
 
 const initialDraft: RepairDraft = {
   customerId: "",
+  productId: "",
+  variantId: "",
   instrumentName: "",
   brand: "",
   issue: "",
@@ -103,6 +110,7 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
   const queryClient = useQueryClient();
   const { data: repairsData, isPending } = useAdminRepairsQuery();
   const { data: customersData } = useCustomersQuery();
+  const { data: catalogData } = useCatalogQuery();
   const [draft, setDraft] = useState<RepairDraft>(initialDraft);
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -125,6 +133,8 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
       );
       const payload = {
         customerId: parsed.customerId,
+        productId: parsed.productId || undefined,
+        variantId: parsed.variantId || undefined,
         instrumentName: parsed.instrumentName,
         brand: parsed.brand,
         issue: parsed.issue,
@@ -218,7 +228,12 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                   <TableCell>
                     {customerMap[request.customerId] ?? request.customerId}
                   </TableCell>
-                  <TableCell>{request.instrumentName}</TableCell>
+                  <TableCell>
+                    <div>{request.productName ?? request.instrumentName}</div>
+                    {request.variantName ? (
+                      <div className="muted">{request.variantName}</div>
+                    ) : null}
+                  </TableCell>
                   <TableCell>{request.issue}</TableCell>
                   <TableCell>
                     {typeof request.estimatedCost === "number"
@@ -257,6 +272,8 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                         setDraft({
                           id: request.id,
                           customerId: request.customerId,
+                          productId: request.productId ?? "",
+                          variantId: request.variantId ?? "",
                           instrumentName: request.instrumentName,
                           brand: request.brand,
                           issue: request.issue,
@@ -317,6 +334,74 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                   {customers.map((customer) => (
                     <SelectItem key={customer.id} value={customer.id}>
                       {customer.fullName ?? customer.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField label={t("labels.repairProductOptional")}>
+              <Select
+                value={draft.productId || "__manual__"}
+                onValueChange={(value) => {
+                  if (value === "__manual__") {
+                    setDraft((current) => ({
+                      ...current,
+                      productId: "",
+                      variantId: "",
+                    }));
+                    return;
+                  }
+                  const product = catalogData?.products.find(
+                    (item) => item.id === value,
+                  );
+                  setDraft((current) => ({
+                    ...current,
+                    productId: value,
+                    variantId: product?.variants?.[0]?.id ?? "",
+                    instrumentName: product?.name ?? current.instrumentName,
+                    brand: product?.brand ?? current.brand,
+                  }));
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__manual__">
+                    {t("labels.manualInstrument")}
+                  </SelectItem>
+                  {(catalogData?.products ?? [])
+                    .filter((product) => product.repairable)
+                    .map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </AppField>
+            <AppField label={t("labels.color")}>
+              <Select
+                value={draft.variantId || "__none__"}
+                onValueChange={(value) =>
+                  setDraft((current) => ({
+                    ...current,
+                    variantId: value === "__none__" ? "" : value,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">{t("common.select")}</SelectItem>
+                  {(
+                    catalogData?.products.find(
+                      (product) => product.id === draft.productId,
+                    )?.variants ?? []
+                  ).map((variant) => (
+                    <SelectItem key={variant.id} value={variant.id}>
+                      {variant.colorName}
                     </SelectItem>
                   ))}
                 </SelectContent>

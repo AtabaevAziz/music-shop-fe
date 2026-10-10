@@ -14,6 +14,7 @@ export type ApiClientMeResponse = {
 
 export type CreateClientOrderItemRequest = {
   productId: string;
+  variantId?: string;
   quantity: number;
 };
 
@@ -37,6 +38,8 @@ export type CreateClientOrderRequest = {
 };
 
 export type CreateClientRepairRequest = {
+  productId?: string;
+  variantId?: string;
   instrumentName: string;
   brand: string;
   issue: string;

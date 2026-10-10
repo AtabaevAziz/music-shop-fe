@@ -177,6 +177,19 @@ export function PublicProductModule({
                 <Link href={`/${locale}/cart`}>{t("storefront.viewCart")}</Link>
               </Button>
             ) : null}
+            {product.repairable ? (
+              <Button asChild variant="outline" size="lg">
+                <Link
+                  href={`/${locale}/repairs?productId=${product.id}${
+                    selectedVariant?.id
+                      ? `&variantId=${selectedVariant.id}`
+                      : ""
+                  }`}
+                >
+                  {t("labels.requestRepair")}
+                </Link>
+              </Button>
+            ) : null}
             <Button asChild variant="outline" size="lg">
               <Link
                 href={

@@ -3393,3 +3393,257 @@ body {
     min-height: 38px;
   }
 }
+
+/* Final responsive contract for the storefront and shared content surfaces. */
+.storefront-shell,
+.storefront-main,
+.storefront-topbar,
+.storefront-flow,
+.storefront-section,
+.storefront-product-hero,
+.storefront-banner,
+.storefront-hero,
+.storefront-products-grid,
+.storefront-category-grid,
+.storefront-services-grid {
+  min-width: 0;
+}
+
+.storefront-product-copy p,
+.storefront-section-head p,
+.storefront-banner p,
+.storefront-product-panel p,
+.storefront-product-topline,
+.storefront-product-footer,
+.storefront-card-actions {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.storefront-product-copy strong,
+.storefront-product-topline > *,
+.storefront-product-footer > * {
+  min-width: 0;
+}
+
+@media (min-width: 1100px) and (max-width: 1439px) {
+  .storefront-shell {
+    padding: 20px;
+  }
+
+  .storefront-topbar {
+    top: 20px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+  }
+
+  .storefront-main {
+    width: min(1180px, 100%);
+  }
+
+  .storefront-hero,
+  .storefront-product-hero {
+    gap: 22px;
+    padding: 26px;
+  }
+
+  .storefront-section,
+  .storefront-banner {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .storefront-shell {
+    padding: 18px;
+  }
+
+  .storefront-topbar {
+    top: 18px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    padding: 14px;
+  }
+
+  .storefront-brand {
+    min-width: 0;
+  }
+
+  .storefront-brand-copy {
+    min-width: 0;
+  }
+
+  .storefront-brand-copy span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .storefront-actions {
+    min-width: 0;
+  }
+
+  .storefront-auth-actions {
+    flex-wrap: nowrap;
+  }
+
+  .storefront-auth-actions > * {
+    min-width: 0;
+  }
+
+  .storefront-hero,
+  .storefront-product-hero {
+    gap: 18px;
+    padding: 22px;
+  }
+
+  .storefront-section,
+  .storefront-banner {
+    padding: 22px;
+  }
+
+  .storefront-section-head {
+    gap: 14px;
+  }
+
+  .storefront-product-card .storefront-product-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .storefront-card-actions {
+    width: 100%;
+  }
+
+  .storefront-card-actions > * {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .storefront-shell {
+    padding: 12px;
+  }
+
+  .storefront-topbar {
+    top: 12px;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 12px;
+  }
+
+  .storefront-brand {
+    max-width: 100%;
+  }
+
+  .storefront-brand-mark {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+  }
+
+  .storefront-brand-copy span {
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .storefront-actions {
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .storefront-actions > button,
+  .storefront-actions > a {
+    min-height: 42px;
+  }
+
+  .storefront-auth-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .storefront-register-button,
+  .storefront-login-button {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
+  .storefront-hero-copy h1,
+  .storefront-section-head h1,
+  .storefront-product-panel h1 {
+    font-size: clamp(2rem, 10vw, 2.7rem);
+  }
+
+  .storefront-section-head h2 {
+    font-size: clamp(1.45rem, 7vw, 2rem);
+  }
+
+  .storefront-section,
+  .storefront-banner,
+  .storefront-hero,
+  .storefront-product-hero {
+    padding: 18px;
+  }
+
+  .storefront-section-head,
+  .storefront-banner {
+    gap: 14px;
+  }
+
+  .storefront-category-pills {
+    max-width: 100%;
+  }
+
+  .storefront-category-pills button {
+    min-height: 42px;
+    padding-inline: 13px;
+  }
+
+  .storefront-product-card .storefront-product-footer,
+  .storefront-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .storefront-card-actions,
+  .storefront-card-actions > * {
+    width: 100%;
+  }
+
+  .storefront-product-footer span,
+  .storefront-product-price {
+    font-size: 1.2rem;
+  }
+
+  .storefront-product-media,
+  .storefront-product-image,
+  .storefront-product-image-placeholder {
+    min-height: 0;
+  }
+
+  .storefront-product-detail-image {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 430px) {
+  .storefront-auth-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .storefront-brand-copy span {
+    max-width: 48vw;
+  }
+
+  .storefront-section,
+  .storefront-banner,
+  .storefront-hero,
+  .storefront-product-hero {
+    padding: 16px;
+    border-radius: 20px;
+  }
+}

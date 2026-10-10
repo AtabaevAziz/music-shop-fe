@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Pen, Trash2 } from "lucide-react";
+import { Pen, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -93,6 +93,66 @@ const productSchema = z.object({
 
 type ProductDraft = Record<string, string>;
 
+type VariantDraft = {
+  colorKey: string;
+  colorName: string;
+  sku: string;
+  barcode: string;
+  price: string;
+  costPrice: string;
+  stockQty: string;
+  minStockQty: string;
+  status: ProductStatus;
+  images: string;
+  primaryImage: string;
+};
+
+function emptyVariantDraft(): VariantDraft {
+  return {
+    colorKey: "",
+    colorName: "",
+    sku: "",
+    barcode: "",
+    price: "",
+    costPrice: "",
+    stockQty: "0",
+    minStockQty: "",
+    status: "draft",
+    images: "",
+    primaryImage: "",
+  };
+}
+
+function parseVariantDrafts(value: string): VariantDraft[] {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.map((item) => {
+      const value = item as Record<string, unknown>;
+      return {
+        colorKey: String(value.colorKey ?? ""),
+        colorName: String(value.colorName ?? ""),
+        sku: String(value.sku ?? ""),
+        barcode: String(value.barcode ?? ""),
+        price: String(value.price ?? ""),
+        costPrice: String(value.costPrice ?? ""),
+        stockQty: String(value.stockQty ?? "0"),
+        minStockQty: String(value.minStockQty ?? ""),
+        status: String(value.status ?? "draft") as ProductStatus,
+        images: Array.isArray(value.images)
+          ? value.images.map(String).join("\n")
+          : "",
+        primaryImage: String(value.primaryImage ?? ""),
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 const ALL_CATEGORIES_VALUE = "__all_categories__";
 const ALL_BRANDS_VALUE = "__all_brands__";
 
@@ -148,12 +208,14 @@ export function CatalogModule({ locale }: { locale: Locale }) {
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [variantRows, setVariantRows] = useState<VariantDraft[]>([]);
   const [draft, setDraft] = useState<ProductDraft>({
     status: "draft",
     condition: conditionValues[0] ?? "new",
     primaryImage: "",
     variants: "[]",
   });
+  setVariantRows([]);
 
   const categoryMap = Object.fromEntries(
     categories.map((item) => [item.id, item.name]),
@@ -217,6 +279,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       condition: conditionValues[0] ?? "new",
       primaryImage: "",
       variants: "[]",
+      repairable: "false",
     });
   }
 
@@ -247,6 +310,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
       shortDescription: product.shortDescription,
       description: product.description,
       condition: product.condition,
+      repairable: String(product.repairable),
       primaryImage: product.primaryImage ?? product.images[0] ?? "",
       images: product.images.join("\n"),
       specs: Object.entries(product.specs)
@@ -254,6 +318,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         .join("\n"),
       variants: JSON.stringify(product.variants ?? [], null, 2),
     });
+    setVariantRows(parseVariantDrafts(JSON.stringify(product.variants ?? [])));
     setIsEditorOpen(true);
   }
 
@@ -283,36 +348,43 @@ export function CatalogModule({ locale }: { locale: Locale }) {
     const primaryImage = images.includes(draft.primaryImage ?? "")
       ? draft.primaryImage
       : images[0];
+    const colorKeys = new Set<string>();
+    const skus = new Set<string>();
     let variants: ProductVariantRequest[] = [];
     try {
-      const parsedVariants = JSON.parse(draft.variants ?? "[]") as unknown;
-      if (!Array.isArray(parsedVariants)) {
-        throw new Error("Variants must be an array.");
-      }
-      variants = parsedVariants.map((variant) => {
-        if (!variant || typeof variant !== "object") {
-          throw new Error("Each variant must be an object.");
+      variants = variantRows.map((variant) => {
+        const colorKey = variant.colorKey.trim().toLowerCase();
+        const sku = variant.sku.trim();
+        const images = parseList(variant.images);
+        if (
+          !colorKey ||
+          !variant.colorName.trim() ||
+          !sku ||
+          images.length === 0
+        ) {
+          throw new Error(t("labels.validationFailed"));
         }
-        const value = variant as Record<string, unknown>;
+        if (colorKeys.has(colorKey) || skus.has(sku)) {
+          throw new Error(t("labels.validationFailed"));
+        }
+        colorKeys.add(colorKey);
+        skus.add(sku);
         return {
-          colorKey: String(value.colorKey ?? ""),
-          colorName: String(value.colorName ?? ""),
-          sku: String(value.sku ?? ""),
-          barcode: value.barcode ? String(value.barcode) : undefined,
-          price: Number(value.price),
-          costPrice: Number(value.costPrice),
-          stockQty: Number(value.stockQty),
-          minStockQty:
-            value.minStockQty === undefined
-              ? undefined
-              : Number(value.minStockQty),
-          status: String(
-            value.status ?? "draft",
-          ) as ProductVariantRequest["status"],
-          images: Array.isArray(value.images) ? value.images.map(String) : [],
-          primaryImage: value.primaryImage
-            ? String(value.primaryImage)
+          colorKey,
+          colorName: variant.colorName.trim(),
+          sku,
+          barcode: normalizeOptionalString(variant.barcode),
+          price: Number(variant.price),
+          costPrice: Number(variant.costPrice),
+          stockQty: Number(variant.stockQty),
+          minStockQty: variant.minStockQty
+            ? Number(variant.minStockQty)
             : undefined,
+          status: variant.status,
+          images,
+          primaryImage: images.includes(variant.primaryImage)
+            ? variant.primaryImage
+            : images[0],
         };
       });
     } catch (error) {
@@ -332,6 +404,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
         primaryImage,
         status: parsed.data.status as ProductStatus,
         condition: parsed.data.condition as Condition,
+        repairable: draft.repairable === "true",
         price: Number(draft.price),
         costPrice: Number(draft.costPrice),
         stockQty: Number(draft.stockQty),
@@ -431,6 +504,7 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                     <TableHead>{t("labels.variants")}</TableHead>
                     <TableHead>{t("labels.price")}</TableHead>
                     <TableHead>{t("labels.stock")}</TableHead>
+                    <TableHead>{t("labels.repairable")}</TableHead>
                     <TableHead>{t("labels.availability")}</TableHead>
                     <TableHead>{t("common.actions")}</TableHead>
                   </TableRow>
@@ -485,6 +559,15 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                             }
                           >
                             {product.stockQty}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={product.repairable ? "success" : "outline"}
+                          >
+                            {product.repairable
+                              ? t("common.yes")
+                              : t("common.no")}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -737,6 +820,20 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 </SelectContent>
               </Select>
             </AppField>
+            <label className="surface flex items-center gap-3 rounded-xl p-4 text-sm font-medium md:col-span-2">
+              <input
+                type="checkbox"
+                checked={draft.repairable === "true"}
+                disabled={isSaving}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    repairable: String(event.target.checked),
+                  }))
+                }
+              />
+              {t("labels.repairable")}
+            </label>
             <AppField
               label={t("labels.shortDescription")}
               className="md:col-span-2"
@@ -824,22 +921,244 @@ export function CatalogModule({ locale }: { locale: Locale }) {
                 })}
               </div>
             ) : null}
-            <AppField
-              label={t("labels.variantsJson")}
-              className="md:col-span-2"
-            >
-              <Textarea
-                value={draft.variants ?? "[]"}
-                disabled={isSaving}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    variants: event.target.value,
-                  }))
-                }
-                rows={10}
-              />
-            </AppField>
+            <section className="surface grid gap-4 rounded-xl p-4 md:col-span-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <strong>{t("labels.variants")}</strong>
+                  <div className="muted">{t("labels.variantEditorHelp")}</div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSaving}
+                  onClick={() =>
+                    setVariantRows((current) => [
+                      ...current,
+                      emptyVariantDraft(),
+                    ])
+                  }
+                >
+                  <Plus size={16} />
+                  {t("common.addNew")}
+                </Button>
+              </div>
+              {variantRows.map((variant, index) => (
+                <div
+                  key={`${variant.colorKey}-${index}`}
+                  className="grid gap-3 rounded-xl border p-4 md:grid-cols-2"
+                >
+                  <AppField label={t("labels.colorKey")}>
+                    <Input
+                      value={variant.colorKey}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, colorKey: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.color")}>
+                    <Input
+                      value={variant.colorName}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, colorName: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.sku")}>
+                    <Input
+                      value={variant.sku}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, sku: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.barcode")}>
+                    <Input
+                      value={variant.barcode}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, barcode: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.price")}>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={variant.price}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, price: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.costPrice")}>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={variant.costPrice}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, costPrice: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.stockQty")}>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={variant.stockQty}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, stockQty: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("labels.minStockQty")}>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={variant.minStockQty}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, minStockQty: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <AppField label={t("common.status")}>
+                    <Select
+                      value={variant.status}
+                      disabled={isSaving}
+                      onValueChange={(value) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, status: value as ProductStatus }
+                              : item,
+                          ),
+                        )
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {productStatuses.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {dynamicLabel(t, status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </AppField>
+                  <AppField
+                    label={t("labels.imagesPerLine")}
+                    className="md:col-span-2"
+                  >
+                    <Textarea
+                      value={variant.images}
+                      disabled={isSaving}
+                      onChange={(event) =>
+                        setVariantRows((current) =>
+                          current.map((item, itemIndex) =>
+                            itemIndex === index
+                              ? { ...item, images: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </AppField>
+                  <div className="flex items-end justify-between gap-3 md:col-span-2">
+                    <AppField
+                      label={t("labels.primary")}
+                      className="min-w-0 flex-1"
+                    >
+                      <Input
+                        value={variant.primaryImage}
+                        disabled={isSaving}
+                        onChange={(event) =>
+                          setVariantRows((current) =>
+                            current.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, primaryImage: event.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                      />
+                    </AppField>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      disabled={isSaving}
+                      aria-label={t("common.delete")}
+                      onClick={() =>
+                        setVariantRows((current) =>
+                          current.filter((_, itemIndex) => itemIndex !== index),
+                        )
+                      }
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {variantRows.length === 0 ? (
+                <div className="empty-state">{t("labels.noVariants")}</div>
+              ) : null}
+            </section>
             <AppField
               label={t("labels.specsKeyValue")}
               className="md:col-span-2"

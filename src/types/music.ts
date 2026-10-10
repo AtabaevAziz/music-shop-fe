@@ -73,6 +73,7 @@ export type Product = {
   barcode?: string;
   categoryId: string;
   brand: string;
+  repairable: boolean;
   price: number;
   costPrice: number;
   stockQty: number;
@@ -225,6 +226,10 @@ export type Order = {
 export type RepairRequest = {
   id: string;
   customerId: string;
+  productId?: string;
+  variantId?: string;
+  productName?: string;
+  variantName?: string;
   instrumentName: string;
   brand: string;
   issue: string;

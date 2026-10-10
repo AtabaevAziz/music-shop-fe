@@ -10,6 +10,8 @@ export type ApiRepairRequest = RepairRequest;
 
 export type CreateRepairRequest = {
   customerId: string;
+  productId?: string;
+  variantId?: string;
   instrumentName: string;
   brand: string;
   issue: string;

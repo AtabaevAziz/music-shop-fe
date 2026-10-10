@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,13 +31,19 @@ export function StorefrontProductCard({
     (state) =>
       state.items.find((item) => item.productId === product.id)?.qty ?? 0,
   );
-  const isGuest = !session;
-  const defaultVariant = product.variants.find(
+  const activeVariants = product.variants.filter(
     (variant) => variant.status === "active",
   );
-  const previewImage = defaultVariant?.primaryImage ?? product.primaryImage;
-  const availableQty = defaultVariant?.availableQty ?? product.availableQty;
-  const price = defaultVariant?.price ?? product.price;
+  const [selectedVariantId, setSelectedVariantId] = useState(
+    activeVariants[0]?.id,
+  );
+  const isGuest = !session;
+  const selectedVariant =
+    activeVariants.find((variant) => variant.id === selectedVariantId) ??
+    activeVariants[0];
+  const previewImage = selectedVariant?.primaryImage ?? product.primaryImage;
+  const availableQty = selectedVariant?.availableQty ?? product.availableQty;
+  const price = selectedVariant?.price ?? product.price;
 
   return (
     <Card className="storefront-product-card">
@@ -64,6 +71,26 @@ export function StorefrontProductCard({
           <strong>{product.name}</strong>
           <p>{product.shortDescription}</p>
         </div>
+        {activeVariants.length > 1 ? (
+          <div className="storefront-variant-picker">
+            <span className="muted">{t("labels.color")}</span>
+            <div className="flex flex-wrap gap-2">
+              {activeVariants.map((variant) => (
+                <Button
+                  key={variant.id}
+                  type="button"
+                  size="sm"
+                  variant={
+                    variant.id === selectedVariant?.id ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedVariantId(variant.id)}
+                >
+                  {variant.colorName}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="storefront-product-footer">
           <span>{formatMoney(price, currency, locale)}</span>
           <div className="storefront-card-actions">
@@ -75,12 +102,25 @@ export function StorefrontProductCard({
             <Button
               type="button"
               disabled={isGuest || !hasHydrated || availableQty < 1}
-              onClick={() => addProduct(product, 1, defaultVariant?.id)}
+              onClick={() => addProduct(product, 1, selectedVariant?.id)}
             >
               {hasHydrated && quantityInCart > 0
                 ? `${t("labels.addToCart")} (${quantityInCart})`
                 : t("labels.addToCart")}
             </Button>
+            {product.repairable ? (
+              <Button asChild variant="ghost">
+                <Link
+                  href={`/${locale}/repairs?productId=${product.id}${
+                    selectedVariant?.id
+                      ? `&variantId=${selectedVariant.id}`
+                      : ""
+                  }`}
+                >
+                  {t("labels.requestRepair")}
+                </Link>
+              </Button>
+            ) : null}
           </div>
         </div>
       </CardContent>

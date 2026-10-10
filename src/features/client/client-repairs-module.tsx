@@ -10,7 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useClientCatalogQuery } from "@/hooks/use-catalog-query";
 import { useClientRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
 import { optionalTrimmedUrl, requiredTrimmedString } from "@/lib/form-utils";
@@ -47,7 +55,10 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const { data, isPending } = useClientRepairsQuery();
+  const { data: catalogData } = useClientCatalogQuery();
   const [draft, setDraft] = useState<RepairDraft>(initialDraft);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedVariantId, setSelectedVariantId] = useState("");
   const [formError, setFormError] = useState("");
   const createMutation = useMutation({
     mutationFn: createClientRepair,
@@ -72,8 +83,14 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
     }
 
     try {
-      await createMutation.mutateAsync(parsed.data);
+      await createMutation.mutateAsync({
+        ...parsed.data,
+        productId: selectedProductId || undefined,
+        variantId: selectedVariantId || undefined,
+      });
       setDraft(initialDraft);
+      setSelectedProductId("");
+      setSelectedVariantId("");
       setFormError("");
     } catch (error) {
       setFormError(
@@ -91,6 +108,75 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
         />
         {formError ? <div className="error">{formError}</div> : null}
         <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              {t("labels.repairProductOptional")}
+            </label>
+            <Select
+              value={selectedProductId || "__manual__"}
+              onValueChange={(value) => {
+                const product = catalogData?.products.find(
+                  (item) => item.id === value,
+                );
+                if (value === "__manual__") {
+                  setSelectedProductId("");
+                  setSelectedVariantId("");
+                  return;
+                }
+                setSelectedProductId(value);
+                setSelectedVariantId(product?.variants?.[0]?.id ?? "");
+                if (product) {
+                  setDraft((current) => ({
+                    ...current,
+                    instrumentName: product.name,
+                    brand: product.brand,
+                  }));
+                }
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("common.select")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__manual__">
+                  {t("labels.manualInstrument")}
+                </SelectItem>
+                {(catalogData?.products ?? [])
+                  .filter((product) => product.repairable)
+                  .map((product) => (
+                    <SelectItem key={product.id} value={product.id}>
+                      {product.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {selectedProductId ? (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("labels.color")}</label>
+              <Select
+                value={selectedVariantId}
+                onValueChange={setSelectedVariantId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("common.select")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(
+                    catalogData?.products.find(
+                      (product) => product.id === selectedProductId,
+                    )?.variants ?? []
+                  )
+                    .filter((variant) => variant.status === "active")
+                    .map((variant) => (
+                      <SelectItem key={variant.id} value={variant.id}>
+                        {variant.colorName}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
           <div className="space-y-2">
             <label
               className="text-sm font-medium"
@@ -196,7 +282,10 @@ export function ClientRepairsModule({ locale }: { locale: Locale }) {
                   <div className="space-y-1">
                     <strong>{request.instrumentName}</strong>
                     <div className="muted">
-                      {request.brand} · {request.id}
+                      {request.brand}
+                      {request.variantName
+                        ? ` · ${request.variantName}`
+                        : ""} · {request.id}
                     </div>
                   </div>
                   <Badge
