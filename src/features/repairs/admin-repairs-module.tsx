@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useCatalogQuery } from "@/hooks/use-catalog-query";
+import { useWorkflowsQuery } from "@/hooks/use-config-query";
 import { useCustomersQuery } from "@/hooks/use-customers-query";
 import { useAdminRepairsQuery } from "@/hooks/use-repairs-query";
 import { Locale } from "@/i18n";
@@ -58,6 +59,15 @@ const repairStatuses = [
   "completed",
   "cancelled",
 ] as const satisfies readonly RepairStatus[];
+
+const fallbackRepairTransitions: Record<RepairStatus, RepairStatus[]> = {
+  new: ["diagnostics", "cancelled"],
+  diagnostics: ["in_progress", "cancelled"],
+  in_progress: ["ready", "cancelled"],
+  ready: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+};
 
 const repairSchema = z.object({
   customerId: z.string().min(1),
@@ -111,10 +121,25 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
   const { data: repairsData, isPending } = useAdminRepairsQuery();
   const { data: customersData } = useCustomersQuery();
   const { data: catalogData } = useCatalogQuery();
+  const { data: workflowsData } = useWorkflowsQuery();
   const [draft, setDraft] = useState<RepairDraft>(initialDraft);
   const [formError, setFormError] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const customers = customersData?.customers ?? [];
+  const allowedRepairStatuses = useMemo(() => {
+    if (!draft.id) {
+      return ["new"] as RepairStatus[];
+    }
+
+    const configuredTransitions =
+      workflowsData?.repairs?.transitions[draft.status];
+    const nextStatuses =
+      configuredTransitions ?? fallbackRepairTransitions[draft.status];
+
+    return [draft.status, ...nextStatuses].filter(
+      (status, index, statuses) => statuses.indexOf(status) === index,
+    );
+  }, [draft.id, draft.status, workflowsData?.repairs?.transitions]);
   const customerMap = useMemo(
     () =>
       Object.fromEntries(
@@ -443,7 +468,7 @@ export function AdminRepairsModule({ locale = "ru" }: { locale?: Locale }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {repairStatuses.map((status) => (
+                  {allowedRepairStatuses.map((status) => (
                     <SelectItem key={status} value={status}>
                       {dynamicLabel(t, status)}
                     </SelectItem>

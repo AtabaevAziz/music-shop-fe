@@ -437,7 +437,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
             <div className="grid gap-3">
               {items.map((item) => (
                 <div
-                  key={item.productId}
+                  key={`${item.productId}-${item.variantId ?? "base"}`}
                   className="flex items-center justify-between gap-3"
                 >
                   <span className="muted">

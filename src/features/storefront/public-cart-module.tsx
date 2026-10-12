@@ -70,7 +70,10 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
         <section className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_340px]">
           <div className="grid gap-4">
             {items.map((item) => (
-              <Card key={item.productId} className="storefront-product-card">
+              <Card
+                key={`${item.productId}-${item.variantId ?? "base"}`}
+                className="storefront-product-card"
+              >
                 <CardContent className="grid gap-4 p-5 md:grid-cols-[160px_minmax(0,1fr)]">
                   <div className="storefront-product-media">
                     {item.primaryImage ? (

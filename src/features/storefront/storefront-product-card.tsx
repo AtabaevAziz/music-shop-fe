@@ -27,16 +27,21 @@ export function StorefrontProductCard({
   const { session } = useAuthSession();
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
-  const quantityInCart = useStorefrontCartStore(
-    (state) =>
-      state.items.find((item) => item.productId === product.id)?.qty ?? 0,
-  );
   const activeVariants = product.variants.filter(
     (variant) => variant.status === "active",
   );
   const [selectedVariantId, setSelectedVariantId] = useState(
     activeVariants[0]?.id,
   );
+  const quantityInCart = useStorefrontCartStore((state) => {
+    const activeVariantId = selectedVariantId ?? activeVariants[0]?.id;
+    return (
+      state.items.find(
+        (item) =>
+          item.productId === product.id && item.variantId === activeVariantId,
+      )?.qty ?? 0
+    );
+  });
   const isGuest = !session;
   const selectedVariant =
     activeVariants.find((variant) => variant.id === selectedVariantId) ??

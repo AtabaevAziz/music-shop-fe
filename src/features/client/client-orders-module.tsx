@@ -118,7 +118,7 @@ export function ClientOrdersModule({ locale }: { locale: Locale }) {
 
                     return (
                       <div
-                        key={`${order.id}-${item.productId}`}
+                        key={`${order.id}-${item.productId}-${item.variantId ?? "base"}`}
                         className="heading-row"
                       >
                         <span>

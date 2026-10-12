@@ -684,7 +684,7 @@ export function OrdersModule({ locale }: { locale: Locale }) {
                     <div className="space-y-2">
                       {selectedOrder.items.map((item) => (
                         <div
-                          key={`${selectedOrder.id}-${item.productId}`}
+                          key={`${selectedOrder.id}-${item.productId}-${item.variantId ?? "base"}`}
                           className="heading-row rounded-lg border border-border px-3 py-2"
                         >
                           <span>
