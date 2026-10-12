@@ -50,7 +50,13 @@ const repairSchema = z.object({
 
 type RepairFormValues = z.infer<typeof repairSchema>;
 
-export function PublicRepairRequestModule({ locale }: { locale: Locale }) {
+export function PublicRepairRequestModule({
+  locale,
+  embedded = false,
+}: {
+  locale: Locale;
+  embedded?: boolean;
+}) {
   const t = useTranslations();
   const searchParams = useSearchParams();
   const { data: products } = useStorefrontProductsQuery();
@@ -116,16 +122,18 @@ export function PublicRepairRequestModule({ locale }: { locale: Locale }) {
 
   return (
     <div className="storefront-flow">
-      <section className="storefront-section storefront-section-tight">
-        <div className="storefront-section-head">
-          <div className="storefront-section-title">
-            <h1>{t("storefront.repairPageTitle")}</h1>
+      {!embedded ? (
+        <section className="storefront-section storefront-section-tight">
+          <div className="storefront-section-head">
+            <div className="storefront-section-title">
+              <h1>{t("storefront.repairPageTitle")}</h1>
+            </div>
+            <div className="storefront-section-copy">
+              <p>{t("storefront.repairPageText")}</p>
+            </div>
           </div>
-          <div className="storefront-section-copy">
-            <p>{t("storefront.repairPageText")}</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {repairRequestId ? (
         <Card className="storefront-empty-card">

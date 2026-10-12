@@ -110,6 +110,28 @@
     "adminBlurb": "Full access to catalog, inventory, orders, and customers.",
     "clientBlurb": "Client self-service access for purchases and repair requests."
   },
+  "landing": {
+    "eyebrow": "Music Shop / instruments and service",
+    "title": "Find your sound. Keep it in tune.",
+    "text": "A focused storefront for instruments, studio equipment, and reliable repair service.",
+    "catalogCta": "Open catalog",
+    "repairCta": "Request a repair",
+    "authCta": "Sign in or register",
+    "catalogModalTitle": "Product catalog",
+    "catalogModalText": "Explore the current assortment and open a product card when you are ready.",
+    "repairModalTitle": "Instrument repair",
+    "repairModalText": "Tell us what happened and our service team will review the request.",
+    "authModalTitle": "Your music shop account",
+    "authModalText": "Sign in to buy, track orders, and manage repair requests.",
+    "featureTitle": "A clear path from choice to service",
+    "featureText": "Buy instruments with confidence and keep them working for longer.",
+    "serviceCatalogTitle": "Instruments and gear",
+    "serviceCatalogText": "Browse the live catalog, compare variants, and build your cart.",
+    "serviceRepairTitle": "Repair service",
+    "serviceRepairText": "Submit an instrument issue with its model and a clear description.",
+    "serviceStudioTitle": "Studio essentials",
+    "serviceStudioText": "Practical equipment for practice, recording, and everyday performance."
+  },
   "storefront": {
     "headerTagline": "Instruments, studio gear, and service",
     "homeLink": "Storefront",

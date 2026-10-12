@@ -1,6 +1,18 @@
 "use client";
 
-import { ChevronDown, Languages, LogOut, Menu, UserRound } from "lucide-react";
+import {
+  ChevronDown,
+  Languages,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ShoppingCart,
+  UserRound,
+  Wrench,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -22,6 +34,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useClientHomeQuery } from "@/hooks/use-client-home-query";
 import {
   useAppConfigQuery,
@@ -53,6 +71,13 @@ const routeSubtitleKeyMap: Record<string, string> = {
   repairs: "section.repairsSubtitle",
 };
 
+const clientNavigationIcons = {
+  dashboard: LayoutDashboard,
+  catalog: Package,
+  orders: ShoppingCart,
+  repairs: Wrench,
+} as const;
+
 export function ClientShell({
   locale,
   children,
@@ -78,6 +103,9 @@ export function ClientShell({
   } = usePermissionsQuery();
   const { data: homeData } = useClientHomeQuery();
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const sidebarStorageKey = "music-shop-client-sidebar-collapsed";
   const queryString = searchParams.toString();
   const sessionRole = session?.role;
   const routeId = getRouteIdFromPathname(pathname);
@@ -121,6 +149,28 @@ export function ClientShell({
     setIsNavOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1099px)");
+    const syncViewport = () => {
+      setIsMobileViewport(mediaQuery.matches);
+      if (!mediaQuery.matches) setIsNavOpen(false);
+    };
+    setIsSidebarCollapsed(
+      window.localStorage.getItem(sidebarStorageKey) === "true",
+    );
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+    return () => mediaQuery.removeEventListener("change", syncViewport);
+  }, []);
+
+  function toggleSidebar() {
+    setIsSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem(sidebarStorageKey, String(next));
+      return next;
+    });
+  }
+
   if (!session) {
     return null;
   }
@@ -151,6 +201,24 @@ export function ClientShell({
   const navContent = (
     <>
       <div className="brand-mark">
+        {!isMobileViewport ? (
+          <Button
+            className="sidebar-collapse-button"
+            variant="ghost"
+            size="icon"
+            type="button"
+            onClick={toggleSidebar}
+            aria-label={t(
+              isSidebarCollapsed ? "nav.expandSidebar" : "nav.collapseSidebar",
+            )}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen size={17} />
+            ) : (
+              <PanelLeftClose size={17} />
+            )}
+          </Button>
+        ) : null}
         <div className="sidebar-kicker">{t("common.brand")}</div>
         <strong className="sidebar-title">{t("meta.appName")}</strong>
         <p className="sidebar-copy muted">{t("section.clientPortalBlurb")}</p>
@@ -158,16 +226,33 @@ export function ClientShell({
       </div>
       <div className="sidebar-body">
         <nav className="nav-list">
-          {localizedNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn("nav-link", pathname === item.href && "active")}
-              onClick={() => setIsNavOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          <TooltipProvider>
+            {localizedNavItems.map((item) => {
+              const Icon =
+                clientNavigationIcons[
+                  item.id as keyof typeof clientNavigationIcons
+                ] ?? Package;
+              const link = (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn("nav-link", pathname === item.href && "active")}
+                  onClick={() => setIsNavOpen(false)}
+                >
+                  <Icon className="nav-link-icon" size={18} />
+                  <span className="nav-link-label">{item.label}</span>
+                </Link>
+              );
+              return isSidebarCollapsed && !isMobileViewport ? (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>{link}</TooltipTrigger>
+                  <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
+              ) : (
+                link
+              );
+            })}
+          </TooltipProvider>
         </nav>
       </div>
       <div className="surface sidebar-metric sidebar-footer">
@@ -186,10 +271,16 @@ export function ClientShell({
   );
 
   return (
-    <div className="app-shell">
+    <div className={cn("app-shell", isSidebarCollapsed && "sidebar-collapsed")}>
       <aside className="sidebar">{navContent}</aside>
       <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
-        <SheetContent side="left" className="sidebar sidebar-mobile p-0">
+        <SheetContent
+          side="left"
+          className={cn(
+            "sidebar sidebar-mobile p-0",
+            isNavOpen && "sidebar-mobile-open",
+          )}
+        >
           <SheetHeader className="sr-only">
             <SheetTitle>{t("nav.openMenu")}</SheetTitle>
           </SheetHeader>

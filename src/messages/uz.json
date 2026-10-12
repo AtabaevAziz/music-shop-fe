@@ -110,6 +110,28 @@
     "adminBlurb": "Katalog, ombor, buyurtmalar va mijozlarga to'liq kirish.",
     "clientBlurb": "Sotib olish va ta'mirlash so'rovlari uchun mijoz kabineti."
   },
+  "landing": {
+    "eyebrow": "Music Shop / asboblar va servis",
+    "title": "O'z ovozingizni toping. Uni soz holda saqlang.",
+    "text": "Musiqa asboblari, studiya jihozlari va ishonchli ta'mirlash xizmati uchun qulay vitrina.",
+    "catalogCta": "Katalogni ochish",
+    "repairCta": "Ta'mirlash so'rovi",
+    "authCta": "Kirish yoki ro'yxatdan o'tish",
+    "catalogModalTitle": "Mahsulotlar katalogi",
+    "catalogModalText": "Joriy assortimentni ko'ring va tayyor bo'lganingizda mahsulot kartasini oching.",
+    "repairModalTitle": "Asbobni ta'mirlash",
+    "repairModalText": "Muammoni yozing — servis jamoasi so'rovni ko'rib chiqadi.",
+    "authModalTitle": "Music Shop akkauntingiz",
+    "authModalText": "Xarid qilish, buyurtmalarni kuzatish va ta'mirlashlarni boshqarish uchun kiring.",
+    "featureTitle": "Tanlovdan servisgacha aniq yo'l",
+    "featureText": "Asboblarni ishonch bilan xarid qiling va ularni uzoqroq ishlatib boring.",
+    "serviceCatalogTitle": "Asboblar va jihozlar",
+    "serviceCatalogText": "Jonli katalogni ko'ring, variantlarni solishtiring va savat yarating.",
+    "serviceRepairTitle": "Ta'mirlash xizmati",
+    "serviceRepairText": "Asbob modeli va muammo tavsifini yuboring.",
+    "serviceStudioTitle": "Studiya uchun",
+    "serviceStudioText": "Mashq, yozuv va kundalik ijro uchun amaliy jihozlar."
+  },
   "storefront": {
     "headerTagline": "Asboblar, studiya va servis",
     "homeLink": "Vitrina",

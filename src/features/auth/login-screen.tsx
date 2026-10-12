@@ -27,9 +27,16 @@ import {
 } from "@/lib/api-config";
 import { ApiClientError } from "@/lib/api-error";
 import { getConfiguredLocales } from "@/lib/runtime-config";
+import { cn } from "@/lib/utils";
 import { useAuthSession } from "@/providers/session-provider";
 
-export function LoginScreen({ locale }: { locale: Locale }) {
+export function LoginScreen({
+  locale,
+  embedded = false,
+}: {
+  locale: Locale;
+  embedded?: boolean;
+}) {
   const isApiConfigured = hasConfiguredApiBaseUrl();
   const t = useTranslations();
   const pathname = usePathname();
@@ -161,7 +168,7 @@ export function LoginScreen({ locale }: { locale: Locale }) {
     mode === "register" ? t("auth.registerAction") : t("auth.signInAction");
 
   return (
-    <div className="auth-page">
+    <div className={cn("auth-page", embedded && "auth-page-embedded")}>
       <div className="auth-card">
         <section className="hero-panel">
           <div className="hero-panel-top">

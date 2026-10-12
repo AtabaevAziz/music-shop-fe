@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useStorefrontCartSync } from "@/features/storefront/use-storefront-cart-sync";
 import { Locale, localeLabelKeyMap, locales } from "@/i18n";
 
 export function PublicShell({
@@ -27,7 +26,6 @@ export function PublicShell({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  useStorefrontCartSync();
   const queryString = searchParams.toString();
 
   return (

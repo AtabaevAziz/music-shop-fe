@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStorefrontCartStore } from "@/features/storefront/storefront-cart-store";
+import { useStorefrontCartSync } from "@/features/storefront/use-storefront-cart-sync";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { useStorefrontProductQuery } from "@/hooks/use-storefront-query";
 import { Locale } from "@/i18n";
@@ -23,6 +24,7 @@ export function PublicProductModule({
   id: string;
   locale: Locale;
 }) {
+  useStorefrontCartSync();
   const t = useTranslations();
   const isApiConfigured = hasConfiguredApiBaseUrl();
   const { session } = useAuthSession();

@@ -768,6 +768,69 @@ p {
   padding: 28px;
 }
 
+.auth-page-embedded {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.auth-page-embedded::before {
+  display: none;
+}
+
+.auth-page-embedded .auth-card {
+  width: 100%;
+  grid-template-columns: 1fr;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.auth-page-embedded .hero-panel {
+  display: none;
+}
+
+.landing-modal-content {
+  width: min(1100px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.landing-presentation {
+  gap: 28px;
+}
+
+.landing-service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.landing-service-grid .card-content,
+.storefront-hero-panel .card-content {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-service-grid h2,
+.storefront-hero-panel strong {
+  font-size: 1.05rem;
+}
+
+@media (max-width: 720px) {
+  .landing-service-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-modal-content {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 16px;
+  }
+}
+
 .auth-card {
   position: relative;
   z-index: 1;

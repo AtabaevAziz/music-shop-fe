@@ -12,6 +12,7 @@ import { Locale } from "@/i18n";
 import { hasConfiguredApiBaseUrl } from "@/lib/api-config";
 
 import { StorefrontProductCard } from "./storefront-product-card";
+import { useStorefrontCartSync } from "./use-storefront-cart-sync";
 
 export function StorefrontCatalogBrowser({
   locale,
@@ -26,6 +27,7 @@ export function StorefrontCatalogBrowser({
   headingLevel?: "h1" | "h2";
   syncCategoryWithUrl?: boolean;
 }) {
+  useStorefrontCartSync();
   const t = useTranslations();
   const isApiConfigured = hasConfiguredApiBaseUrl();
   const pathname = usePathname();
