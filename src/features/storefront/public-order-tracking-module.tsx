@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAppConfigQuery } from "@/hooks/use-config-query";
 import { Locale } from "@/i18n";
 import { dynamicLabel } from "@/lib/translations";
@@ -305,15 +304,6 @@ export function PublicOrderTrackingModule({ locale }: { locale: Locale }) {
                   ))}
                 </div>
               </div>
-
-              {order.warehouseIssue ? (
-                <AppField label={t("labels.warehouseIssue")}>
-                  <Textarea
-                    readOnly
-                    value={`${order.warehouseIssue.type}\n${order.warehouseIssue.comment ?? ""}`.trim()}
-                  />
-                </AppField>
-              ) : null}
 
               <div className="flex flex-wrap gap-3">
                 <Button asChild>

@@ -27,9 +27,7 @@ export function StorefrontProductCard({
   const { session } = useAuthSession();
   const addProduct = useStorefrontCartStore((state) => state.addProduct);
   const hasHydrated = useStorefrontCartStore((state) => state.hasHydrated);
-  const activeVariants = product.variants.filter(
-    (variant) => variant.status === "active",
-  );
+  const activeVariants = product.variants;
   const [selectedVariantId, setSelectedVariantId] = useState(
     activeVariants[0]?.id,
   );
@@ -47,7 +45,7 @@ export function StorefrontProductCard({
     activeVariants.find((variant) => variant.id === selectedVariantId) ??
     activeVariants[0];
   const previewImage = selectedVariant?.primaryImage ?? product.primaryImage;
-  const availableQty = selectedVariant?.availableQty ?? product.availableQty;
+  const inStock = selectedVariant?.inStock ?? product.inStock;
   const price = selectedVariant?.price ?? product.price;
 
   return (
@@ -106,7 +104,7 @@ export function StorefrontProductCard({
             </Button>
             <Button
               type="button"
-              disabled={isGuest || !hasHydrated || availableQty < 1}
+              disabled={isGuest || !hasHydrated || !inStock}
               onClick={() => addProduct(product, 1, selectedVariant?.id)}
             >
               {hasHydrated && quantityInCart > 0

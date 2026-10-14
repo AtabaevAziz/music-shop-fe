@@ -14,8 +14,7 @@ export type StorefrontCartItem = {
   brand: string;
   price: number;
   qty: number;
-  stockQty: number;
-  availableQty: number;
+  inStock: boolean;
   primaryImage?: string;
 };
 
@@ -38,6 +37,8 @@ function normalizeCartItemImage(primaryImage?: string) {
   return resolveProductMediaPath(primaryImage);
 }
 
+const MAX_PUBLIC_CART_QTY = 99;
+
 export const useStorefrontCartStore = create<StorefrontCartState>()(
   persist(
     (set) => ({
@@ -48,18 +49,16 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
         set((state) => {
           const variant =
             product.variants.find((item) => item.id === variantId) ??
-            product.variants.find((item) => item.status === "active");
+            product.variants.find((item) => item.inStock);
           const effectiveVariantId = variant?.id;
           const effectivePrice = variant?.price ?? product.price;
-          const effectiveStockQty = variant?.stockQty ?? product.stockQty;
-          const effectiveAvailableQty =
-            variant?.availableQty ?? product.availableQty;
+          const effectiveInStock = variant?.inStock ?? product.inStock;
           const existingItem = state.items.find(
             (item) =>
               item.productId === product.id &&
               item.variantId === effectiveVariantId,
           );
-          const nextQty = Math.max(1, Math.min(effectiveAvailableQty, qty));
+          const nextQty = Math.max(1, Math.min(MAX_PUBLIC_CART_QTY, qty));
 
           if (!existingItem) {
             return {
@@ -73,8 +72,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   brand: product.brand,
                   price: effectivePrice,
                   qty: nextQty,
-                  stockQty: effectiveStockQty,
-                  availableQty: effectiveAvailableQty,
+                  inStock: effectiveInStock,
                   primaryImage: normalizeCartItemImage(
                     variant?.primaryImage ?? product.primaryImage,
                   ),
@@ -93,12 +91,11 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                     name: product.name,
                     brand: product.brand,
                     price: effectivePrice,
-                    stockQty: effectiveStockQty,
-                    availableQty: effectiveAvailableQty,
+                    inStock: effectiveInStock,
                     primaryImage: normalizeCartItemImage(
                       variant?.primaryImage ?? product.primaryImage,
                     ),
-                    qty: Math.min(item.qty + nextQty, effectiveAvailableQty),
+                    qty: Math.min(item.qty + nextQty, MAX_PUBLIC_CART_QTY),
                   }
                 : item,
             ),
@@ -125,8 +122,7 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
             return [
               {
                 ...item,
-                qty: Math.max(1, Math.min(qty, item.availableQty)),
-                availableQty: item.availableQty,
+                qty: Math.max(1, Math.min(qty, MAX_PUBLIC_CART_QTY)),
               },
             ];
           }),
@@ -148,12 +144,10 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
               const variant = product.variants.find(
                 (candidate) => candidate.id === item.variantId,
               );
-              const availableQty =
-                variant?.availableQty ?? product.availableQty;
-              const stockQty = variant?.stockQty ?? product.stockQty;
+              const inStock = variant?.inStock ?? product.inStock;
               const price = variant?.price ?? product.price;
 
-              if (availableQty < 1) {
+              if (!inStock) {
                 return [];
               }
 
@@ -164,12 +158,11 @@ export const useStorefrontCartStore = create<StorefrontCartState>()(
                   brand: product.brand,
                   variantName: variant?.colorName ?? item.variantName,
                   price,
-                  stockQty,
-                  availableQty,
+                  inStock,
                   primaryImage: normalizeCartItemImage(
                     variant?.primaryImage ?? product.primaryImage,
                   ),
-                  qty: Math.max(1, Math.min(item.qty, availableQty)),
+                  qty: Math.max(1, Math.min(item.qty, MAX_PUBLIC_CART_QTY)),
                 },
               ];
             }),

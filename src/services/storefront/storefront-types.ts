@@ -1,4 +1,4 @@
-import type { Condition, ProductVariant } from "@/types/music";
+import type { Condition } from "@/types/music";
 
 export type StorefrontCategory = {
   id: string;
@@ -20,9 +20,7 @@ export type StorefrontProduct = {
   slug?: string;
   sku: string;
   price: number;
-  stockQty: number;
-  reservedQty: number;
-  availableQty: number;
+  inStock: boolean;
   shortDescription: string;
   description: string;
   specs: Record<string, string>;
@@ -32,7 +30,18 @@ export type StorefrontProduct = {
   category: StorefrontCategory;
   brand: string;
   repairable: boolean;
-  variants: ProductVariant[];
+  variants: StorefrontProductVariant[];
+};
+
+export type StorefrontProductVariant = {
+  id: string;
+  colorKey: string;
+  colorName: string;
+  sku: string;
+  price: number;
+  inStock: boolean;
+  images: string[];
+  primaryImage?: string;
 };
 
 export type ApiStorefrontProduct = {
@@ -41,9 +50,7 @@ export type ApiStorefrontProduct = {
   slug?: string;
   sku: string;
   price: number;
-  stockQty: number;
-  reservedQty: number;
-  availableQty: number;
+  inStock: boolean;
   shortDescription: string;
   description: string;
   specs: Record<string, string>;
@@ -53,7 +60,7 @@ export type ApiStorefrontProduct = {
   category: ApiStorefrontCategory;
   brand: string;
   repairable: boolean;
-  variants: ProductVariant[];
+  variants: StorefrontProductVariant[];
 };
 
 export type ApiStorefrontProductListResponse = {

@@ -1,4 +1,4 @@
-import type { Order, RepairRequest } from "@/types/music";
+import type { Order, RepairRequest, RepairStatus } from "@/types/music";
 
 export type PublicOrderPaymentMethod = "cash" | "online";
 export type PublicOrderDeliveryMethod =
@@ -44,8 +44,39 @@ export type CreatePublicRepairRequest = {
   photoUrl?: string;
 };
 
-export type ApiPublicOrder = Order;
-export type ApiPublicRepair = RepairRequest;
+export type ApiPublicOrder = Pick<
+  Order,
+  | "id"
+  | "orderNumber"
+  | "trackingToken"
+  | "stage"
+  | "customer"
+  | "address"
+  | "items"
+  | "paymentMethod"
+  | "paymentStatus"
+  | "deliveryMethod"
+  | "deliveryStatus"
+  | "delivery"
+  | "status"
+  | "subtotal"
+  | "deliveryCost"
+  | "total"
+  | "timeline"
+  | "createdAt"
+  | "updatedAt"
+> & {
+  payment?: {
+    method: PublicOrderPaymentMethod;
+    status: string;
+    amount: number;
+    paidAt?: string | null;
+  } | null;
+};
+
+export type ApiPublicRepair = Pick<RepairRequest, "id" | "createdAt"> & {
+  status: RepairStatus;
+};
 
 export type GetPublicOrderRequest = {
   orderNumber: string;

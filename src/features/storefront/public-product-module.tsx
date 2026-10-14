@@ -81,11 +81,10 @@ export function PublicProductModule({
 
   const selectedVariant =
     product.variants.find((variant) => variant.id === selectedVariantId) ??
-    product.variants.find((variant) => variant.status === "active");
+    product.variants.find((variant) => variant.inStock);
   const displayImage = selectedVariant?.primaryImage ?? product.primaryImage;
   const displayPrice = selectedVariant?.price ?? product.price;
-  const displayAvailableQty =
-    selectedVariant?.availableQty ?? product.availableQty;
+  const displayInStock = selectedVariant?.inStock ?? product.inStock;
 
   return (
     <div className="storefront-flow">
@@ -128,7 +127,7 @@ export function PublicProductModule({
                     variant={
                       variant.id === selectedVariant?.id ? "default" : "outline"
                     }
-                    disabled={variant.status !== "active"}
+                    disabled={!variant.inStock}
                     onClick={() => setSelectedVariantId(variant.id)}
                   >
                     {variant.colorName}
@@ -141,9 +140,7 @@ export function PublicProductModule({
             <div>
               <span>{t("labels.availability")}</span>
               <strong>
-                {displayAvailableQty > 0
-                  ? t("labels.inStock")
-                  : t("labels.outOfStock")}
+                {displayInStock ? t("labels.inStock") : t("labels.outOfStock")}
               </strong>
             </div>
             <div>
@@ -160,14 +157,16 @@ export function PublicProductModule({
             </div>
             <div>
               <span>{t("labels.stock")}</span>
-              <strong>{displayAvailableQty}</strong>
+              <strong>
+                {displayInStock ? t("labels.inStock") : t("labels.outOfStock")}
+              </strong>
             </div>
           </div>
           <div className="storefront-cta-row">
             <Button
               type="button"
               size="lg"
-              disabled={isGuest || !hasHydrated || displayAvailableQty < 1}
+              disabled={isGuest || !hasHydrated || !displayInStock}
               onClick={() => addProduct(product, 1, selectedVariant?.id)}
             >
               {hasHydrated && quantityInCart > 0

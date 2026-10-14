@@ -45,7 +45,7 @@ import {
 import { dynamicLabel } from "@/lib/translations";
 import { formatMoney } from "@/lib/utils";
 import { createPublicOrder } from "@/services/public";
-import type { Order } from "@/types/music";
+import type { ApiPublicOrder } from "@/services/public/public-types";
 
 const checkoutSchema = z.object({
   firstName: requiredTrimmedString(2),
@@ -81,7 +81,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
   const currency = appConfig?.defaultCurrency ?? "UZS";
   const totalItems = getStorefrontCartItemsCount(items);
   const total = getStorefrontCartTotal(items);
-  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<ApiPublicOrder | null>(null);
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {

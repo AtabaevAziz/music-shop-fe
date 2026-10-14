@@ -95,7 +95,9 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                       <strong>{item.name}</strong>
                       <span className="muted">{item.brand}</span>
                       <span className="muted">
-                        {t("labels.availability")}: {item.availableQty}
+                        {t("labels.availability")}: {item.inStock
+                          ? t("labels.inStock")
+                          : t("labels.outOfStock")}
                       </span>
                       <span className="text-lg font-bold">
                         {formatMoney(item.price, currency, locale)}
@@ -107,7 +109,7 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                         <Input
                           type="number"
                           min="1"
-                          max={String(item.availableQty)}
+                          max="99"
                           value={String(item.qty)}
                           onChange={(event) =>
                             setProductQty(
