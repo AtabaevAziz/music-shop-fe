@@ -177,7 +177,7 @@ export function AppShell({
     setIsSidebarCollapsed(
       window.localStorage.getItem(sidebarStorageKey) === "true",
     );
-    const mediaQuery = window.matchMedia("(max-width: 1099px)");
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
     const updateViewport = () => {
       const isMobile = mediaQuery.matches;
       setIsMobileViewport(isMobile);

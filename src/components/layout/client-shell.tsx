@@ -150,7 +150,7 @@ export function ClientShell({
   }, [pathname]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 1099px)");
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
     const syncViewport = () => {
       setIsMobileViewport(mediaQuery.matches);
       if (!mediaQuery.matches) setIsNavOpen(false);
