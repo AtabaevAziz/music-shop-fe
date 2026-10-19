@@ -95,7 +95,8 @@ export function PublicCartModule({ locale }: { locale: Locale }) {
                       <strong>{item.name}</strong>
                       <span className="muted">{item.brand}</span>
                       <span className="muted">
-                        {t("labels.availability")}: {item.inStock
+                        {t("labels.availability")}:{" "}
+                        {item.inStock
                           ? t("labels.inStock")
                           : t("labels.outOfStock")}
                       </span>
