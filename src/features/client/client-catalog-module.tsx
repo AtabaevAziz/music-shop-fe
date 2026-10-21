@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -74,6 +74,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
   const [qty, setQty] = useState("1");
   const [notes, setNotes] = useState("");
   const [formError, setFormError] = useState("");
+  const idempotencyKeyRef = useRef<string | null>(null);
   const orderMutation = useMutation({
     mutationFn: createClientOrder,
     onSuccess: async () => {
@@ -129,7 +130,9 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
     }
 
     try {
+      idempotencyKeyRef.current ??= crypto.randomUUID();
       await orderMutation.mutateAsync({
+        idempotencyKey: idempotencyKeyRef.current,
         ...customerDetails,
         items: [
           {
@@ -144,6 +147,7 @@ export function ClientCatalogModule({ locale }: { locale: Locale }) {
       });
       setFormError("");
       setPurchaseTarget(null);
+      idempotencyKeyRef.current = null;
       setQty("1");
       setNotes("");
     } catch (error) {

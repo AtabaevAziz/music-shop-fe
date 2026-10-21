@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -82,6 +82,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
   const totalItems = getStorefrontCartItemsCount(items);
   const total = getStorefrontCartTotal(items);
   const [placedOrder, setPlacedOrder] = useState<ApiPublicOrder | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -140,7 +141,9 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
   }
 
   async function submit(values: CheckoutFormValues) {
+    idempotencyKeyRef.current ??= crypto.randomUUID();
     await orderMutation.mutateAsync({
+      idempotencyKey: idempotencyKeyRef.current,
       firstName: normalizeRequiredString(values.firstName),
       lastName: normalizeRequiredString(values.lastName),
       phone: normalizeRequiredString(values.phone),
@@ -162,6 +165,7 @@ export function PublicCheckoutModule({ locale }: { locale: Locale }) {
         quantity: item.qty,
       })),
     });
+    idempotencyKeyRef.current = null;
   }
 
   if (placedOrder) {

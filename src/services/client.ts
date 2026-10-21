@@ -36,9 +36,11 @@ export async function getClientOrders() {
 }
 
 export async function createClientOrder(input: CreateClientOrderRequest) {
+  const { idempotencyKey, ...body } = input;
   const response = await api.post<ApiClientOrderResponse>(
     "client/orders",
-    input,
+    body,
+    { headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {} },
   );
   return fromApiClientOrder(response.order);
 }

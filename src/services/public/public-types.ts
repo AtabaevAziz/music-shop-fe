@@ -14,6 +14,7 @@ export type CreateOrderItemRequest = {
 };
 
 export type CreatePublicOrderRequest = {
+  idempotencyKey?: string;
   firstName: string;
   lastName: string;
   phone: string;

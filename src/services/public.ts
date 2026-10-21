@@ -8,9 +8,11 @@ import type {
 } from "@/services/public/public-types";
 
 export async function createPublicOrder(input: CreatePublicOrderRequest) {
+  const { idempotencyKey, ...body } = input;
   const response = await api.post<ApiPublicOrderResponse>(
     "public/orders",
-    input,
+    body,
+    { headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {} },
   );
   return response.order;
 }

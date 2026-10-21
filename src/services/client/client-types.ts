@@ -19,6 +19,7 @@ export type CreateClientOrderItemRequest = {
 };
 
 export type CreateClientOrderRequest = {
+  idempotencyKey?: string;
   items: CreateClientOrderItemRequest[];
   firstName: string;
   lastName: string;
